@@ -1,0 +1,7 @@
+.idea
+build
+buildnumber
+
+Launcher.jar
+LauncherAuthlib.jar
+LaunchServer.jar

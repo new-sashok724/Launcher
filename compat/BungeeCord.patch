@@ -1,0 +1,217 @@
+diff --git a/bootstrap/pom.xml b/bootstrap/pom.xml
+index 48f56b3..238ab60 100644
+--- a/bootstrap/pom.xml
++++ b/bootstrap/pom.xml
+@@ -58,6 +58,7 @@
+                     <archive>
+                         <manifestEntries>
+                             <Main-Class>net.md_5.bungee.Bootstrap</Main-Class> 
++                            <Class-Path>Launcher.jar</Class-Path>
+                             <Implementation-Version>${describe}</Implementation-Version>
+                             <Specification-Version>${maven.build.timestamp}</Specification-Version>
+                         </manifestEntries>
+diff --git a/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java b/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
+index b7cb81e..6be2273 100644
+--- a/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
++++ b/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
+@@ -5,9 +5,9 @@ public class Bootstrap
+ 
+     public static void main(String[] args) throws Exception
+     {
+-        if ( Float.parseFloat( System.getProperty( "java.class.version" ) ) < 51.0 )
++        if ( Float.parseFloat( System.getProperty( "java.class.version" ) ) < 52.0 )
+         {
+-            System.err.println( "*** ERROR *** BungeeCord requires Java 7 or above to function! Please download and install it!" );
++            System.err.println( "*** ERROR *** BungeeCord requires Java 8 or above to function! Please download and install it!" );
+             System.out.println( "You can check your Java version with the command: java -version" );
+             return;
+         }
+diff --git a/pom.xml b/pom.xml
+index 1376c1a..c3821d8 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -66,8 +66,8 @@
+     <properties>
+         <build.number>unknown</build.number>
+         <netty.version>4.0.31.Final</netty.version>
+-        <maven.compiler.source>1.7</maven.compiler.source>
+-        <maven.compiler.target>1.7</maven.compiler.target>
++        <maven.compiler.source>1.8</maven.compiler.source>
++        <maven.compiler.target>1.8</maven.compiler.target>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+     </properties>
+ 
+@@ -96,6 +96,13 @@
+             <version>1.14.8</version>
+             <scope>provided</scope>
+         </dependency>
++        <dependency>
++            <groupId>launcher</groupId>
++            <artifactId>Launcher</artifactId>
++            <version>12.0+</version>
++            <scope>system</scope>
++            <systemPath>/full/path/to/Launcher.jar</systemPath>
++        </dependency>
+     </dependencies>
+ 
+     <build>
+@@ -117,31 +124,6 @@
+                     </execution>
+                 </executions>
+             </plugin>
+-            <plugin>
+-                <groupId>org.codehaus.mojo</groupId>
+-                <artifactId>animal-sniffer-maven-plugin</artifactId>
+-                <version>1.13</version>
+-                <executions>
+-                    <execution>
+-                        <phase>process-classes</phase>
+-                        <goals>
+-                            <goal>check</goal>
+-                        </goals>
+-                    </execution>
+-                </executions>
+-                <configuration>
+-                    <ignores>
+-                        <ignore>java.lang.ClassLoader</ignore>
+-                        <ignore>java.lang.Throwable</ignore>
+-                        <ignore>java.util.Locale</ignore>
+-                    </ignores>
+-                    <signature>
+-                        <groupId>org.codehaus.mojo.signature</groupId>
+-                        <artifactId>java16</artifactId>
+-                        <version>1.1</version>
+-                    </signature>
+-                </configuration>
+-            </plugin>
+             <!-- OSS Parent 9 uses 2.7, 2.10+ is broken anyway -->
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
+index c13d2e6..62a4820 100644
+--- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
++++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
+@@ -59,6 +59,11 @@ import net.md_5.bungee.protocol.packet.PingPacket;
+ import net.md_5.bungee.protocol.packet.StatusRequest;
+ import net.md_5.bungee.protocol.packet.StatusResponse;
+ 
++import launcher.client.PlayerProfile;
++import launcher.request.auth.CheckServerRequest;
++
+ @RequiredArgsConstructor
+ public class InitialHandler extends PacketHandler implements PendingConnection
+ {
+@@ -383,35 +388,28 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+         {
+             sha.update( bit );
+         }
+-        String encodedHash = URLEncoder.encode( new BigInteger( sha.digest() ).toString( 16 ), "UTF-8" );
+-
+-        String authURL = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash;
+ 
+-        Callback<String> handler = new Callback<String>()
+-        {
+-            @Override
+-            public void done(String result, Throwable error)
+-            {
+-                if ( error == null )
+-                {
+-                    LoginResult obj = BungeeCord.getInstance().gson.fromJson( result, LoginResult.class );
+-                    if ( obj != null )
+-                    {
+-                        loginProfile = obj;
+-                        uniqueId = Util.getUUID( obj.getId() );
+-                        finish();
+-                        return;
+-                    }
+-                    disconnect( "Not authenticated with Minecraft.net" );
+-                } else
+-                {
+-                    disconnect( bungee.getTranslation( "mojang_fail" ) );
+-                    bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with minecraft.net", error );
++        final String username = InitialHandler.this.getName();
++        final String serverID = new BigInteger(sha.digest()).toString(16);
++        ch.getHandle().eventLoop().execute(() -> {
++            try {
++                PlayerProfile pp = new CheckServerRequest(username, serverID).request();
++                if(pp == null) { // Invalid username or serverID
++                    disconnect("Bad Login (Serverside)");
++                    return;
+                 }
+-            }
+-        };
+ 
+-        HttpClient.get( authURL, ch.getHandle().eventLoop(), handler );
++                // Successful login
++                loginProfile = new LoginResult(pp);
++                uniqueId = pp.uuid;
++                finish();
++            } catch(Exception e) {
++                disconnect("Authentication failed");
++                bungee.getLogger().log(Level.SEVERE, "Error authenticating " + username + " with Launcher", e);
++            }
++        });
+     }
+ 
+     private void finish()
+diff --git a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
+index 9311ef7..b9c4f56 100644
+--- a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
++++ b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
+@@ -3,6 +3,19 @@ package net.md_5.bungee.connection;
+ import lombok.AllArgsConstructor;
+ import lombok.Data;
+ 
++import java.net.URL;
++import java.io.IOException;
++import java.io.FileNotFoundException;
++import java.net.UnknownHostException;
++import java.util.List;
++import java.util.LinkedList;
++import launcher.client.PlayerProfile;
++import launcher.client.ClientLauncher;
++import launcher.helper.LogHelper;
++import launcher.helper.SecurityHelper;
++
+ @Data
+ @AllArgsConstructor
+ public class LoginResult
+@@ -11,6 +24,40 @@ public class LoginResult
+     private String id;
+     private Property[] properties;
+ 
++    public LoginResult(PlayerProfile pp) {
++        id = ClientLauncher.toHash(pp.uuid);
++        List<Property> properitesList = new LinkedList<>();
++        String skinHash = hash(pp.skinURL);
++        if(skinHash != null) {
++            properitesList.add(new Property(ClientLauncher.SKIN_URL_PROPERTY, pp.skinURL, ""));
++            properitesList.add(new Property("l_skinHash", skinHash, ""));
++        }
++        String cloakHash = hash(pp.cloakURL);
++        if(cloakHash != null) {
++            properitesList.add(new Property(ClientLauncher.CLOAK_URL_PROPERTY, pp.cloakURL, ""));
++            properitesList.add(new Property("l_cloakHash", cloakHash, ""));
++        }
++        properties = properitesList.toArray(new Property[properitesList.size()]);
++    }
++
++    private static String hash(String url) {
++        if (url == null) {
++            return null;
++        }
++
++        // Try get digest of the texture
++        try {
++            return SecurityHelper.toHex(SecurityHelper.digest(SecurityHelper.DigestAlgorithm.SHA256, new URL(url)));
++        } catch (FileNotFoundException e) {
++            return null; // Just didn't has texture
++        } catch (IOException e) {
++            LogHelper.error("Can't hash texture: %s, %s", url, e.toString());
++            return null;
++        }
++    }
++
+     @Data
+     @AllArgsConstructor
+     public static class Property

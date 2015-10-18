@@ -69,7 +69,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
 
 	@LauncherAPI
 	protected void addEntry(Entry entry) {
-		entryCache.putIfAbsent(entry.uuid, entry);
+		entryCache.put(entry.uuid, entry);
 		usernamesCache.put(low(entry.username), entry.uuid);
 	}
 

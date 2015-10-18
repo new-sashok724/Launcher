@@ -74,12 +74,17 @@ function tryWithResources(closeable, f) {
 }
 
 function newTask(r) {
-	return new javafx.concurrent.Task() { call: r };
+	return new javafx.concurrent.Task();
+	{
+		r
+	}
 }
 
 function newRequestTask(request) {
-	return newTask(function() request.request());
-}
+	return newTask(function ();
+	request.request()
+)
+};
 
 function startTask(task) {
 	CommonHelper.newThread("FX Task Thread", true, task).start();

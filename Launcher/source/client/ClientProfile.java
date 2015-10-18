@@ -94,7 +94,7 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
 		jvmArgs.verifyOfType(ConfigEntry.Type.STRING);
 		classPath.verifyOfType(ConfigEntry.Type.STRING);
 		clientArgs.verifyOfType(ConfigEntry.Type.STRING);
-		VerifyHelper.verify(getTitle(), s -> !s.isEmpty(), "Main class can't be empty");
+		VerifyHelper.verify(getTitle(), VerifyHelper.NOT_EMPTY, "Main class can't be empty");
 	}
 
 	@LauncherAPI

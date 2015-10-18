@@ -1,17 +1,17 @@
 package launchserver.command.handler;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 
 import launcher.helper.IOHelper;
 import launchserver.LaunchServer;
-import launchserver.helper.LineReader;
 
 public final class StdCommandHandler extends CommandHandler {
-	private final LineReader reader;
+	private final BufferedReader reader;
 
 	public StdCommandHandler(LaunchServer server) {
 		super(server);
-		reader = new LineReader(IOHelper.newReader(System.in));
+		reader = IOHelper.newReader(System.in);
 	}
 
 	@Override

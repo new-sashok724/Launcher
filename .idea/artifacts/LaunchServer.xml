@@ -1,0 +1,20 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="LaunchServer">
+    <output-path>$PROJECT_DIR$/</output-path>
+    <root id="archive" name="LaunchServer.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/LaunchServer/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="Launcher" />
+      <element id="module-output" name="LaunchServer" />
+      <element id="directory" name="launchserver">
+        <element id="directory" name="defaults">
+          <element id="archive" name="runtime.zip">
+            <element id="dir-copy" path="$PROJECT_DIR$/Launcher/runtime" />
+          </element>
+        </element>
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/buildnumber" />
+    </root>
+  </artifact>
+</component>

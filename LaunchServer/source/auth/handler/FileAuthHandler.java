@@ -79,7 +79,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 
 	@Override
 	public final UUID checkServer(String username, String serverID) {
-		lock.writeLock().lock();
+		lock.readLock().lock();
 		try {
 			UUID uuid = usernameToUUID(username);
 			Auth auth = authsMap.get(uuid);
@@ -87,7 +87,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 			// Check server (if has such account of course)
 			return auth != null && auth.checkServer(username, serverID) ? uuid : null;
 		} finally {
-			lock.writeLock().unlock();
+			lock.readLock().unlock();
 		}
 	}
 

@@ -1,6 +1,7 @@
 package launcher.helper;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -11,9 +12,7 @@ import java.util.Collections;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import launcher.Launcher;
@@ -22,7 +21,7 @@ import org.fusesource.jansi.Ansi;
 import org.fusesource.jansi.AnsiConsole;
 import org.fusesource.jansi.AnsiOutputStream;
 
-public final class LogHelper implements Runnable {
+public final class LogHelper {
 	@LauncherAPI public static final String DEBUG_PROPERTY = "launcher.debug";
 	@LauncherAPI public static final boolean JANSI;
 
@@ -32,28 +31,7 @@ public final class LogHelper implements Runnable {
 	private static final Set<Output> OUTPUTS = Collections.newSetFromMap(new ConcurrentHashMap<>(2));
 	private static final Output STD_OUTPUT;
 
-	// Logger queue
-	private static final BlockingDeque<String> MESSAGES = new LinkedBlockingDeque<>();
-
 	private LogHelper() {
-	}
-
-	@Override
-	public void run() {
-		try {
-			writeLoop();
-		} catch (InterruptedException ignored) {
-			// Do nothing
-		}
-	}
-
-	private void writeLoop() throws InterruptedException {
-		while (!Thread.interrupted()) {
-			String message = MESSAGES.take();
-			for (Output output : OUTPUTS) {
-				output.println(message);
-			}
-		}
 	}
 
 	@LauncherAPI
@@ -63,7 +41,16 @@ public final class LogHelper implements Runnable {
 
 	@LauncherAPI
 	public static void addOutput(Path file) throws IOException {
-		addOutput(new FileOutput(file));
+		if (JANSI) {
+			addOutput(new JAnsiOutput(IOHelper.newOutput(file, true)));
+		} else {
+			addOutput(IOHelper.newWriter(file, true));
+		}
+	}
+
+	@LauncherAPI
+	public static void addOutput(Writer writer) throws IOException {
+		addOutput(new WriterOutput(writer));
 	}
 
 	@LauncherAPI
@@ -121,8 +108,10 @@ public final class LogHelper implements Runnable {
 	}
 
 	@LauncherAPI
-	public static void println(String message) {
-		MESSAGES.add(message);
+	public static synchronized void println(String message) {
+		for (Output output : OUTPUTS) {
+			output.println(message);
+		}
 	}
 
 	@LauncherAPI
@@ -282,17 +271,13 @@ public final class LogHelper implements Runnable {
 				error(e);
 			}
 		}
-
-		// Start logging thread
-		CommonHelper.newThread("LogHelper Thread", true, new LogHelper()).start();
 	}
 
-	private static final class FileOutput implements Output, AutoCloseable {
+	private static class WriterOutput implements Output, AutoCloseable {
 		private final Writer writer;
 
-		private FileOutput(Path file) throws IOException {
-			writer = JANSI ? IOHelper.newWriter(new AnsiOutputStream(IOHelper.newOutput(file, true))) :
-				IOHelper.newWriter(file, true);
+		private WriterOutput(Writer writer) throws IOException {
+			this.writer = writer;
 		}
 
 		@Override
@@ -308,6 +293,12 @@ public final class LogHelper implements Runnable {
 			} catch (IOException ignored) {
 				// Do nothing?
 			}
+		}
+	}
+
+	private static final class JAnsiOutput extends WriterOutput {
+		private JAnsiOutput(OutputStream output) throws IOException {
+			super(IOHelper.newWriter(new AnsiOutputStream(output)));
 		}
 	}
 

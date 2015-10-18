@@ -296,7 +296,7 @@ public final class LaunchServer implements Runnable {
 		LogHelper.info("Reading LaunchServer config file");
 		try (BufferedReader reader = IOHelper.newReader(CONFIG_FILE)) {
 			newConfig = new Config(TextConfigReader.read(reader, true));
-			if (oldConfig != null && !oldConfig.address.equals(newConfig.address)) {
+			if (oldConfig != null && !oldConfig.getBindAddress().equals(newConfig.getBindAddress())) {
 				LogHelper.warning("To bind new address, use 'rebind' command");
 			}
 		}

@@ -33,6 +33,7 @@ var LauncherApp = Java.extend(JSApplication, {
 		stage.setScene(scene);
 
 		// Center and show stage
+		stage.sizeToScene();
 		stage.centerOnScreen();
 		stage.show();
 	}, stop: function() {

@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/source-json" isTestSource="false" packagePrefix="org.json" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/source" isTestSource="false" packagePrefix="launcher" />
       <sourceFolder url="file://$MODULE_DIR$/source-testing" isTestSource="true" packagePrefix="launcher" />
+      <excludeFolder url="file://$MODULE_DIR$/runtime" />
     </content>
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="library" name="jansi-1.11" level="project" />

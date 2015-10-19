@@ -17,7 +17,6 @@ public abstract class LauncherBinary {
 	protected LauncherBinary(LaunchServer server, Path binaryFile) throws IOException {
 		this.server = server;
 		this.binaryFile = binaryFile;
-		hash();
 	}
 
 	@LauncherAPI

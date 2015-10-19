@@ -114,6 +114,7 @@ public final class LaunchServer implements Runnable {
 		// Setup
 		reloadKeyPair();
 		reloadConfig();
+		hashLauncherBinaries();
 
 		// Hash updates dir
 		if (!IOHelper.isDir(UPDATES_DIR)) {
@@ -318,10 +319,14 @@ public final class LaunchServer implements Runnable {
 			}
 		}
 
+		// Create new launcher EXE binary
+		LauncherBinary newExeBinary = newConfig.launch4J ?
+			new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
+		newExeBinary.hash();
+
 		// Apply changes
 		config = newConfig;
-		launcherEXEBinary = newConfig.launch4J ?
-			new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
+		launcherEXEBinary = newExeBinary;
 	}
 
 	@LauncherAPI

@@ -34,7 +34,7 @@ public final class JLineCommandHandler extends CommandHandler {
 
 	@Override
 	public String readLine() throws IOException {
-		return reader.readLine("> ");
+		return reader.readLine();
 	}
 
 	private final class JLineOutput implements LogHelper.Output {

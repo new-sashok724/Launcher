@@ -14,9 +14,10 @@ public abstract class LauncherBinary {
 	private volatile SignedBytesHolder binary;
 
 	@LauncherAPI
-	protected LauncherBinary(LaunchServer server, Path binaryFile) {
+	protected LauncherBinary(LaunchServer server, Path binaryFile) throws IOException {
 		this.server = server;
 		this.binaryFile = binaryFile;
+		hash();
 	}
 
 	@LauncherAPI

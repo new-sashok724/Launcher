@@ -114,7 +114,6 @@ public final class LaunchServer implements Runnable {
 		// Setup
 		reloadKeyPair();
 		reloadConfig();
-		hashLauncherBinaries();
 
 		// Hash updates dir
 		if (!IOHelper.isDir(UPDATES_DIR)) {
@@ -302,7 +301,7 @@ public final class LaunchServer implements Runnable {
 		}
 		newConfig.verify();
 
-		// Flush old config providers
+		// Flush old auth handler and provider
 		if (oldConfig != null) {
 			// Flush auth handler
 			try {
@@ -321,7 +320,8 @@ public final class LaunchServer implements Runnable {
 
 		// Apply changes
 		config = newConfig;
-		launcherEXEBinary = newConfig.launch4J ? new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
+		launcherEXEBinary = newConfig.launch4J ?
+			new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
 	}
 
 	@LauncherAPI

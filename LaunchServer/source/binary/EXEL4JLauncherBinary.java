@@ -31,6 +31,15 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
 	public void build() throws IOException {
 		LogHelper.info("Building launcher EXE binary file (Using Launch4J)");
 
+		// Set favicon path
+		Config config = ConfigPersister.getInstance().getConfig();
+		if (IOHelper.isFile(FAVICON_FILE)) {
+			config.setIcon(new File("favicon.ico"));
+		} else {
+			config.setIcon(null);
+			LogHelper.warning("Missing favicon.ico file");
+		}
+
 		// Start building
 		Builder builder = new Builder(Launch4JLog.INSTANCE);
 		try {
@@ -65,11 +74,6 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
 		config.setDontWrapJar(false);
 		config.setJar(JARLauncherBinary.JAR_BINARY_FILE.toFile());
 		config.setOutfile(EXE_BINARY_FILE.toFile());
-		if (IOHelper.isFile(FAVICON_FILE)) {
-			config.setIcon(new File("favicon.ico"));
-		} else {
-			LogHelper.warning("Missing favicon.ico file");
-		}
 
 		// Return prepared config
 		ConfigPersister.getInstance().setAntConfig(config, null);

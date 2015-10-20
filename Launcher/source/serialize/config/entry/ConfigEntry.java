@@ -73,7 +73,7 @@ public abstract class ConfigEntry<V> extends StreamObject {
 			case BLOCK:
 				return new BlockConfigEntry(input, ro);
 			default:
-				throw new IOException("Unsupported config entry type: " + type.name());
+				throw new AssertionError("Unsupported config entry type: " + type.name());
 		}
 	}
 

@@ -470,7 +470,7 @@ public final class IOHelper {
 		try {
 			return path.toUri().toURL();
 		} catch (MalformedURLException e) {
-			throw new AssertionError(e);
+			throw new InternalError(e);
 		}
 	}
 

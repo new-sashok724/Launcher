@@ -196,7 +196,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 		// Verify digest
 		byte[] digestBytes = digest.digest();
 		if (!hFile.isSameDigest(digestBytes)) {
-			throw new IOException(String.format("File digest mismatch: '%s'", filePath));
+			throw new SecurityException(String.format("File digest mismatch: '%s'", filePath));
 		}
 	}
 

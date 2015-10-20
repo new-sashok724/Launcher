@@ -57,7 +57,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 		LogHelper.info("Starting server socket thread");
 		try (ServerSocket serverSocket = new ServerSocket()) {
 			if (!this.serverSocket.compareAndSet(null, serverSocket)) {
-				throw new IOException("Previous socket wasn'sizet closed");
+				throw new IllegalStateException("Previous socket wasn't closed");
 			}
 
 			// Set socket params
@@ -88,10 +88,8 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 
 	@LauncherAPI
 	public Response newCustomResponse(String name, HInput input, HOutput output) throws IOException {
-		Response.Factory factory = customResponses.get(name);
-		if (factory == null) {
-			throw new IOException(String.format("Unknown custom response: '%s'", name));
-		}
+		Response.Factory factory = VerifyHelper.getMapValue(customResponses, name,
+			String.format("Unknown custom response: '%s'", name));
 		return factory.newResponse(server, input, output);
 	}
 

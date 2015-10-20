@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import launcher.LauncherAPI;
+import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.stream.EnumSerializer.Itf;
@@ -25,7 +26,7 @@ public final class EnumSerializer<E extends Enum<?> & Itf> {
 			try {
 				itf = (Itf) field.get(null);
 			} catch (IllegalAccessException e) {
-				throw new RuntimeException(e);
+				throw new InternalError(e);
 			}
 			map.put(itf.getNumber(), clazz.cast(itf));
 		}
@@ -34,11 +35,7 @@ public final class EnumSerializer<E extends Enum<?> & Itf> {
 	@LauncherAPI
 	public E read(HInput input) throws IOException {
 		int n = input.readVarInt();
-		E e = map.get(n);
-		if (e == null) {
-			throw new IOException("Unknown enum number: " + n);
-		}
-		return e;
+		return VerifyHelper.getMapValue(map, n, "Unknown enum number: " + n);
 	}
 
 	@LauncherAPI

@@ -9,6 +9,7 @@ import java.util.Map;
 
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
+import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 import launchserver.helper.LineReader;
@@ -54,22 +55,18 @@ public final class FileAuthProvider extends DigestAuthProvider {
 		try (BufferedReader reader = new LineReader(IOHelper.newReader(file))) {
 			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
 				// Get and verify split index
-				int splitIndex = line.indexOf(':');
-				if (splitIndex < 0) {
-					throw new IOException(String.format("Illegal line in users file: '%s'", line));
-				}
+				int splitIndex = VerifyHelper.verifyInt(line.indexOf(':'), VerifyHelper.NOT_NEGATIVE,
+					String.format("Illegal line in users file: '%s'", line));
 
 				// Split and verify username and password
-				String username = line.substring(0, splitIndex).trim();
-				String password = line.substring(splitIndex + 1).trim();
-				if (username.isEmpty() || password.isEmpty()) {
-					throw new IOException(String.format("Empty username or password in users file: '%s'", line));
-				}
+				String username = VerifyHelper.verify(line.substring(0, splitIndex).trim(),
+					VerifyHelper.NOT_EMPTY, "Empty username");
+				String password = VerifyHelper.verify(line.substring(splitIndex + 1).trim(),
+					VerifyHelper.NOT_EMPTY, "Empty pasword");
 
 				// Try put to cache
-				if (cache.put(username, password) != null) {
-					throw new IOException(String.format("Duplicate username in users file: '%s'", username));
-				}
+				VerifyHelper.putIfAbsent(cache, username, password,
+					String.format("Duplicate username in users file: '%s'", username));
 			}
 		}
 

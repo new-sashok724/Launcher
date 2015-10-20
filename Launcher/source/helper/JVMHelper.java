@@ -170,7 +170,7 @@ public final class JVMHelper {
 			if (name.startsWith("Mac OS X")) {
 				return MACOSX;
 			}
-			throw new IllegalArgumentException(String.format("This shit is not yet supported: '%s'", name));
+			throw new RuntimeException(String.format("This shit is not yet supported: '%s'", name));
 		}
 	}
 }

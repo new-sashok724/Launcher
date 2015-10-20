@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import launcher.helper.IOHelper;
+import launcher.helper.VerifyHelper;
 import launcher.serialize.config.TextConfigReader;
 import launcher.serialize.config.TextConfigWriter;
 import launcher.serialize.config.entry.BlockConfigEntry;
@@ -31,10 +32,8 @@ public final class TextFileAuthHandler extends FileAuthHandler {
 		Set<Map.Entry<String, ConfigEntry<?>>> entrySet = authFile.getValue().entrySet();
 		for (Map.Entry<String, ConfigEntry<?>> entry : entrySet) {
 			UUID uuid = UUID.fromString(entry.getKey());
-			ConfigEntry<?> value = entry.getValue();
-			if (value.getType() != ConfigEntry.Type.BLOCK) {
-				throw new IOException("Unsupported config entry type: " + uuid);
-			}
+			ConfigEntry<?> value = VerifyHelper.verify(entry.getValue(),
+				v -> v.getType() == ConfigEntry.Type.BLOCK, "Illegal config entry type: " + uuid);
 
 			// Get auth entry data
 			BlockConfigEntry authBlock = (BlockConfigEntry) value;

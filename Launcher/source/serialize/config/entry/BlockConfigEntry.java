@@ -101,9 +101,7 @@ public final class BlockConfigEntry extends ConfigEntry<Map<String, ConfigEntry<
 			ConfigEntry<?> entry = readEntry(input, ro);
 
 			// Try add entry to map
-			if (map.put(name, entry) != null) {
-				throw new IOException(String.format("Duplicate config entry: '%s'", name));
-			}
+			VerifyHelper.putIfAbsent(map, name, entry, String.format("Duplicate config entry: '%s'", name));
 		}
 		return map;
 	}

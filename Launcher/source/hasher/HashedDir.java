@@ -14,6 +14,7 @@ import java.util.Set;
 
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
+import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.stream.EnumSerializer;
@@ -35,9 +36,6 @@ public final class HashedDir extends HashedEntry {
 		int entriesCount = input.readLength(0);
 		for (int i = 0; i < entriesCount; i++) {
 			String name = IOHelper.verifyFileName(input.readString(255));
-			if (map.containsKey(name)) {
-				throw new IOException(String.format("Duplicate hashed entry: '%s'", name));
-			}
 
 			// Read entry
 			HashedEntry entry;
@@ -54,9 +52,7 @@ public final class HashedDir extends HashedEntry {
 			}
 
 			// Try add entry to map
-			if (map.put(name, entry) != null) {
-				throw new IOException(String.format("Duplicate dir entry: '%s'", name));
-			}
+			VerifyHelper.putIfAbsent(map, name, entry, String.format("Duplicate dir entry: '%s'", name));
 		}
 	}
 

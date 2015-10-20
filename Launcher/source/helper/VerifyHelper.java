@@ -22,7 +22,7 @@ public final class VerifyHelper {
 
 	@LauncherAPI
 	public static <K, V> V getMapValue(Map<K, V> map, K key, String error) {
-		return verify(map.get(key), v -> v == null, error);
+		return verify(map.get(key), v -> v != null, error);
 	}
 
 	@LauncherAPI
@@ -41,7 +41,7 @@ public final class VerifyHelper {
 	}
 
 	public static <K, V> void putIfAbsent(Map<K, V> map, K key, V value, String error) {
-		verify(map.putIfAbsent(key, value), o -> o != null, error);
+		verify(map.putIfAbsent(key, value), o -> o == null, error);
 	}
 
 	@LauncherAPI

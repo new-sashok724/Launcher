@@ -16,6 +16,17 @@ import launcher.serialize.stream.EnumSerializer;
 
 public abstract class Request<R> {
 	private final AtomicBoolean started = new AtomicBoolean(false);
+	@LauncherAPI protected final Launcher.Config config;
+
+	@LauncherAPI
+	protected Request(Launcher.Config config) {
+		this.config = config == null ? Launcher.getConfig() : config;
+	}
+
+	@LauncherAPI
+	protected Request() {
+		this(null);
+	}
 
 	@LauncherAPI
 	public abstract Type getType();
@@ -29,8 +40,9 @@ public abstract class Request<R> {
 
 		// Make request to LaunchServer
 		try (Socket socket = IOHelper.newSocket()) {
-			socket.connect(IOHelper.resolve(Launcher.getConfig().address));
-			try (InputStream is = socket.getInputStream(); OutputStream os = socket.getOutputStream(); HInput input = new HInput(is); HOutput output = new HOutput(os)) {
+			socket.connect(IOHelper.resolve(config.address));
+			try (InputStream is = socket.getInputStream(); OutputStream os = socket.getOutputStream();
+				 HInput input = new HInput(is); HOutput output = new HOutput(os)) {
 				writeHandshake(input, output);
 
 				// Start request
@@ -52,11 +64,10 @@ public abstract class Request<R> {
 	@LauncherAPI
 	protected abstract R requestDo(HInput input, HOutput output) throws Exception;
 
-	private static void writeHandshake(HInput input, HOutput output) throws IOException {
+	private void writeHandshake(HInput input, HOutput output) throws IOException {
 		output.writeInt(Launcher.PROTOCOL_MAGIC);
 
 		// Write license & key info
-		Launcher.Config config = Launcher.getConfig();
 		output.writeBigInteger(config.publicKey.getModulus(), SecurityHelper.RSA_KEY_LENGTH + 1);
 		output.flush();
 
@@ -69,9 +80,9 @@ public abstract class Request<R> {
 	@LauncherAPI
 	public enum Type implements EnumSerializer.Itf {
 		PING(0), // Ping request
-		LAUNCHER(1), UPDATE(2), // Update requests
-		AUTH(3), JOIN_SERVER(4), CHECK_SERVER(5), // Auth requests
-		PROFILE_BY_USERNAME(6), PROFILE_BY_UUID(7), BATCH_PROFILE_BY_USERNAME(8), // Profile requests
+		LAUNCHER(1), UPDATE(2), UPDATE_LIST(3), // Update requests
+		AUTH(4), JOIN_SERVER(5), CHECK_SERVER(6), // Auth requests
+		PROFILE_BY_USERNAME(7), PROFILE_BY_UUID(8), BATCH_PROFILE_BY_USERNAME(0), // Profile requests
 		CUSTOM(255); // Custom requests
 		private static final EnumSerializer<Type> SERIALIZER = new EnumSerializer<>(Type.class);
 		private final int n;

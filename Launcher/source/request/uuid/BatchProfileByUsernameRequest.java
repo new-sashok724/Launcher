@@ -3,6 +3,7 @@ package launcher.request.uuid;
 import java.io.IOException;
 import java.util.Arrays;
 
+import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
 import launcher.helper.IOHelper;
@@ -16,12 +17,18 @@ public final class BatchProfileByUsernameRequest extends Request<PlayerProfile[]
 	private final String[] usernames;
 
 	@LauncherAPI
-	public BatchProfileByUsernameRequest(String... usernames) throws IOException {
+	public BatchProfileByUsernameRequest(Launcher.Config config, String... usernames) throws IOException {
+		super(config);
 		this.usernames = Arrays.copyOf(usernames, usernames.length);
 		IOHelper.verifyLength(this.usernames.length, MAX_BATCH_SIZE);
 		for (String username : this.usernames) {
 			VerifyHelper.verifyUsername(username);
 		}
+	}
+
+	@LauncherAPI
+	public BatchProfileByUsernameRequest(String... usernames) throws IOException {
+		this(null, usernames);
 	}
 
 	@Override
@@ -43,7 +50,7 @@ public final class BatchProfileByUsernameRequest extends Request<PlayerProfile[]
 			profiles[i] = input.readBoolean() ? new PlayerProfile(input) : null;
 		}
 
-		// Return profile
+		// Return result
 		return profiles;
 	}
 }

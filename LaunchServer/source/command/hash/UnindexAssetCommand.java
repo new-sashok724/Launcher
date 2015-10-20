@@ -66,7 +66,7 @@ public final class UnindexAssetCommand extends Command {
 		}
 
 		// Finished
-		server.hashUpdatesDir(Collections.singleton(outputAssetDirName));
+		server.syncUpdatesDir(Collections.singleton(outputAssetDirName));
 		LogHelper.subInfo("Asset successfully unindexed: '%s'", inputAssetDirName);
 	}
 }

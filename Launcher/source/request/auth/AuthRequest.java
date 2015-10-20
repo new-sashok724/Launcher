@@ -3,6 +3,7 @@ package launcher.request.auth;
 import java.io.IOException;
 import java.util.Arrays;
 
+import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
 import launcher.helper.IOHelper;
@@ -16,9 +17,15 @@ public final class AuthRequest extends Request<AuthRequest.Result> {
 	private final byte[] encryptedPassword;
 
 	@LauncherAPI
-	public AuthRequest(String login, byte[] encryptedPassword) {
+	public AuthRequest(Launcher.Config config, String login, byte[] encryptedPassword) {
+		super(config);
 		this.login = login;
 		this.encryptedPassword = Arrays.copyOf(encryptedPassword, encryptedPassword.length);
+	}
+
+	@LauncherAPI
+	public AuthRequest(String login, byte[] encryptedPassword) {
+		this(null, login, encryptedPassword);
 	}
 
 	@Override

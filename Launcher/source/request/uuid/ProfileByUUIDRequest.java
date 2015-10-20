@@ -3,6 +3,7 @@ package launcher.request.uuid;
 import java.io.IOException;
 import java.util.UUID;
 
+import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
 import launcher.request.Request;
@@ -13,8 +14,14 @@ public final class ProfileByUUIDRequest extends Request<PlayerProfile> {
 	private final UUID uuid;
 
 	@LauncherAPI
-	public ProfileByUUIDRequest(UUID uuid) {
+	public ProfileByUUIDRequest(Launcher.Config config, UUID uuid) {
+		super(config);
 		this.uuid = uuid;
+	}
+
+	@LauncherAPI
+	public ProfileByUUIDRequest(UUID uuid) {
+		this(null, uuid);
 	}
 
 	@Override

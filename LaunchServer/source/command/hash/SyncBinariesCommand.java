@@ -6,8 +6,8 @@ import launcher.helper.LogHelper;
 import launchserver.LaunchServer;
 import launchserver.command.Command;
 
-public final class HashBinariesCommand extends Command {
-	public HashBinariesCommand(LaunchServer server) {
+public final class SyncBinariesCommand extends Command {
+	public SyncBinariesCommand(LaunchServer server) {
 		super(server);
 	}
 
@@ -18,12 +18,12 @@ public final class HashBinariesCommand extends Command {
 
 	@Override
 	public String getUsageDescription() {
-		return "Rehash launcher binaries";
+		return "Resync launcher binaries";
 	}
 
 	@Override
 	public void invoke(String... args) throws IOException {
-		server.hashLauncherBinaries();
-		LogHelper.subInfo("Binaries successfully rehashed");
+		server.syncLauncherBinaries();
+		LogHelper.subInfo("Binaries successfully resynced");
 	}
 }

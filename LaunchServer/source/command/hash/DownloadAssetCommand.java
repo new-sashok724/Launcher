@@ -47,7 +47,7 @@ public final class DownloadAssetCommand extends Command {
 		unpack(new URL(String.format(ASSET_URL_MASK, version.name)), assetDir);
 
 		// Finished
-		server.hashUpdatesDir(Collections.singleton(dirName));
+		server.syncUpdatesDir(Collections.singleton(dirName));
 		LogHelper.subInfo("Asset successfully downloaded: '%s'", dirName);
 	}
 

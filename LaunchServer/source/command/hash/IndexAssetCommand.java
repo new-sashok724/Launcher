@@ -68,7 +68,7 @@ public final class IndexAssetCommand extends Command {
 		}
 
 		// Finished
-		server.hashUpdatesDir(Collections.singleton(outputAssetDirName));
+		server.syncUpdatesDir(Collections.singleton(outputAssetDirName));
 		LogHelper.subInfo("Asset successfully indexed: '%s'", inputAssetDirName);
 	}
 

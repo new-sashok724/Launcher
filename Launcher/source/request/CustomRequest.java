@@ -1,10 +1,19 @@
 package launcher.request;
 
+import launcher.Launcher;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 
 public abstract class CustomRequest<T> extends Request<T> {
+	public CustomRequest(Launcher.Config config) {
+		super(config);
+	}
+
+	public CustomRequest() {
+		this(null);
+	}
+
 	@Override
 	public final Type getType() {
 		return Type.CUSTOM;

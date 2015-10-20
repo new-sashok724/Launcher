@@ -9,8 +9,8 @@ import launcher.helper.LogHelper;
 import launchserver.LaunchServer;
 import launchserver.command.Command;
 
-public final class HashUpdatesCommand extends Command {
-	public HashUpdatesCommand(LaunchServer server) {
+public final class SyncUpdatesCommand extends Command {
+	public SyncUpdatesCommand(LaunchServer server) {
 		super(server);
 	}
 
@@ -21,7 +21,7 @@ public final class HashUpdatesCommand extends Command {
 
 	@Override
 	public String getUsageDescription() {
-		return "Rehash updates dir";
+		return "Resync updates dir";
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public final class HashUpdatesCommand extends Command {
 		}
 
 		// Hash updates dir
-		server.hashUpdatesDir(dirs);
-		LogHelper.subInfo("Updates dir successfully rehashed");
+		server.syncUpdatesDir(dirs);
+		LogHelper.subInfo("Updates dir successfully resynced");
 	}
 }

@@ -6,8 +6,8 @@ import launcher.helper.LogHelper;
 import launchserver.LaunchServer;
 import launchserver.command.Command;
 
-public final class HashProfilesCommand extends Command {
-	public HashProfilesCommand(LaunchServer server) {
+public final class SyncProfilesCommand extends Command {
+	public SyncProfilesCommand(LaunchServer server) {
 		super(server);
 	}
 
@@ -18,12 +18,12 @@ public final class HashProfilesCommand extends Command {
 
 	@Override
 	public String getUsageDescription() {
-		return "Rehash profiles dir";
+		return "Resync profiles dir";
 	}
 
 	@Override
 	public void invoke(String... args) throws IOException {
-		server.hashProfilesDir();
-		LogHelper.subInfo("Profiles successfully rehashed");
+		server.syncProfilesDir();
+		LogHelper.subInfo("Profiles successfully resynced");
 	}
 }

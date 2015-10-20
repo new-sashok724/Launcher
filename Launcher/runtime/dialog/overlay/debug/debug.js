@@ -72,16 +72,15 @@ function debugProcess(process) {
 		var buffer = IOHelper.newCharBuffer();
 		var reader = IOHelper.newReader(process.getInputStream(),
 			java.nio.charset.Charset.defaultCharset());
+		var appendFunction = function(line)
+			javafx.application.Platform.runLater(function() debug.append(line));
 		for(var length = reader.read(buffer); length >= 0; length = reader.read(buffer)) {
-			task.updateMessage(new java.lang.String(buffer, 0, length));
+			appendFunction(new java.lang.String(buffer, 0, length));
 		}
 		
 		// So we wait for exit code
 		return process.waitFor();
 	});
-	task.messageProperty()["addListener(javafx.beans.value.ChangeListener)"](
-		function(o, ov, nv) debug.append(nv) // Anyone knows how to handle it better?
-	);
 	
 	// Set completion handlers
 	task.setOnFailed(function(event) {

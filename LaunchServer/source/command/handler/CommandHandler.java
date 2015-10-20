@@ -34,10 +34,10 @@ import launchserver.command.basic.StopCommand;
 import launchserver.command.basic.VersionCommand;
 import launchserver.command.hash.DownloadAssetCommand;
 import launchserver.command.hash.DownloadClientCommand;
-import launchserver.command.hash.HashBinariesCommand;
-import launchserver.command.hash.HashProfilesCommand;
-import launchserver.command.hash.HashUpdatesCommand;
 import launchserver.command.hash.IndexAssetCommand;
+import launchserver.command.hash.SyncBinariesCommand;
+import launchserver.command.hash.SyncProfilesCommand;
+import launchserver.command.hash.SyncUpdatesCommand;
 import launchserver.command.hash.UnindexAssetCommand;
 
 public abstract class CommandHandler implements Runnable {
@@ -57,14 +57,14 @@ public abstract class CommandHandler implements Runnable {
 		register("clear", new ClearCommand(server));
 		register("gc", new GCCommand(server));
 
-		// Register hash commands
+		// Register sync commands
 		register("indexAsset", new IndexAssetCommand(server));
 		register("unindexAsset", new UnindexAssetCommand(server));
 		register("downloadAsset", new DownloadAssetCommand(server));
 		register("downloadClient", new DownloadClientCommand(server));
-		register("hashBinaries", new HashBinariesCommand(server));
-		register("hashUpdates", new HashUpdatesCommand(server));
-		register("hashProfiles", new HashProfilesCommand(server));
+		register("syncBinaries", new SyncBinariesCommand(server));
+		register("syncUpdates", new SyncUpdatesCommand(server));
+		register("syncProfiles", new SyncProfilesCommand(server));
 
 		// Register auth commands
 		register("auth", new AuthCommand(server));

@@ -23,7 +23,13 @@ public final class LauncherRequest extends Request<LauncherRequest.Result> {
 	@LauncherAPI public static final boolean EXE_BINARY = IOHelper.hasExtension(BINARY_PATH, "exe");
 
 	@LauncherAPI
+	public LauncherRequest(Launcher.Config config) {
+		super(config);
+	}
+
+	@LauncherAPI
 	public LauncherRequest() {
+		this(null);
 	}
 
 	@Override
@@ -39,7 +45,7 @@ public final class LauncherRequest extends Request<LauncherRequest.Result> {
 		readError(input);
 
 		// Verify launcher sign
-		RSAPublicKey publicKey = Launcher.getConfig().publicKey;
+		RSAPublicKey publicKey = config.publicKey;
 		byte[] sign = input.readByteArray(-SecurityHelper.RSA_KEY_LENGTH);
 		boolean shouldUpdate = !SecurityHelper.isValidSign(BINARY_PATH, sign, publicKey);
 

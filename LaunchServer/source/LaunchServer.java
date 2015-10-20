@@ -114,19 +114,19 @@ public final class LaunchServer implements Runnable {
 		// Setup
 		reloadKeyPair();
 		reloadConfig();
-		hashLauncherBinaries();
+		syncLauncherBinaries();
 
 		// Hash updates dir
 		if (!IOHelper.isDir(UPDATES_DIR)) {
 			Files.createDirectory(UPDATES_DIR);
 		}
-		hashUpdatesDir(null);
+		syncUpdatesDir(null);
 
 		// Hash profiles dir
 		if (!IOHelper.isDir(PROFILES_DIR)) {
 			Files.createDirectory(PROFILES_DIR);
 		}
-		hashProfilesDir();
+		syncProfilesDir();
 
 		// Set server socket thread
 		serverSocketHandler = new ServerSocketHandler(this);
@@ -193,25 +193,25 @@ public final class LaunchServer implements Runnable {
 	}
 
 	@LauncherAPI
-	public void hashLauncherBinaries() throws IOException {
-		LogHelper.info("Hashing launcher binaries");
+	public void syncLauncherBinaries() throws IOException {
+		LogHelper.info("Syncing launcher binaries");
 
-		// Hash launcher binary
-		LogHelper.subInfo("Hashing launcher binary file");
-		if (!launcherBinary.hash()) {
+		// Syncing launcher binary
+		LogHelper.subInfo("Syncing launcher binary file");
+		if (!launcherBinary.sync()) {
 			LogHelper.subWarning("Missing launcher binary file");
 		}
 
-		// Hash launcher EXE binary
-		LogHelper.subInfo("Hashing launcher EXE binary file");
-		if (!launcherEXEBinary.hash()) {
+		// Syncing launcher EXE binary
+		LogHelper.subInfo("Syncing launcher EXE binary file");
+		if (!launcherEXEBinary.sync()) {
 			LogHelper.subWarning("Missing launcher EXE binary file");
 		}
 	}
 
 	@LauncherAPI
-	public void hashProfilesDir() throws IOException {
-		LogHelper.info("Hashing profiles dir");
+	public void syncProfilesDir() throws IOException {
+		LogHelper.info("Syncing profiles dir");
 		List<SignedObjectHolder<ClientProfile>> newProfies = new LinkedList<>();
 		IOHelper.walk(PROFILES_DIR, new ProfilesFileVisitor(newProfies), false);
 
@@ -221,8 +221,8 @@ public final class LaunchServer implements Runnable {
 	}
 
 	@LauncherAPI
-	public void hashUpdatesDir(Collection<String> dirs) throws IOException {
-		LogHelper.info("Hashing updates dir");
+	public void syncUpdatesDir(Collection<String> dirs) throws IOException {
+		LogHelper.info("Syncing updates dir");
 		Map<String, SignedObjectHolder<HashedDir>> newUpdatesDirMap = new HashMap<>(16);
 		try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(UPDATES_DIR)) {
 			for (Path updateDir : dirStream) {
@@ -247,7 +247,7 @@ public final class LaunchServer implements Runnable {
 				}
 
 				// Hash and sign update dir
-				LogHelper.subInfo("Hashing '%s' update dir", name);
+				LogHelper.subInfo("Syncing '%s' update dir", name);
 				HashedDir updateHDir = new HashedDir(updateDir, null);
 				newUpdatesDirMap.put(name, new SignedObjectHolder<>(updateHDir, privateKey));
 			}
@@ -322,7 +322,7 @@ public final class LaunchServer implements Runnable {
 		// Create new launcher EXE binary
 		LauncherBinary newExeBinary = newConfig.launch4J ?
 			new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
-		newExeBinary.hash();
+		newExeBinary.sync();
 
 		// Apply changes
 		config = newConfig;

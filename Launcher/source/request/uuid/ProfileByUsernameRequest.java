@@ -2,6 +2,7 @@ package launcher.request.uuid;
 
 import java.io.IOException;
 
+import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
 import launcher.helper.VerifyHelper;
@@ -13,8 +14,14 @@ public final class ProfileByUsernameRequest extends Request<PlayerProfile> {
 	private final String username;
 
 	@LauncherAPI
-	public ProfileByUsernameRequest(String username) {
+	public ProfileByUsernameRequest(Launcher.Config config, String username) {
+		super(config);
 		this.username = VerifyHelper.verifyUsername(username);
+	}
+
+	@LauncherAPI
+	public ProfileByUsernameRequest(String username) {
+		this(null, username);
 	}
 
 	@Override

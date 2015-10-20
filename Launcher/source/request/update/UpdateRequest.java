@@ -44,10 +44,16 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 	private Instant startTime;
 
 	@LauncherAPI
-	public UpdateRequest(String dirName, Path dir, FileNameMatcher matcher) {
+	public UpdateRequest(Launcher.Config config, String dirName, Path dir, FileNameMatcher matcher) {
+		super(config);
 		this.dirName = IOHelper.verifyFileName(dirName);
 		this.dir = dir;
 		this.matcher = matcher;
+	}
+
+	@LauncherAPI
+	public UpdateRequest(String dirName, Path dir, FileNameMatcher matcher) {
+		this(null, dirName, dir, matcher);
 	}
 
 	@Override
@@ -72,7 +78,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 		readError(input);
 
 		// Get diff between local and remote dir
-		SignedObjectHolder<HashedDir> remoteHDirHolder = new SignedObjectHolder<>(input, Launcher.getConfig().publicKey, HashedDir::new);
+		SignedObjectHolder<HashedDir> remoteHDirHolder = new SignedObjectHolder<>(input, config.publicKey, HashedDir::new);
 		HashedDir.Diff diff = remoteHDirHolder.object.diff(localDir, matcher);
 		totalSize = diff.mismatch.size();
 

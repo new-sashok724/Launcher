@@ -134,8 +134,8 @@ public abstract class CommandHandler implements Runnable {
 	@LauncherAPI
 	public final void register(String name, Command command) {
 		VerifyHelper.verifyIDName(name);
-		VerifyHelper.verify(commands.putIfAbsent(name, Objects.requireNonNull(command, "command")),
-			c -> c == null, String.format("Command has been already registered: '%s'", name));
+		VerifyHelper.putIfAbsent(commands, name, Objects.requireNonNull(command, "command"),
+			String.format("Command has been already registered: '%s'", name));
 	}
 
 	private void readLoop() throws IOException {

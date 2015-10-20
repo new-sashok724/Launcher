@@ -24,6 +24,7 @@ import launchserver.response.profile.BatchProfileByUsernameResponse;
 import launchserver.response.profile.ProfileByUUIDResponse;
 import launchserver.response.profile.ProfileByUsernameResponse;
 import launchserver.response.update.LauncherResponse;
+import launchserver.response.update.UpdateListResponse;
 import launchserver.response.update.UpdateResponse;
 
 public final class ResponseThread implements Runnable {
@@ -106,6 +107,9 @@ public final class ResponseThread implements Runnable {
 				break;
 			case UPDATE:
 				response = new UpdateResponse(server, input, output);
+				break;
+			case UPDATE_LIST:
+				response = new UpdateListResponse(server, input, output);
 				break;
 			case PROFILE_BY_USERNAME:
 				response = new ProfileByUsernameResponse(server, input, output);

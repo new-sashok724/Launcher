@@ -31,6 +31,8 @@ public final class UpdateListRequest extends Request<Set<String>> {
 	@Override
 	protected Set<String> requestDo(HInput input, HOutput output) throws IOException {
 		int count = input.readLength(0);
+
+		// Read all update dirs names
 		Set<String> result = new HashSet<>(count);
 		for (int i = 0; i < count; i++) {
 			result.add(IOHelper.verifyFileName(input.readString(255)));

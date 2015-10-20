@@ -98,8 +98,8 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 	@LauncherAPI
 	public void registerCustomResponse(String name, Response.Factory factory) {
 		VerifyHelper.verifyIDName(name);
-		VerifyHelper.verify(customResponses.putIfAbsent(name, Objects.requireNonNull(factory, "factory")),
-			c -> c == null, String.format("Custom response has been already registered: '%s'", name));
+		VerifyHelper.putIfAbsent(customResponses, name, Objects.requireNonNull(factory, "factory"),
+			String.format("Custom response has been already registered: '%s'", name));
 	}
 
 	@LauncherAPI

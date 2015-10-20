@@ -31,8 +31,8 @@ public abstract class AuthProvider extends ConfigObject implements Flushable {
 
 	@LauncherAPI
 	public static void registerProvider(String name, Adapter<AuthProvider> adapter) {
-		VerifyHelper.verify(AUTH_PROVIDERS.putIfAbsent(name, Objects.requireNonNull(adapter, "adapter")),
-			a -> a == null, String.format("Auth provider has been already registered: '%s'", name));
+		VerifyHelper.putIfAbsent(AUTH_PROVIDERS, name, Objects.requireNonNull(adapter, "adapter"),
+			String.format("Auth provider has been already registered: '%s'", name));
 	}
 
 	static {

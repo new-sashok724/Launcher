@@ -279,7 +279,10 @@ public final class Launcher {
 			int count = input.readLength(0);
 			Map<String, byte[]> localResources = new HashMap<>(count);
 			for (int i = 0; i < count; i++) {
-				localResources.put(input.readString(255), input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH));
+				String name = input.readString(255);
+				VerifyHelper.putIfAbsent(localResources, name,
+					input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH),
+					String.format("Duplicate runtime resource: '%s'", name));
 			}
 			runtime = Collections.unmodifiableMap(localResources);
 

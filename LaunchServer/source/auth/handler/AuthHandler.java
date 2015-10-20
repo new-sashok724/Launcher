@@ -45,8 +45,8 @@ public abstract class AuthHandler extends ConfigObject implements Flushable {
 	@LauncherAPI
 	public static void registerHandler(String name, Adapter<AuthHandler> adapter) {
 		VerifyHelper.verifyIDName(name);
-		VerifyHelper.verify(AUTH_HANDLERS.putIfAbsent(name, Objects.requireNonNull(adapter, "adapter")),
-			a -> a == null, String.format("Auth handler has been already registered: '%s'", name));
+		VerifyHelper.putIfAbsent(AUTH_HANDLERS, name, Objects.requireNonNull(adapter, "adapter"),
+			String.format("Auth handler has been already registered: '%s'", name));
 	}
 
 	static {

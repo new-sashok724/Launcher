@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.CRC32;
@@ -116,13 +117,13 @@ public final class LaunchServer implements Runnable {
 		reloadConfig();
 		syncLauncherBinaries();
 
-		// Hash updates dir
+		// Sync updates dir
 		if (!IOHelper.isDir(UPDATES_DIR)) {
 			Files.createDirectory(UPDATES_DIR);
 		}
 		syncUpdatesDir(null);
 
-		// Hash profiles dir
+		// Sync profiles dir
 		if (!IOHelper.isDir(PROFILES_DIR)) {
 			Files.createDirectory(PROFILES_DIR);
 		}
@@ -193,66 +194,8 @@ public final class LaunchServer implements Runnable {
 	}
 
 	@LauncherAPI
-	public void syncLauncherBinaries() throws IOException {
-		LogHelper.info("Syncing launcher binaries");
-
-		// Syncing launcher binary
-		LogHelper.subInfo("Syncing launcher binary file");
-		if (!launcherBinary.sync()) {
-			LogHelper.subWarning("Missing launcher binary file");
-		}
-
-		// Syncing launcher EXE binary
-		LogHelper.subInfo("Syncing launcher EXE binary file");
-		if (!launcherEXEBinary.sync()) {
-			LogHelper.subWarning("Missing launcher EXE binary file");
-		}
-	}
-
-	@LauncherAPI
-	public void syncProfilesDir() throws IOException {
-		LogHelper.info("Syncing profiles dir");
-		List<SignedObjectHolder<ClientProfile>> newProfies = new LinkedList<>();
-		IOHelper.walk(PROFILES_DIR, new ProfilesFileVisitor(newProfies), false);
-
-		// Sort and set new profiles
-		Collections.sort(newProfies, (a, b) -> a.object.compareTo(b.object));
-		profilesList = Collections.unmodifiableList(newProfies);
-	}
-
-	@LauncherAPI
-	public void syncUpdatesDir(Collection<String> dirs) throws IOException {
-		LogHelper.info("Syncing updates dir");
-		Map<String, SignedObjectHolder<HashedDir>> newUpdatesDirMap = new HashMap<>(16);
-		try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(UPDATES_DIR)) {
-			for (Path updateDir : dirStream) {
-				if (Files.isHidden(updateDir)) {
-					continue; // Skip hidden
-				}
-
-				// Resolve name and verify is dir
-				String name = IOHelper.getFileName(updateDir);
-				if (!IOHelper.isDir(updateDir)) {
-					LogHelper.subWarning("Not update dir: '%s'", name);
-					continue;
-				}
-
-				// Add from previous map (it's guaranteed to be non-null)
-				if (dirs != null && !dirs.contains(name)) {
-					SignedObjectHolder<HashedDir> hdir = updatesDirMap.get(name);
-					if (hdir != null) {
-						newUpdatesDirMap.put(name, hdir);
-						continue;
-					}
-				}
-
-				// Hash and sign update dir
-				LogHelper.subInfo("Syncing '%s' update dir", name);
-				HashedDir updateHDir = new HashedDir(updateDir, null);
-				newUpdatesDirMap.put(name, new SignedObjectHolder<>(updateHDir, privateKey));
-			}
-		}
-		updatesDirMap = Collections.unmodifiableMap(newUpdatesDirMap);
+	public Set<Map.Entry<String, SignedObjectHolder<HashedDir>>> getUpdateDirs() {
+		return updatesDirMap.entrySet();
 	}
 
 	@LauncherAPI
@@ -362,6 +305,69 @@ public final class LaunchServer implements Runnable {
 		privateKey = newPrivateKey;
 	}
 
+	@LauncherAPI
+	public void syncLauncherBinaries() throws IOException {
+		LogHelper.info("Syncing launcher binaries");
+
+		// Syncing launcher binary
+		LogHelper.subInfo("Syncing launcher binary file");
+		if (!launcherBinary.sync()) {
+			LogHelper.subWarning("Missing launcher binary file");
+		}
+
+		// Syncing launcher EXE binary
+		LogHelper.subInfo("Syncing launcher EXE binary file");
+		if (!launcherEXEBinary.sync()) {
+			LogHelper.subWarning("Missing launcher EXE binary file");
+		}
+	}
+
+	@LauncherAPI
+	public void syncProfilesDir() throws IOException {
+		LogHelper.info("Syncing profiles dir");
+		List<SignedObjectHolder<ClientProfile>> newProfies = new LinkedList<>();
+		IOHelper.walk(PROFILES_DIR, new ProfilesFileVisitor(newProfies), false);
+
+		// Sort and set new profiles
+		Collections.sort(newProfies, (a, b) -> a.object.compareTo(b.object));
+		profilesList = Collections.unmodifiableList(newProfies);
+	}
+
+	@LauncherAPI
+	public void syncUpdatesDir(Collection<String> dirs) throws IOException {
+		LogHelper.info("Syncing updates dir");
+		Map<String, SignedObjectHolder<HashedDir>> newUpdatesDirMap = new HashMap<>(16);
+		try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(UPDATES_DIR)) {
+			for (Path updateDir : dirStream) {
+				if (Files.isHidden(updateDir)) {
+					continue; // Skip hidden
+				}
+
+				// Resolve name and verify is dir
+				String name = IOHelper.getFileName(updateDir);
+				if (!IOHelper.isDir(updateDir)) {
+					LogHelper.subWarning("Not update dir: '%s'", name);
+					continue;
+				}
+
+				// Add from previous map (it's guaranteed to be non-null)
+				if (dirs != null && !dirs.contains(name)) {
+					SignedObjectHolder<HashedDir> hdir = updatesDirMap.get(name);
+					if (hdir != null) {
+						newUpdatesDirMap.put(name, hdir);
+						continue;
+					}
+				}
+
+				// Sync and sign update dir
+				LogHelper.subInfo("Syncing '%s' update dir", name);
+				HashedDir updateHDir = new HashedDir(updateDir, null);
+				newUpdatesDirMap.put(name, new SignedObjectHolder<>(updateHDir, privateKey));
+			}
+		}
+		updatesDirMap = Collections.unmodifiableMap(newUpdatesDirMap);
+	}
+
 	private void setScriptBindings() {
 		LogHelper.info("Setting up server script engine bindings");
 		Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
@@ -439,7 +445,7 @@ public final class LaunchServer implements Runnable {
 
 		@Override
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			LogHelper.subInfo("Hashing '%s' profile", IOHelper.getFileName(file));
+			LogHelper.subInfo("Sync '%s' profile", IOHelper.getFileName(file));
 
 			// Read profile
 			ClientProfile profile;

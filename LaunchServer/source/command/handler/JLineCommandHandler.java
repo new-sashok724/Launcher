@@ -5,7 +5,6 @@ import java.io.IOException;
 import jline.console.ConsoleReader;
 import launcher.helper.LogHelper;
 import launchserver.LaunchServer;
-import org.fusesource.jansi.Ansi;
 
 public final class JLineCommandHandler extends CommandHandler {
 	private final ConsoleReader reader;
@@ -38,13 +37,10 @@ public final class JLineCommandHandler extends CommandHandler {
 	}
 
 	private final class JLineOutput implements LogHelper.Output {
-		private final String ANSI_RESET = LogHelper.JANSI ?
-			Ansi.ansi().reset().toString() : "\u0027[m";
-
 		@Override
 		public void println(String message) {
 			try {
-				reader.println(ConsoleReader.RESET_LINE + message + ANSI_RESET);
+				reader.println(ConsoleReader.RESET_LINE + message);
 				reader.drawLine();
 				reader.flush();
 			} catch (IOException ignored) {

@@ -13,7 +13,7 @@ public final class EXELauncherBinary extends LauncherBinary {
 	@LauncherAPI public static final Path EXE_BINARY_FILE = IOHelper.toPath("Launcher.exe");
 
 	@LauncherAPI
-	public EXELauncherBinary(LaunchServer server) throws IOException {
+	public EXELauncherBinary(LaunchServer server) {
 		super(server, IOHelper.WORKING_DIR.resolve(EXE_BINARY_FILE));
 	}
 

@@ -23,11 +23,10 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 	private final String serverIDColumn;
 
 	// Prepared SQL queries
-	private final String queryAllSQL;
 	private final String queryByUUIDSQL;
 	private final String queryByUsernameSQL;
+	private final String updateAuthSQL;
 	private final String updateServerIDSQL;
-	private final String updateAccessTokenSQL;
 
 	public MySQLAuthHandler(BlockConfigEntry block) {
 		super(block);
@@ -39,19 +38,21 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 		serverIDColumn = block.getEntryValue("serverIDColumn", StringConfigEntry.class);
 
 		// Prepare SQL queries
-		queryAllSQL = String.format("SELECT %s, %s, %s, %s FROM %s",
-			uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table);
 		queryByUUIDSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=?",
 			uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table, uuidColumn);
 		queryByUsernameSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=?",
 			uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table, usernameColumn);
-		updateServerIDSQL = String.format("UPDATE %s SET %s=? WHERE %s=?", table, serverIDColumn, uuidColumn);
-		updateAccessTokenSQL = String.format("UPDATE %s SET %s=? WHERE %s=?", table, accessTokenColumn, uuidColumn);
+		updateAuthSQL = String.format("UPDATE %s SET %s=?, %s=? WHERE %s=?",
+			table, usernameColumn, accessTokenColumn, uuidColumn);
+		updateServerIDSQL = String.format("UPDATE %s SET %s=? WHERE %s=?",
+			table, serverIDColumn, uuidColumn);
 
 		// Fetch all entries
 		if (block.getEntryValue("fetchAll", BooleanConfigEntry.class)) {
 			LogHelper.info("Fetching all AuthHandler entries");
-			try (Connection c = mySQLHolder.getConnection(); ResultSet set = c.createStatement().executeQuery(queryAllSQL)) {
+			String query = String.format("SELECT %s, %s, %s, %s FROM %s",
+				uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table);
+			try (Connection c = mySQLHolder.getConnection(); ResultSet set = c.createStatement().executeQuery(query)) {
 				for (Entry entry = constructEntry(set); entry != null; entry = constructEntry(set)) {
 					addEntry(entry);
 				}
@@ -87,13 +88,28 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 	}
 
 	@Override
-	protected boolean updateAccessToken(UUID uuid, String accessToken) throws IOException {
-		return update(updateAccessTokenSQL, uuid.toString(), accessToken);
+	protected boolean updateAuth(UUID uuid, String username, String accessToken) throws IOException {
+		try (Connection c = mySQLHolder.getConnection();
+			 PreparedStatement s = c.prepareStatement(updateAuthSQL)) {
+			s.setString(1, username); // Username case
+			s.setString(2, accessToken);
+			s.setString(3, uuid.toString());
+			return s.executeUpdate() > 0;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 
 	@Override
 	protected boolean updateServerID(UUID uuid, String serverID) throws IOException {
-		return update(updateServerIDSQL, uuid.toString(), serverID);
+		try (Connection c = mySQLHolder.getConnection();
+			 PreparedStatement s = c.prepareStatement(updateServerIDSQL)) {
+			s.setString(1, serverID);
+			s.setString(2, uuid.toString());
+			return s.executeUpdate() > 0;
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
 	}
 
 	private Entry constructEntry(ResultSet set) throws SQLException {
@@ -107,16 +123,6 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 			try (ResultSet set = s.executeQuery()) {
 				return constructEntry(set);
 			}
-		} catch (SQLException e) {
-			throw new IOException(e);
-		}
-	}
-
-	private boolean update(String sql, String key, String newValue) throws IOException {
-		try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(sql)) {
-			s.setString(1, newValue);
-			s.setString(2, key);
-			return s.executeUpdate() > 0;
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}

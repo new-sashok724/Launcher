@@ -25,7 +25,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
 	@Override
 	public final synchronized UUID auth(String username, String accessToken) throws IOException {
 		Entry entry = getEntry(username);
-		if (entry == null || !updateAccessToken(entry.uuid, accessToken)) {
+		if (entry == null || !updateAuth(entry.uuid, username, accessToken)) {
 			return null; // Account doesn't exist
 		}
 
@@ -80,7 +80,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
 	protected abstract Entry fetchEntry(String username) throws IOException;
 
 	@LauncherAPI
-	protected abstract boolean updateAccessToken(UUID uuid, String accessToken) throws IOException;
+	protected abstract boolean updateAuth(UUID uuid, String username, String accessToken) throws IOException;
 
 	@LauncherAPI
 	protected abstract boolean updateServerID(UUID uuid, String serverID) throws IOException;

@@ -67,7 +67,7 @@ public abstract class Request<R> {
 	private void writeHandshake(HInput input, HOutput output) throws IOException {
 		output.writeInt(Launcher.PROTOCOL_MAGIC);
 
-		// Write license & key info
+		// Write key info
 		output.writeBigInteger(config.publicKey.getModulus(), SecurityHelper.RSA_KEY_LENGTH + 1);
 		output.flush();
 

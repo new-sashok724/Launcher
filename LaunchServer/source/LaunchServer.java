@@ -464,7 +464,6 @@ public final class LaunchServer implements Runnable {
 
 		// Instance
 		@LauncherAPI public final int port;
-		@LauncherAPI public final boolean metrics;
 		private final StringConfigEntry address;
 		private final String bindAddress;
 
@@ -485,7 +484,6 @@ public final class LaunchServer implements Runnable {
 			port = block.getEntryValue("port", IntegerConfigEntry.class);
 			bindAddress = block.hasEntry("bindAddress") ?
 				block.getEntryValue("bindAddress", StringConfigEntry.class) : getAddress();
-			metrics = block.getEntryValue("metrics", BooleanConfigEntry.class);
 
 			// Skin system
 			skinsURL = block.getEntryValue("skinsURL", StringConfigEntry.class);

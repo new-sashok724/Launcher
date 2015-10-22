@@ -262,13 +262,15 @@ public final class Launcher {
 		@LauncherAPI public final RSAPublicKey publicKey;
 		@LauncherAPI public final Map<String, byte[]> runtime;
 
+		@LauncherAPI
 		@SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
 		public Config(String address, int port, RSAPublicKey publicKey, Map<String, byte[]> runtime) {
 			this.address = InetSocketAddress.createUnresolved(address, port);
-			this.publicKey = publicKey;
-			this.runtime = runtime;
+			this.publicKey = Objects.requireNonNull(publicKey, "publicKey");
+			this.runtime = Collections.unmodifiableMap(new HashMap<>(runtime));
 		}
 
+		@LauncherAPI
 		public Config(HInput input) throws IOException, InvalidKeySpecException {
 			String localAddress = input.readASCII(255);
 			address = InetSocketAddress.createUnresolved(

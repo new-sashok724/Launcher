@@ -27,7 +27,7 @@ import launcher.serialize.stream.StreamObject;
 
 public abstract class FileAuthHandler extends AuthHandler {
 	@LauncherAPI public final Path file;
-	@LauncherAPI public final boolean md5UUIDs;
+	@LauncherAPI public final boolean offlineUUIDs;
 
 	// Instance
 	private final SecureRandom random = SecurityHelper.newRandom();
@@ -41,7 +41,9 @@ public abstract class FileAuthHandler extends AuthHandler {
 	protected FileAuthHandler(BlockConfigEntry block) {
 		super(block);
 		file = IOHelper.toPath(block.getEntryValue("file", StringConfigEntry.class));
-		md5UUIDs = block.getEntryValue("md5UUIDs", BooleanConfigEntry.class);
+		offlineUUIDs = block.getEntryValue("offlineUUIDs", BooleanConfigEntry.class);
+
+		// Read auth handler file
 		if (IOHelper.isFile(file)) {
 			LogHelper.info("Reading auth handler file");
 			try {
@@ -162,12 +164,12 @@ public abstract class FileAuthHandler extends AuthHandler {
 	protected abstract void writeAuthFile() throws IOException;
 
 	private UUID genUUIDFor(String username) {
-		if (md5UUIDs) {
+		if (offlineUUIDs) {
 			UUID md5UUID = PlayerProfile.md5UUID(username);
 			if (!authsMap.containsKey(md5UUID)) {
 				return md5UUID;
 			}
-			LogHelper.warning("MD5 UUID has been already registered, using random: '%s'", username);
+			LogHelper.warning("Offline UUID collision, using random: '%s'", username);
 		}
 
 		// Pick random UUID

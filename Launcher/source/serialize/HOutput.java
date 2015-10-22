@@ -4,6 +4,7 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.util.Objects;
 import java.util.UUID;
 
 import launcher.LauncherAPI;
@@ -14,7 +15,7 @@ public final class HOutput implements AutoCloseable, Flushable {
 
 	@LauncherAPI
 	public HOutput(OutputStream stream) {
-		this.stream = stream;
+		this.stream = Objects.requireNonNull(stream, "stream");
 	}
 
 	@Override

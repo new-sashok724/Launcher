@@ -1,6 +1,7 @@
 package launcher.client;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 import launcher.LauncherAPI;
@@ -31,10 +32,10 @@ public final class PlayerProfile extends StreamObject {
 
 	@LauncherAPI
 	public PlayerProfile(UUID uuid, String username, String skinURL, String cloakURL) {
-		this.uuid = uuid;
-		this.username = username;
-		this.skinURL = skinURL;
-		this.cloakURL = cloakURL;
+		this.uuid = Objects.requireNonNull(uuid, "uuid");
+		this.username = VerifyHelper.verifyUsername(username);
+		this.skinURL = skinURL == null ? null : IOHelper.verifyURL(skinURL);
+		this.cloakURL = cloakURL == null ? null : IOHelper.verifyURL(cloakURL);
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.Objects;
 
 import com.sun.nio.file.ExtendedWatchEventModifier;
 import com.sun.nio.file.SensitivityWatchEventModifier;
@@ -41,8 +42,8 @@ public final class DirWatcher implements Runnable, AutoCloseable {
 
 	@LauncherAPI
 	public DirWatcher(Path dir, HashedDir hdir, FileNameMatcher matcher) throws IOException {
-		this.dir = dir;
-		this.hdir = hdir;
+		this.dir = Objects.requireNonNull(dir, "dir");
+		this.hdir = Objects.requireNonNull(hdir, "hdir");
 		this.matcher = matcher;
 		service = dir.getFileSystem().newWatchService();
 

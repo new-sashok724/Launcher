@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayDeque;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 
 import launcher.Launcher;
@@ -47,7 +48,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 	public UpdateRequest(Launcher.Config config, String dirName, Path dir, FileNameMatcher matcher) {
 		super(config);
 		this.dirName = IOHelper.verifyFileName(dirName);
-		this.dir = dir;
+		this.dir = Objects.requireNonNull(dir, "dir");
 		this.matcher = matcher;
 	}
 

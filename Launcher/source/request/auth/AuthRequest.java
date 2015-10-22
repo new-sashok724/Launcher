@@ -8,6 +8,7 @@ import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
 import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
+import launcher.helper.VerifyHelper;
 import launcher.request.Request;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
@@ -19,7 +20,7 @@ public final class AuthRequest extends Request<AuthRequest.Result> {
 	@LauncherAPI
 	public AuthRequest(Launcher.Config config, String login, byte[] encryptedPassword) {
 		super(config);
-		this.login = login;
+		this.login = VerifyHelper.verify(login, VerifyHelper.NOT_EMPTY, "Login can't be empty");
 		this.encryptedPassword = Arrays.copyOf(encryptedPassword, encryptedPassword.length);
 	}
 

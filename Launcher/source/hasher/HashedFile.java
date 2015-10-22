@@ -7,6 +7,7 @@ import java.util.Arrays;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
+import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 
@@ -19,7 +20,8 @@ public final class HashedFile extends HashedEntry {
 
 	@LauncherAPI
 	public HashedFile(long size, byte[] digest) {
-		this.size = size;
+		this.size = VerifyHelper.verifyLong(size,
+			VerifyHelper.L_NOT_NEGATIVE, "Illegal size: " + size);
 		this.digest = Arrays.copyOf(digest, digest.length);
 	}
 

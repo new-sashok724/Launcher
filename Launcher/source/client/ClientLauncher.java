@@ -307,7 +307,7 @@ public final class ClientLauncher {
 
 			// Client params
 			this.pp = pp;
-			this.accessToken = accessToken;
+			this.accessToken = SecurityHelper.verifyToken(accessToken);
 			this.autoEnter = autoEnter;
 			this.fullScreen = fullScreen;
 			this.ram = ram;

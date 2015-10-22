@@ -5,6 +5,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.Objects;
 import java.util.UUID;
 
 import launcher.LauncherAPI;
@@ -15,7 +16,7 @@ public final class HInput implements AutoCloseable {
 
 	@LauncherAPI
 	public HInput(InputStream stream) {
-		this.stream = stream;
+		this.stream = Objects.requireNonNull(stream, "stream");
 	}
 
 	@LauncherAPI

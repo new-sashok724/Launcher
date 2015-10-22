@@ -25,7 +25,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
 	@Override
 	public final synchronized UUID auth(String username, String accessToken) throws IOException {
 		Entry entry = getEntry(username);
-		if (entry == null || !updateAuth(entry.uuid, username, accessToken)) {
+		if (entry == null || !updateAuth(entry.uuid, entry.username, accessToken)) {
 			return null; // Account doesn't exist
 		}
 

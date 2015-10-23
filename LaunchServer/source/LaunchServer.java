@@ -445,7 +445,7 @@ public final class LaunchServer implements Runnable {
 
 		@Override
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			LogHelper.subInfo("Sync '%s' profile", IOHelper.getFileName(file));
+			LogHelper.subInfo("Syncing '%s' profile", IOHelper.getFileName(file));
 
 			// Read profile
 			ClientProfile profile;

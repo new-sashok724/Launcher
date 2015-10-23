@@ -33,6 +33,7 @@ public final class ResponseThread implements Runnable {
 	// Instance
 	private final LaunchServer server;
 	private final Socket socket;
+	private boolean handshakePassed = false;
 
 	public ResponseThread(LaunchServer server, Socket socket) throws SocketException {
 		this.server = server;
@@ -46,6 +47,8 @@ public final class ResponseThread implements Runnable {
 		try (InputStream is = socket.getInputStream(); OutputStream os = socket.getOutputStream();
 			 HInput input = new HInput(is); HOutput output = new HOutput(os)) {
 			readHandshake(input, output);
+
+			// Start response
 			try {
 				respond(input, output);
 			} catch (RequestException e) {
@@ -54,8 +57,12 @@ public final class ResponseThread implements Runnable {
 		} catch (Exception e) {
 			LogHelper.error(e);
 		} finally {
-			server.serverSocketHandler.onDisconnected(socket);
 			IOHelper.close(socket);
+
+			// Invoke disconnect listener
+			if (handshakePassed) {
+				server.serverSocketHandler.onDisconnected(socket);
+			}
 		}
 	}
 
@@ -86,6 +93,10 @@ public final class ResponseThread implements Runnable {
 		} else {
 			LogHelper.subDebug("Type: " + type.name());
 		}
+
+		// Invoke connect listener
+		server.serverSocketHandler.onConnected(socket, type);
+		handshakePassed = true;
 
 		// Choose response based on type
 		Response response;

@@ -10,14 +10,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import launcher.LauncherAPI;
 import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
+import launcher.request.Request;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
@@ -32,7 +33,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 
 	// API
 	private final Map<String, Response.Factory> customResponses = new ConcurrentHashMap<>(2);
-	private volatile Predicate<Socket> connectListener;
+	private volatile BiConsumer<Socket, Request.Type> connectListener;
 	private volatile Consumer<Socket> disconnectListener;
 
 	public ServerSocketHandler(LaunchServer server) {
@@ -69,14 +70,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 
 			// Listen for incoming connections
 			while (serverSocket.isBound()) {
-				Socket socket = serverSocket.accept();
-				if (connectListener != null && !connectListener.test(socket)) {
-					IOHelper.close(socket);
-					continue;
-				}
-
-				// Filter passed
-				threadPool.execute(new ResponseThread(server, socket));
+				threadPool.execute(new ResponseThread(server, serverSocket.accept()));
 			}
 		} catch (IOException e) {
 			// Ignore error after close/rebind
@@ -101,13 +95,19 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 	}
 
 	@LauncherAPI
-	public void setConnectListener(Predicate<Socket> connectListener) {
+	public void setConnectListener(BiConsumer<Socket, Request.Type> connectListener) {
 		this.connectListener = connectListener;
 	}
 
 	@LauncherAPI
 	public void setDisconnectListener(Consumer<Socket> disconnectListener) {
 		this.disconnectListener = disconnectListener;
+	}
+
+	/*package*/ void onConnected(Socket socket, Request.Type type) {
+		if (connectListener != null) {
+			connectListener.accept(socket, type);
+		}
 	}
 
 	/*package*/ void onDisconnected(Socket socket) {

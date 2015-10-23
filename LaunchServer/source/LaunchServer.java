@@ -66,6 +66,7 @@ import launchserver.command.CommandException;
 import launchserver.command.handler.CommandHandler;
 import launchserver.command.handler.JLineCommandHandler;
 import launchserver.command.handler.StdCommandHandler;
+import launchserver.response.Response;
 import launchserver.response.ServerSocketHandler;
 
 public final class LaunchServer implements Runnable {
@@ -432,8 +433,8 @@ public final class LaunchServer implements Runnable {
 		bindings.put("CommandExceptionClass", CommandException.class);
 
 		// Set response class bindings
-		bindings.put("ResponseClass", Command.class);
-		bindings.put("ResponseFactoryClass", CommandHandler.class);
+		bindings.put("ResponseClass", Response.class);
+		bindings.put("ResponseFactoryClass", Response.Factory.class);
 	}
 
 	private final class ProfilesFileVisitor extends SimpleFileVisitor<Path> {

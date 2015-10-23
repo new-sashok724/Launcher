@@ -45,31 +45,31 @@ public abstract class CommandHandler implements Runnable {
 
 	protected CommandHandler(LaunchServer server) {
 		// Register basic commands
-		register("help", new HelpCommand(server));
-		register("version", new VersionCommand(server));
-		register("build", new BuildCommand(server));
-		register("stop", new StopCommand(server));
-		register("rebind", new RebindCommand(server));
-		register("reloadConfig", new ReloadConfigCommand(server));
-		register("reloadKeyPair", new ReloadKeyPairCommand(server));
-		register("eval", new EvalCommand(server));
-		register("debug", new DebugCommand(server));
-		register("clear", new ClearCommand(server));
-		register("gc", new GCCommand(server));
+		registerCommand("help", new HelpCommand(server));
+		registerCommand("version", new VersionCommand(server));
+		registerCommand("build", new BuildCommand(server));
+		registerCommand("stop", new StopCommand(server));
+		registerCommand("rebind", new RebindCommand(server));
+		registerCommand("reloadConfig", new ReloadConfigCommand(server));
+		registerCommand("reloadKeyPair", new ReloadKeyPairCommand(server));
+		registerCommand("eval", new EvalCommand(server));
+		registerCommand("debug", new DebugCommand(server));
+		registerCommand("clear", new ClearCommand(server));
+		registerCommand("gc", new GCCommand(server));
 
 		// Register sync commands
-		register("indexAsset", new IndexAssetCommand(server));
-		register("unindexAsset", new UnindexAssetCommand(server));
-		register("downloadAsset", new DownloadAssetCommand(server));
-		register("downloadClient", new DownloadClientCommand(server));
-		register("syncBinaries", new SyncBinariesCommand(server));
-		register("syncUpdates", new SyncUpdatesCommand(server));
-		register("syncProfiles", new SyncProfilesCommand(server));
+		registerCommand("indexAsset", new IndexAssetCommand(server));
+		registerCommand("unindexAsset", new UnindexAssetCommand(server));
+		registerCommand("downloadAsset", new DownloadAssetCommand(server));
+		registerCommand("downloadClient", new DownloadClientCommand(server));
+		registerCommand("syncBinaries", new SyncBinariesCommand(server));
+		registerCommand("syncUpdates", new SyncUpdatesCommand(server));
+		registerCommand("syncProfiles", new SyncProfilesCommand(server));
 
 		// Register auth commands
-		register("auth", new AuthCommand(server));
-		register("usernameToUUID", new UsernameToUUIDCommand(server));
-		register("uuidToUsername", new UUIDToUsernameCommand(server));
+		registerCommand("auth", new AuthCommand(server));
+		registerCommand("usernameToUUID", new UsernameToUUIDCommand(server));
+		registerCommand("uuidToUsername", new UUIDToUsernameCommand(server));
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public abstract class CommandHandler implements Runnable {
 	public abstract String readLine() throws IOException;
 
 	@LauncherAPI
-	public final void register(String name, Command command) {
+	public final void registerCommand(String name, Command command) {
 		VerifyHelper.verifyIDName(name);
 		VerifyHelper.putIfAbsent(commands, name, Objects.requireNonNull(command, "command"),
 			String.format("Command has been already registered: '%s'", name));

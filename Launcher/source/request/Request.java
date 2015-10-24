@@ -76,7 +76,7 @@ public abstract class Request<R> {
 		PING(0), // Ping request
 		LAUNCHER(1), UPDATE(2), UPDATE_LIST(3), // Update requests
 		AUTH(4), JOIN_SERVER(5), CHECK_SERVER(6), // Auth requests
-		PROFILE_BY_USERNAME(7), PROFILE_BY_UUID(8), BATCH_PROFILE_BY_USERNAME(0), // Profile requests
+		PROFILE_BY_USERNAME(7), PROFILE_BY_UUID(8), BATCH_PROFILE_BY_USERNAME(9), // Profile requests
 		CUSTOM(255); // Custom requests
 		private static final EnumSerializer<Type> SERIALIZER = new EnumSerializer<>(Type.class);
 		private final int n;

@@ -147,7 +147,7 @@ public final class ResponseThread implements Runnable {
 				break;
 			case CUSTOM:
 				String name = VerifyHelper.verifyIDName(input.readASCII(255));
-				response = server.serverSocketHandler.newCustomResponse(name, input, output);
+				response = server.serverSocketHandler.newCustomResponse(name, id, input, output);
 				break;
 			default:
 				throw new AssertionError("Unsupported request type: " + type.name());

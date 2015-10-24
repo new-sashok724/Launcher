@@ -90,10 +90,10 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 	}
 
 	@LauncherAPI
-	public Response newCustomResponse(String name, HInput input, HOutput output) throws IOException {
+	public Response newCustomResponse(String name, int id, HInput input, HOutput output) throws IOException {
 		Response.Factory factory = VerifyHelper.getMapValue(customResponses, name,
 			String.format("Unknown custom response: '%s'", name));
-		return factory.newResponse(server, input, output);
+		return factory.newResponse(server, id, input, output);
 	}
 
 	@LauncherAPI

@@ -3,7 +3,6 @@ package launchserver.response.profile;
 import java.io.IOException;
 import java.util.Arrays;
 
-import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.uuid.BatchProfileByUsernameRequest;
 import launcher.serialize.HInput;
@@ -12,8 +11,8 @@ import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class BatchProfileByUsernameResponse extends Response {
-	public BatchProfileByUsernameResponse(LaunchServer server, HInput input, HOutput output) {
-		super(server, input, output);
+	public BatchProfileByUsernameResponse(LaunchServer server, int id, HInput input, HOutput output) {
+		super(server, id, input, output);
 	}
 
 	@Override
@@ -22,7 +21,7 @@ public final class BatchProfileByUsernameResponse extends Response {
 		for (int i = 0; i < usernames.length; i++) {
 			usernames[i] = VerifyHelper.verifyUsername(input.readASCII(16));
 		}
-		LogHelper.subDebug("Usernames: " + Arrays.toString(usernames));
+		debug("Usernames: " + Arrays.toString(usernames));
 
 		// Respond with profiles array
 		for (String username : usernames) {

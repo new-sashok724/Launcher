@@ -18,8 +18,8 @@ import launchserver.response.Response;
 import launchserver.response.profile.ProfileByUUIDResponse;
 
 public final class AuthResponse extends Response {
-	public AuthResponse(LaunchServer server, HInput input, HOutput output) {
-		super(server, input, output);
+	public AuthResponse(LaunchServer server, int id, HInput input, HOutput output) {
+		super(server, id, input, output);
 	}
 
 	@Override
@@ -36,8 +36,8 @@ public final class AuthResponse extends Response {
 		}
 
 		// Authenticate
+		debug("Login: '%s', Password: '%s'", id, login, echo(password.length()));
 		LaunchServer.Config config = server.getConfig();
-		LogHelper.subDebug("Login: '%s', password: '%s'", login, echo(password.length()));
 		String username;
 		try {
 			username = VerifyHelper.verifyUsername(config.authProvider.auth(login, password));
@@ -47,7 +47,7 @@ public final class AuthResponse extends Response {
 			LogHelper.error(e);
 			throw new RequestException("Internal auth error", e);
 		}
-		LogHelper.subDebug("Auth: '%s' -> '%s'", login, username);
+		debug("Auth: '%s' -> '%s'", id, login, username);
 
 		// Authenticate on server (and get UUID)
 		String accessToken = SecurityHelper.randomStringToken();

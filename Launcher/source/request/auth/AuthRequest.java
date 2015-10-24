@@ -40,7 +40,7 @@ public final class AuthRequest extends Request<AuthRequest.Result> {
 		output.writeByteArray(encryptedPassword, IOHelper.BUFFER_SIZE);
 		output.flush();
 
-		// Read UUID and accessToken
+		// Read UUID and access token
 		readError(input);
 		PlayerProfile pp = new PlayerProfile(input);
 		String accessToken = input.readASCII(-SecurityHelper.TOKEN_STRING_LENGTH);

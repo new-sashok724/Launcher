@@ -198,10 +198,10 @@ public abstract class FileAuthHandler extends AuthHandler {
 		public Auth(String username, String accessToken, String serverID) {
 			this(username);
 			if (accessToken == null && serverID != null) {
-				throw new IllegalArgumentException("Can't set accessToken while serverID is null");
+				throw new IllegalArgumentException("Can't set access token while server ID is null");
 			}
 
-			// Set and verify accessToken
+			// Set and verify access token
 			this.accessToken = accessToken == null ?
 				null : SecurityHelper.verifyToken(accessToken);
 			this.serverID = serverID == null ?

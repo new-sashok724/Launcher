@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import launcher.hasher.HashedDir;
 import launcher.hasher.HashedEntry;
 import launcher.helper.IOHelper;
-import launcher.helper.LogHelper;
 import launcher.request.RequestException;
 import launcher.request.update.UpdateRequest;
 import launcher.serialize.HInput;
@@ -19,8 +18,8 @@ import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class UpdateResponse extends Response {
-	public UpdateResponse(LaunchServer server, HInput input, HOutput output) {
-		super(server, input, output);
+	public UpdateResponse(LaunchServer server, int id, HInput input, HOutput output) {
+		super(server, id, input, output);
 	}
 
 	@Override
@@ -34,7 +33,7 @@ public final class UpdateResponse extends Response {
 		writeNoError(output);
 
 		// Write update hdir
-		LogHelper.subDebug("Update dir: '%s'", updateDirName);
+		debug("Update dir: '%s'", updateDirName);
 		hdir.write(output);
 		output.flush();
 
@@ -58,7 +57,7 @@ public final class UpdateResponse extends Response {
 				UpdateRequest.Action action = actionsSlice[i];
 				switch (action.type) {
 					case CD:
-						LogHelper.subDebug("CD '%s'", action.name);
+						debug("CD '%s'", action.name);
 
 						// Get hashed dir (for validation)
 						HashedEntry hSubdir = dirStack.getLast().getEntry(action.name);
@@ -71,7 +70,7 @@ public final class UpdateResponse extends Response {
 						dir = dir.resolve(action.name);
 						break;
 					case GET:
-						LogHelper.subDebug("GET '%s'", action.name);
+						debug("GET '%s'", action.name);
 
 						// Get hashed file (for validation)
 						HashedEntry hFile = dirStack.getLast().getEntry(action.name);
@@ -86,7 +85,7 @@ public final class UpdateResponse extends Response {
 						}
 						break;
 					case CD_BACK:
-						LogHelper.subDebug("CD ..");
+						debug("CD ..");
 
 						// Remove from hashed dir stack
 						dirStack.removeLast();

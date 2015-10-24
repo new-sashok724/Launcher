@@ -1,6 +1,7 @@
 package launchserver.response;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Map;
@@ -9,10 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import launcher.LauncherAPI;
 import launcher.helper.CommonHelper;
@@ -34,9 +33,8 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 
 	// API
 	private final Map<String, Response.Factory> customResponses = new ConcurrentHashMap<>(2);
-	private volatile BiConsumer<Socket, Request.Type> connectListener;
-	private volatile Predicate<Socket> preConnectListener;
-	private volatile Consumer<Socket> disconnectListener;
+	private final AtomicInteger idCounter = new AtomicInteger(0);
+	private volatile Listener listener;
 
 	public ServerSocketHandler(LaunchServer server) {
 		this.server = server;
@@ -73,11 +71,15 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 			// Listen for incoming connections
 			while (serverSocket.isBound()) {
 				Socket socket = serverSocket.accept();
-				if (preConnectListener != null && !preConnectListener.test(socket)) {
-					IOHelper.close(socket);
-					continue;
+
+				// Invoke pre-connect listener
+				int id = idCounter.incrementAndGet();
+				if (listener != null && !listener.onConnect(id, socket.getInetAddress())) {
+					continue; // Listener didn't accepted this connection
 				}
-				threadPool.execute(new ResponseThread(server, socket));
+
+				// Reply in separate thread
+				threadPool.execute(new ResponseThread(server, id, socket));
 			}
 		} catch (IOException e) {
 			// Ignore error after close/rebind
@@ -102,29 +104,28 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 	}
 
 	@LauncherAPI
-	public void setConnectListener(BiConsumer<Socket, Request.Type> connectListener) {
-		this.connectListener = connectListener;
+	public void setListener(Listener listener) {
+		this.listener = listener;
 	}
 
-	@LauncherAPI
-	public void setDisconnectListener(Consumer<Socket> disconnectListener) {
-		this.disconnectListener = disconnectListener;
-	}
-
-	@LauncherAPI
-	public void setPreConnectListener(Predicate<Socket> preConnectListener) {
-		this.preConnectListener = preConnectListener;
-	}
-
-	/*package*/ void onConnected(Socket socket, Request.Type type) {
-		if (connectListener != null) {
-			connectListener.accept(socket, type);
+	/*package*/ void onDisconnect(int id, Exception e) {
+		if (listener != null) {
+			listener.onDisconnect(id, e);
 		}
 	}
 
-	/*package*/ void onDisconnected(Socket socket) {
-		if (disconnectListener != null) {
-			disconnectListener.accept(socket);
-		}
+	/*package*/ boolean onHandshake(int id, Request.Type type) {
+		return listener == null || listener.onHandshake(id, type);
+	}
+
+	public interface Listener {
+		@LauncherAPI
+		boolean onConnect(int id, InetAddress address);
+
+		@LauncherAPI
+		void onDisconnect(int id, Exception e);
+
+		@LauncherAPI
+		boolean onHandshake(int id, Request.Type type);
 	}
 }

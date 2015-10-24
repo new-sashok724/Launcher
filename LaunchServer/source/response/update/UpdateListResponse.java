@@ -11,8 +11,8 @@ import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class UpdateListResponse extends Response {
-	public UpdateListResponse(LaunchServer server, HInput input, HOutput output) {
-		super(server, input, output);
+	public UpdateListResponse(LaunchServer server, int id, HInput input, HOutput output) {
+		super(server, id, input, output);
 	}
 
 	@Override

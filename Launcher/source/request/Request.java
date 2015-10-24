@@ -1,8 +1,6 @@
 package launcher.request;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -41,8 +39,8 @@ public abstract class Request<R> {
 		// Make request to LaunchServer
 		try (Socket socket = IOHelper.newSocket()) {
 			socket.connect(IOHelper.resolve(config.address));
-			try (InputStream is = socket.getInputStream(); OutputStream os = socket.getOutputStream();
-				 HInput input = new HInput(is); HOutput output = new HOutput(os)) {
+			try (HInput input = new HInput(socket.getInputStream());
+				 HOutput output = new HOutput(socket.getOutputStream())) {
 				writeHandshake(input, output);
 
 				// Start request

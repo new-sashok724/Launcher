@@ -3,7 +3,6 @@ package launchserver.response.profile;
 import java.io.IOException;
 import java.util.UUID;
 
-import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
@@ -11,14 +10,16 @@ import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class ProfileByUsernameResponse extends Response {
-	public ProfileByUsernameResponse(LaunchServer server, HInput input, HOutput output) {
-		super(server, input, output);
+	public ProfileByUsernameResponse(LaunchServer server, int id, HInput input, HOutput output) {
+		super(server, id, input, output);
 	}
 
 	@Override
 	public void reply() throws IOException {
 		String username = VerifyHelper.verifyUsername(input.readASCII(16));
-		LogHelper.subDebug("Username: " + username);
+		debug("Username: " + username);
+
+		// Write response
 		writeProfile(server, output, username);
 	}
 

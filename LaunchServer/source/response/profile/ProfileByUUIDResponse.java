@@ -4,21 +4,20 @@ import java.io.IOException;
 import java.util.UUID;
 
 import launcher.client.PlayerProfile;
-import launcher.helper.LogHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class ProfileByUUIDResponse extends Response {
-	public ProfileByUUIDResponse(LaunchServer server, HInput input, HOutput output) {
-		super(server, input, output);
+	public ProfileByUUIDResponse(LaunchServer server, int id, HInput input, HOutput output) {
+		super(server, id, input, output);
 	}
 
 	@Override
 	public void reply() throws IOException {
 		UUID uuid = input.readUUID();
-		LogHelper.subDebug("UUID: " + uuid);
+		debug("UUID: " + uuid);
 
 		// Verify has such profile
 		String username = server.getConfig().authHandler.uuidToUsername(uuid);

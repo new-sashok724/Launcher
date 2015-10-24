@@ -8,8 +8,8 @@ import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
 
 public final class PingResponse extends Response {
-	public PingResponse(LaunchServer server, HInput input, HOutput output) {
-		super(server, input, output);
+	public PingResponse(LaunchServer server, int id, HInput input, HOutput output) {
+		super(server, id, input, output);
 	}
 
 	@Override

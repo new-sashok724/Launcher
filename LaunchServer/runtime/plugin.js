@@ -15,11 +15,11 @@ server.commandHandler.registerCommand("test", new (Java.extend(Command, {
 }))(server));
 
 // Register custom response
-server.serverSocketHandler.registerCustomResponse("test", function(server, input, output) {
+server.serverSocketHandler.registerCustomResponse("test", function(server, id, input, output) {
 	return new (Java.extend(Response, function() {
 		LogHelper.info("[plugin.js] Custom response invoked!");
 		output.writeInt(0x724);
-	}))(server, input, output);
+	}))(server, id, input, output);
 });
 
 /* You can test custom request like this:

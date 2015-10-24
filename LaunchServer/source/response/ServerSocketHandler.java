@@ -12,6 +12,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import launcher.LauncherAPI;
 import launcher.helper.CommonHelper;
@@ -34,6 +35,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 	// API
 	private final Map<String, Response.Factory> customResponses = new ConcurrentHashMap<>(2);
 	private volatile BiConsumer<Socket, Request.Type> connectListener;
+	private volatile Predicate<Socket> preConnectListener;
 	private volatile Consumer<Socket> disconnectListener;
 
 	public ServerSocketHandler(LaunchServer server) {
@@ -70,7 +72,12 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 
 			// Listen for incoming connections
 			while (serverSocket.isBound()) {
-				threadPool.execute(new ResponseThread(server, serverSocket.accept()));
+				Socket socket = serverSocket.accept();
+				if (preConnectListener != null && !preConnectListener.test(socket)) {
+					IOHelper.close(socket);
+					continue;
+				}
+				threadPool.execute(new ResponseThread(server, socket));
 			}
 		} catch (IOException e) {
 			// Ignore error after close/rebind
@@ -102,6 +109,11 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 	@LauncherAPI
 	public void setDisconnectListener(Consumer<Socket> disconnectListener) {
 		this.disconnectListener = disconnectListener;
+	}
+
+	@LauncherAPI
+	public void setPreConnectListener(Predicate<Socket> preConnectListener) {
+		this.preConnectListener = preConnectListener;
 	}
 
 	/*package*/ void onConnected(Socket socket, Request.Type type) {

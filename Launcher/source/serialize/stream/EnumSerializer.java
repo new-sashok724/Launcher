@@ -28,7 +28,8 @@ public final class EnumSerializer<E extends Enum<?> & Itf> {
 			} catch (IllegalAccessException e) {
 				throw new InternalError(e);
 			}
-			map.put(itf.getNumber(), clazz.cast(itf));
+			VerifyHelper.putIfAbsent(map, itf.getNumber(), clazz.cast(itf),
+				"Duplicate number for enum constant " + field.getName());
 		}
 	}
 

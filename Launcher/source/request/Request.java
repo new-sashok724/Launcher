@@ -42,10 +42,6 @@ public abstract class Request<R> {
 			try (HInput input = new HInput(socket.getInputStream());
 				 HOutput output = new HOutput(socket.getOutputStream())) {
 				writeHandshake(input, output);
-
-				// Start request
-				EnumSerializer.write(output, getType());
-				output.flush();
 				return requestDo(input, output);
 			}
 		}
@@ -63,10 +59,10 @@ public abstract class Request<R> {
 	protected abstract R requestDo(HInput input, HOutput output) throws Exception;
 
 	private void writeHandshake(HInput input, HOutput output) throws IOException {
+		// Write handshake
 		output.writeInt(Launcher.PROTOCOL_MAGIC);
-
-		// Write key info
 		output.writeBigInteger(config.publicKey.getModulus(), SecurityHelper.RSA_KEY_LENGTH + 1);
+		EnumSerializer.write(output, getType());
 		output.flush();
 
 		// Verify is accepted

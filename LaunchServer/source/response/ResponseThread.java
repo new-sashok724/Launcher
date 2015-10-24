@@ -95,7 +95,6 @@ public final class ResponseThread implements Runnable {
 		Request.Type type = Request.Type.read(input);
 		if (!server.serverSocketHandler.onHandshake(id, type)) {
 			output.writeBoolean(false);
-			output.flush();
 			return null;
 		}
 

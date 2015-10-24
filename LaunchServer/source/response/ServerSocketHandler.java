@@ -33,7 +33,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 
 	// API
 	private final Map<String, Response.Factory> customResponses = new ConcurrentHashMap<>(2);
-	private final AtomicLong idCounter = new AtomicLong(0);
+	private final AtomicLong idCounter = new AtomicLong(0L);
 	private volatile Listener listener;
 
 	public ServerSocketHandler(LaunchServer server) {

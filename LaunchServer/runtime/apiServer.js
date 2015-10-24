@@ -17,3 +17,4 @@ var CommandException = CommandExceptionClass.static;
 // Response class API imports
 var Response = ResponseClass.static;
 var ResponseFactory = ResponseFactoryClass.static;
+var ServerSocketHandlerListener = ServerSocketHandlerListenerClass.static;

@@ -11,7 +11,7 @@ import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class JoinServerResponse extends Response {
-	public JoinServerResponse(LaunchServer server, int id, HInput input, HOutput output) {
+	public JoinServerResponse(LaunchServer server, long id, HInput input, HOutput output) {
 		super(server, id, input, output);
 	}
 

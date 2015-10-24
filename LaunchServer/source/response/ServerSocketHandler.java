@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import launcher.LauncherAPI;
@@ -33,7 +33,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 
 	// API
 	private final Map<String, Response.Factory> customResponses = new ConcurrentHashMap<>(2);
-	private final AtomicInteger idCounter = new AtomicInteger(0);
+	private final AtomicLong idCounter = new AtomicLong(0);
 	private volatile Listener listener;
 
 	public ServerSocketHandler(LaunchServer server) {
@@ -73,7 +73,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 				Socket socket = serverSocket.accept();
 
 				// Invoke pre-connect listener
-				int id = idCounter.incrementAndGet();
+				long id = idCounter.incrementAndGet();
 				if (listener != null && !listener.onConnect(id, socket.getInetAddress())) {
 					continue; // Listener didn't accepted this connection
 				}
@@ -90,7 +90,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 	}
 
 	@LauncherAPI
-	public Response newCustomResponse(String name, int id, HInput input, HOutput output) throws IOException {
+	public Response newCustomResponse(String name, long id, HInput input, HOutput output) throws IOException {
 		Response.Factory factory = VerifyHelper.getMapValue(customResponses, name,
 			String.format("Unknown custom response: '%s'", name));
 		return factory.newResponse(server, id, input, output);
@@ -108,24 +108,24 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 		this.listener = listener;
 	}
 
-	/*package*/ void onDisconnect(int id, Exception e) {
+	/*package*/ void onDisconnect(long id, Exception e) {
 		if (listener != null) {
 			listener.onDisconnect(id, e);
 		}
 	}
 
-	/*package*/ boolean onHandshake(int id, Request.Type type) {
+	/*package*/ boolean onHandshake(long id, Request.Type type) {
 		return listener == null || listener.onHandshake(id, type);
 	}
 
 	public interface Listener {
 		@LauncherAPI
-		boolean onConnect(int id, InetAddress address);
+		boolean onConnect(long id, InetAddress address);
 
 		@LauncherAPI
-		void onDisconnect(int id, Exception e);
+		void onDisconnect(long id, Exception e);
 
 		@LauncherAPI
-		boolean onHandshake(int id, Request.Type type);
+		boolean onHandshake(long id, Request.Type type);
 	}
 }

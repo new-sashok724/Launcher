@@ -12,7 +12,7 @@ import launchserver.response.Response;
 import launchserver.response.profile.ProfileByUUIDResponse;
 
 public final class CheckServerResponse extends Response {
-	public CheckServerResponse(LaunchServer server, int id, HInput input, HOutput output) {
+	public CheckServerResponse(LaunchServer server, long id, HInput input, HOutput output) {
 		super(server, id, input, output);
 	}
 

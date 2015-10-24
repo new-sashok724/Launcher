@@ -10,12 +10,12 @@ import launchserver.LaunchServer;
 
 public abstract class Response {
 	@LauncherAPI protected final LaunchServer server;
-	@LauncherAPI protected final int id;
+	@LauncherAPI protected final long id;
 	@LauncherAPI protected final HInput input;
 	@LauncherAPI protected final HOutput output;
 
 	@LauncherAPI
-	protected Response(LaunchServer server, int id, HInput input, HOutput output) {
+	protected Response(LaunchServer server, long id, HInput input, HOutput output) {
 		this.server = server;
 		this.id = id;
 		this.input = input;
@@ -43,6 +43,6 @@ public abstract class Response {
 	@FunctionalInterface
 	public interface Factory {
 		@LauncherAPI
-		Response newResponse(LaunchServer server, int id, HInput input, HOutput output);
+		Response newResponse(LaunchServer server, long id, HInput input, HOutput output);
 	}
 }

@@ -14,7 +14,7 @@ import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class LauncherResponse extends Response {
-	public LauncherResponse(LaunchServer server, int id, HInput input, HOutput output) {
+	public LauncherResponse(LaunchServer server, long id, HInput input, HOutput output) {
 		super(server, id, input, output);
 	}
 

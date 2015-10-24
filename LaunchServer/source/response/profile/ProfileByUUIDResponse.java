@@ -10,7 +10,7 @@ import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class ProfileByUUIDResponse extends Response {
-	public ProfileByUUIDResponse(LaunchServer server, int id, HInput input, HOutput output) {
+	public ProfileByUUIDResponse(LaunchServer server, long id, HInput input, HOutput output) {
 		super(server, id, input, output);
 	}
 

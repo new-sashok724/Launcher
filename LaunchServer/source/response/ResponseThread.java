@@ -30,10 +30,10 @@ public final class ResponseThread implements Runnable {
 
 	// Instance
 	private final LaunchServer server;
-	private final int id;
+	private final long id;
 	private final Socket socket;
 
-	public ResponseThread(LaunchServer server, int id, Socket socket) throws SocketException {
+	public ResponseThread(LaunchServer server, long id, Socket socket) throws SocketException {
 		this.server = server;
 		this.id = id;
 		this.socket = socket;

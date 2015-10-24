@@ -435,6 +435,7 @@ public final class LaunchServer implements Runnable {
 		// Set response class bindings
 		bindings.put("ResponseClass", Response.class);
 		bindings.put("ResponseFactoryClass", Response.Factory.class);
+		bindings.put("ServerSocketHandlerListenerClass", ServerSocketHandler.Listener.class);
 	}
 
 	private final class ProfilesFileVisitor extends SimpleFileVisitor<Path> {

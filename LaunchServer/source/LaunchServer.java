@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.zip.CRC32;
 
 import launcher.Launcher;
@@ -88,7 +89,8 @@ public final class LaunchServer implements Runnable {
 	private final ScriptEngine engine = CommonHelper.newScriptEngine();
 
 	// Launcher config
-	private volatile Config config;
+	private Config config;
+	private final ReentrantReadWriteLock configLock = new ReentrantReadWriteLock();
 	private volatile RSAPublicKey publicKey;
 	private volatile RSAPrivateKey privateKey;
 
@@ -160,17 +162,27 @@ public final class LaunchServer implements Runnable {
 	@LauncherAPI
 	public void buildLauncherBinaries() throws IOException {
 		launcherBinary.build();
-		launcherEXEBinary.build();
+		getEXEBinary().build();
 	}
 
 	@LauncherAPI
 	public Config getConfig() {
-		return config;
+		configLock.readLock().lock();
+		try {
+			return config;
+		} finally {
+			configLock.readLock().unlock();
+		}
 	}
 
 	@LauncherAPI
 	public LauncherBinary getEXEBinary() {
-		return launcherEXEBinary;
+		configLock.readLock().lock();
+		try {
+			return launcherEXEBinary;
+		} finally {
+			configLock.readLock().unlock();
+		}
 	}
 
 	@LauncherAPI
@@ -215,62 +227,67 @@ public final class LaunchServer implements Runnable {
 
 	@LauncherAPI
 	public void reloadConfig() throws IOException {
-		Config oldConfig = config;
+		configLock.writeLock().lock();
+		try {
+			Config oldConfig = config;
 
-		// Create LaunchServer config if not exist
-		Config newConfig;
-		if (!IOHelper.isFile(CONFIG_FILE)) {
-			LogHelper.info("Creating LaunchServer config");
-			try (BufferedReader reader = IOHelper.newReader(IOHelper.getResourceURL("launchserver/defaults/config.cfg"))) {
-				newConfig = new Config(TextConfigReader.read(reader, false));
+			// Create LaunchServer config if not exist
+			Config newConfig;
+			if (!IOHelper.isFile(CONFIG_FILE)) {
+				LogHelper.info("Creating LaunchServer config");
+				try (BufferedReader reader = IOHelper.newReader(IOHelper.getResourceURL("launchserver/defaults/config.cfg"))) {
+					newConfig = new Config(TextConfigReader.read(reader, false));
+				}
+
+				// Set server address
+				LogHelper.println("LaunchServer address: ");
+				newConfig.setAddress(commandHandler.readLine());
+
+				// Write LaunchServer config
+				LogHelper.info("Writing LaunchServer config file");
+				try (BufferedWriter writer = IOHelper.newWriter(CONFIG_FILE)) {
+					TextConfigWriter.write(newConfig.block, writer, true);
+				}
 			}
 
-			// Set server address
-			LogHelper.println("LaunchServer address: ");
-			newConfig.setAddress(commandHandler.readLine());
+			// Flush old auth handler and provider
+			if (oldConfig != null) {
+				// Flush auth handler
+				try {
+					config.authHandler.flush();
+				} catch (IOException e) {
+					LogHelper.error(e);
+				}
 
-			// Write LaunchServer config
-			LogHelper.info("Writing LaunchServer config file");
-			try (BufferedWriter writer = IOHelper.newWriter(CONFIG_FILE)) {
-				TextConfigWriter.write(newConfig.block, writer, true);
+				//  Flush auth provider
+				try {
+					config.authProvider.flush();
+				} catch (IOException e) {
+					LogHelper.error(e);
+				}
 			}
+
+			// Read LaunchServer config (also re-read after setup for RO)
+			LogHelper.info("Reading LaunchServer config file");
+			try (BufferedReader reader = IOHelper.newReader(CONFIG_FILE)) {
+				newConfig = new Config(TextConfigReader.read(reader, true));
+				if (oldConfig != null && !oldConfig.getBindAddress().equals(newConfig.getBindAddress())) {
+					LogHelper.warning("To bind new address, use 'rebind' command");
+				}
+			}
+			newConfig.verify();
+
+			// Create new launcher EXE binary
+			LauncherBinary newExeBinary = newConfig.launch4J ?
+				new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
+			newExeBinary.sync();
+
+			// Apply changes
+			config = newConfig;
+			launcherEXEBinary = newExeBinary;
+		} finally {
+			configLock.writeLock().unlock();
 		}
-
-		// Read LaunchServer config (also re-read after setup for RO)
-		LogHelper.info("Reading LaunchServer config file");
-		try (BufferedReader reader = IOHelper.newReader(CONFIG_FILE)) {
-			newConfig = new Config(TextConfigReader.read(reader, true));
-			if (oldConfig != null && !oldConfig.getBindAddress().equals(newConfig.getBindAddress())) {
-				LogHelper.warning("To bind new address, use 'rebind' command");
-			}
-		}
-		newConfig.verify();
-
-		// Flush old auth handler and provider
-		if (oldConfig != null) {
-			// Flush auth handler
-			try {
-				config.authHandler.flush();
-			} catch (IOException e) {
-				LogHelper.error(e);
-			}
-
-			//  Flush auth provider
-			try {
-				config.authProvider.flush();
-			} catch (IOException e) {
-				LogHelper.error(e);
-			}
-		}
-
-		// Create new launcher EXE binary
-		LauncherBinary newExeBinary = newConfig.launch4J ?
-			new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
-		newExeBinary.sync();
-
-		// Apply changes
-		config = newConfig;
-		launcherEXEBinary = newExeBinary;
 	}
 
 	@LauncherAPI
@@ -318,7 +335,7 @@ public final class LaunchServer implements Runnable {
 
 		// Syncing launcher EXE binary
 		LogHelper.subInfo("Syncing launcher EXE binary file");
-		if (!launcherEXEBinary.sync()) {
+		if (!getEXEBinary().sync()) {
 			LogHelper.subWarning("Missing launcher EXE binary file");
 		}
 	}
@@ -382,16 +399,24 @@ public final class LaunchServer implements Runnable {
 	private void shutdownHook() {
 		serverSocketHandler.close();
 
-		// Flush auth handler and provider
+		// Flush auth handler
+		configLock.readLock().lock();
 		try {
 			config.authHandler.flush();
 		} catch (IOException e) {
 			LogHelper.error(e);
+		} finally {
+			configLock.readLock().unlock();
 		}
+
+		// Flush auth provider
+		configLock.readLock().lock();
 		try {
 			config.authProvider.flush();
 		} catch (IOException e) {
 			LogHelper.error(e);
+		} finally {
+			configLock.readLock().unlock();
 		}
 
 		// Print last message before death :(

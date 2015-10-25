@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 
-Name: com/mojang/authlib
+Name: com/mojang/authlib/
 Sealed: true
 
-Name: com/mojang/util
+Name: com/mojang/util/
 Sealed: true

@@ -60,8 +60,8 @@ public final class JARLauncherBinary extends LauncherBinary {
 			byte[] launcherConfigBytes;
 			try (ByteArrayOutputStream configArray = IOHelper.newByteArrayOutput()) {
 				try (HOutput configOutput = new HOutput(configArray)) {
-					LaunchServer.Config config = server.getConfig();
-					new Launcher.Config(config.getAddress(), config.port, server.getPublicKey(), runtime).write(configOutput);
+					new Launcher.Config(server.config.getAddress(), server.config.port,
+						server.publicKey, runtime).write(configOutput);
 				}
 				launcherConfigBytes = configArray.toByteArray();
 			}

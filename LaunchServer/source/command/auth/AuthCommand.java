@@ -30,11 +30,11 @@ public final class AuthCommand extends Command {
 		String password = args[1];
 
 		// Authenticate
-		String username = server.getConfig().authProvider.auth(login, password);
+		String username = server.config.authProvider.auth(login, password);
 
 		// Authenticate on server (and get UUID)
 		String accessToken = SecurityHelper.randomStringToken();
-		UUID uuid = server.getConfig().authHandler.auth(username, accessToken);
+		UUID uuid = server.config.authHandler.auth(username, accessToken);
 		if (uuid == null) {
 			throw new CommandException("Can't assing UUID (Command)");
 		}

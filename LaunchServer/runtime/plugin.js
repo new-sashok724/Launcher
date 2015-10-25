@@ -7,7 +7,7 @@ LogHelper.info("[plugin.js] Test message");
 server.commandHandler.registerCommand("test", new (Java.extend(Command, {
 	getArgsDescription: function() { return "[anything]"; },
 	getUsageDescription: function() { return "plugin.js test command"; },
-	
+
 	invoke: function(args) {
 		LogHelper.info("[plugin.js] Command invoked! Args: " +
 			java.util.Arrays.toString(args));
@@ -25,7 +25,7 @@ server.serverSocketHandler.registerCustomResponse("test", function(server, id, i
 /* You can test custom request like this:
 var TestCustomRequest = Java.extend(CustomRequest, {
 	getName: function() { return "test"; },
-	
+
 	requestDoCustom: function(input, output) {
 		return input.readInt();
 	}

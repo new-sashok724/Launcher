@@ -86,7 +86,7 @@ public final class ResponseThread implements Runnable {
 
 		// Verify key modulus
 		BigInteger keyModulus = input.readBigInteger(SecurityHelper.RSA_KEY_LENGTH + 1);
-		if (!keyModulus.equals(server.getPrivateKey().getModulus())) {
+		if (!keyModulus.equals(server.privateKey.getModulus())) {
 			output.writeBoolean(false);
 			throw new IOException(String.format("#%d Key modulus mismatch", id));
 		}

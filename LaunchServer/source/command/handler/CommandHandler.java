@@ -28,8 +28,6 @@ import launchserver.command.basic.EvalCommand;
 import launchserver.command.basic.GCCommand;
 import launchserver.command.basic.HelpCommand;
 import launchserver.command.basic.RebindCommand;
-import launchserver.command.basic.ReloadConfigCommand;
-import launchserver.command.basic.ReloadKeyPairCommand;
 import launchserver.command.basic.StopCommand;
 import launchserver.command.basic.VersionCommand;
 import launchserver.command.hash.DownloadAssetCommand;
@@ -50,8 +48,6 @@ public abstract class CommandHandler implements Runnable {
 		registerCommand("build", new BuildCommand(server));
 		registerCommand("stop", new StopCommand(server));
 		registerCommand("rebind", new RebindCommand(server));
-		registerCommand("reloadConfig", new ReloadConfigCommand(server));
-		registerCommand("reloadKeyPair", new ReloadKeyPairCommand(server));
 		registerCommand("eval", new EvalCommand(server));
 		registerCommand("debug", new DebugCommand(server));
 		registerCommand("clear", new ClearCommand(server));

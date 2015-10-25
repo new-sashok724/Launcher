@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.zip.CRC32;
 
 import launcher.Launcher;
@@ -78,21 +77,20 @@ public final class LaunchServer implements Runnable {
 	@LauncherAPI public static final Path UPDATES_DIR = IOHelper.WORKING_DIR.resolve("updates");
 	@LauncherAPI public static final Path PROFILES_DIR = IOHelper.WORKING_DIR.resolve("profiles");
 
+	// Server config
+	@LauncherAPI public final Config config;
+	@LauncherAPI public final RSAPublicKey publicKey;
+	@LauncherAPI public final RSAPrivateKey privateKey;
+
 	// Launcher binary
 	@LauncherAPI public final LauncherBinary launcherBinary = new JARLauncherBinary(this);
-	private volatile LauncherBinary launcherEXEBinary;
+	@LauncherAPI public final LauncherBinary launcherEXEBinary;
 
 	// Server
 	@LauncherAPI public final CommandHandler commandHandler;
 	@LauncherAPI public final ServerSocketHandler serverSocketHandler;
 	private final AtomicBoolean started = new AtomicBoolean(false);
 	private final ScriptEngine engine = CommonHelper.newScriptEngine();
-
-	// Launcher config
-	private Config config;
-	private final ReentrantReadWriteLock configLock = new ReentrantReadWriteLock();
-	private volatile RSAPublicKey publicKey;
-	private volatile RSAPrivateKey privateKey;
 
 	// Updates and profiles
 	private volatile List<SignedObjectHolder<ClientProfile>> profilesList;
@@ -115,9 +113,42 @@ public final class LaunchServer implements Runnable {
 		}
 		commandHandler = localCommandHandler;
 
-		// Setup
-		reloadKeyPair();
-		reloadConfig();
+		// Set key pair
+		if (IOHelper.isFile(PUBLIC_KEY_FILE) && IOHelper.isFile(PRIVATE_KEY_FILE)) {
+			LogHelper.info("Reading RSA keypair");
+			publicKey = SecurityHelper.toPublicRSAKey(IOHelper.read(PUBLIC_KEY_FILE));
+			privateKey = SecurityHelper.toPrivateRSAKey(IOHelper.read(PRIVATE_KEY_FILE));
+			if (!publicKey.getModulus().equals(privateKey.getModulus())) {
+				throw new IOException("Private and public key modulus mismatch");
+			}
+		} else {
+			LogHelper.info("Generating RSA keypair");
+			KeyPair pair = SecurityHelper.genRSAKeyPair();
+			publicKey = (RSAPublicKey) pair.getPublic();
+			privateKey = (RSAPrivateKey) pair.getPrivate();
+
+			// Write key pair files
+			LogHelper.info("Writing RSA keypair files");
+			IOHelper.write(PUBLIC_KEY_FILE, publicKey.getEncoded());
+			IOHelper.write(PRIVATE_KEY_FILE, privateKey.getEncoded());
+		}
+
+		// Print keypair fingerprints
+		CRC32 crc = new CRC32();
+		crc.update(publicKey.getModulus().toByteArray());
+		LogHelper.subInfo("Modulus CRC32: 0x%08x", crc.getValue());
+
+		// Read LaunchServer config
+		generateConfigIfNotExists();
+		LogHelper.info("Reading LaunchServer config file");
+		try (BufferedReader reader = IOHelper.newReader(CONFIG_FILE)) {
+			config = new Config(TextConfigReader.read(reader, true));
+		}
+		config.verify();
+
+		// Set launcher EXE binary
+		launcherEXEBinary = config.launch4J ?
+			new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
 		syncLauncherBinaries();
 
 		// Sync updates dir
@@ -162,43 +193,13 @@ public final class LaunchServer implements Runnable {
 	@LauncherAPI
 	public void buildLauncherBinaries() throws IOException {
 		launcherBinary.build();
-		getEXEBinary().build();
-	}
-
-	@LauncherAPI
-	public Config getConfig() {
-		configLock.readLock().lock();
-		try {
-			return config;
-		} finally {
-			configLock.readLock().unlock();
-		}
-	}
-
-	@LauncherAPI
-	public LauncherBinary getEXEBinary() {
-		configLock.readLock().lock();
-		try {
-			return launcherEXEBinary;
-		} finally {
-			configLock.readLock().unlock();
-		}
-	}
-
-	@LauncherAPI
-	public RSAPrivateKey getPrivateKey() {
-		return privateKey;
+		launcherEXEBinary.build();
 	}
 
 	@LauncherAPI
 	@SuppressWarnings("ReturnOfCollectionOrArrayField")
 	public Collection<SignedObjectHolder<ClientProfile>> getProfiles() {
 		return profilesList;
-	}
-
-	@LauncherAPI
-	public RSAPublicKey getPublicKey() {
-		return publicKey;
 	}
 
 	@LauncherAPI
@@ -226,104 +227,6 @@ public final class LaunchServer implements Runnable {
 	}
 
 	@LauncherAPI
-	public void reloadConfig() throws IOException {
-		configLock.writeLock().lock();
-		try {
-			Config oldConfig = config;
-
-			// Create LaunchServer config if not exist
-			Config newConfig;
-			if (!IOHelper.isFile(CONFIG_FILE)) {
-				LogHelper.info("Creating LaunchServer config");
-				try (BufferedReader reader = IOHelper.newReader(IOHelper.getResourceURL("launchserver/defaults/config.cfg"))) {
-					newConfig = new Config(TextConfigReader.read(reader, false));
-				}
-
-				// Set server address
-				LogHelper.println("LaunchServer address: ");
-				newConfig.setAddress(commandHandler.readLine());
-
-				// Write LaunchServer config
-				LogHelper.info("Writing LaunchServer config file");
-				try (BufferedWriter writer = IOHelper.newWriter(CONFIG_FILE)) {
-					TextConfigWriter.write(newConfig.block, writer, true);
-				}
-			}
-
-			// Flush old auth handler and provider
-			if (oldConfig != null) {
-				// Flush auth handler
-				try {
-					config.authHandler.flush();
-				} catch (IOException e) {
-					LogHelper.error(e);
-				}
-
-				//  Flush auth provider
-				try {
-					config.authProvider.flush();
-				} catch (IOException e) {
-					LogHelper.error(e);
-				}
-			}
-
-			// Read LaunchServer config (also re-read after setup for RO)
-			LogHelper.info("Reading LaunchServer config file");
-			try (BufferedReader reader = IOHelper.newReader(CONFIG_FILE)) {
-				newConfig = new Config(TextConfigReader.read(reader, true));
-				if (oldConfig != null && !oldConfig.getBindAddress().equals(newConfig.getBindAddress())) {
-					LogHelper.warning("To bind new address, use 'rebind' command");
-				}
-			}
-			newConfig.verify();
-
-			// Create new launcher EXE binary
-			LauncherBinary newExeBinary = newConfig.launch4J ?
-				new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
-			newExeBinary.sync();
-
-			// Apply changes
-			config = newConfig;
-			launcherEXEBinary = newExeBinary;
-		} finally {
-			configLock.writeLock().unlock();
-		}
-	}
-
-	@LauncherAPI
-	public void reloadKeyPair() throws IOException, InvalidKeySpecException {
-		RSAPublicKey newPublicKey;
-		RSAPrivateKey newPrivateKey;
-		if (IOHelper.isFile(PUBLIC_KEY_FILE) && IOHelper.isFile(PRIVATE_KEY_FILE)) {
-			LogHelper.info("Reading RSA keypair");
-			newPublicKey = SecurityHelper.toPublicRSAKey(IOHelper.read(PUBLIC_KEY_FILE));
-			newPrivateKey = SecurityHelper.toPrivateRSAKey(IOHelper.read(PRIVATE_KEY_FILE));
-			if (!newPublicKey.getModulus().equals(newPrivateKey.getModulus())) {
-				throw new IOException("Private and public key modulus mismatch");
-			}
-
-			// Print keypair fingerprints
-			CRC32 crc = new CRC32();
-			crc.update(newPublicKey.getModulus().toByteArray());
-			LogHelper.subInfo("Modulus CRC32: 0x%08x", crc.getValue());
-		} else {
-			LogHelper.info("Generating RSA keypair");
-			KeyPair pair = SecurityHelper.genRSAKeyPair();
-			newPublicKey = (RSAPublicKey) pair.getPublic();
-			newPrivateKey = (RSAPrivateKey) pair.getPrivate();
-
-			// Write key pair files
-			LogHelper.info("Writing RSA keypair files");
-			IOHelper.write(PUBLIC_KEY_FILE, newPublicKey.getEncoded());
-			IOHelper.write(PRIVATE_KEY_FILE, newPrivateKey.getEncoded());
-		}
-
-		// Apply changes
-		publicKey = newPublicKey;
-		privateKey = newPrivateKey;
-	}
-
-	@LauncherAPI
 	public void syncLauncherBinaries() throws IOException {
 		LogHelper.info("Syncing launcher binaries");
 
@@ -335,7 +238,7 @@ public final class LaunchServer implements Runnable {
 
 		// Syncing launcher EXE binary
 		LogHelper.subInfo("Syncing launcher EXE binary file");
-		if (!getEXEBinary().sync()) {
+		if (!launcherEXEBinary.sync()) {
 			LogHelper.subWarning("Missing launcher EXE binary file");
 		}
 	}
@@ -386,6 +289,29 @@ public final class LaunchServer implements Runnable {
 		updatesDirMap = Collections.unmodifiableMap(newUpdatesDirMap);
 	}
 
+	private void generateConfigIfNotExists() throws IOException {
+		if (IOHelper.isFile(CONFIG_FILE)) {
+			return;
+		}
+
+		// Create new config
+		Config newConfig;
+		LogHelper.info("Creating LaunchServer config");
+		try (BufferedReader reader = IOHelper.newReader(IOHelper.getResourceURL("launchserver/defaults/config.cfg"))) {
+			newConfig = new Config(TextConfigReader.read(reader, false));
+		}
+
+		// Set server address
+		LogHelper.println("LaunchServer address: ");
+		newConfig.setAddress(commandHandler.readLine());
+
+		// Write LaunchServer config
+		LogHelper.info("Writing LaunchServer config file");
+		try (BufferedWriter writer = IOHelper.newWriter(CONFIG_FILE)) {
+			TextConfigWriter.write(newConfig.block, writer, true);
+		}
+	}
+
 	private void setScriptBindings() {
 		LogHelper.info("Setting up server script engine bindings");
 		Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
@@ -399,24 +325,16 @@ public final class LaunchServer implements Runnable {
 	private void shutdownHook() {
 		serverSocketHandler.close();
 
-		// Flush auth handler
-		configLock.readLock().lock();
+		// Flush auth handler and provider
 		try {
 			config.authHandler.flush();
 		} catch (IOException e) {
 			LogHelper.error(e);
-		} finally {
-			configLock.readLock().unlock();
 		}
-
-		// Flush auth provider
-		configLock.readLock().lock();
 		try {
 			config.authProvider.flush();
 		} catch (IOException e) {
 			LogHelper.error(e);
-		} finally {
-			configLock.readLock().unlock();
 		}
 
 		// Print last message before death :(

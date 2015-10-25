@@ -24,7 +24,7 @@ public final class ProfileByUsernameResponse extends Response {
 	}
 
 	public static void writeProfile(LaunchServer server, HOutput output, String username) throws IOException {
-		UUID uuid = server.getConfig().authHandler.usernameToUUID(username);
+		UUID uuid = server.config.authHandler.usernameToUUID(username);
 		if (uuid == null) {
 			output.writeBoolean(false);
 			return;

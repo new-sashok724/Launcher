@@ -20,7 +20,7 @@ public final class ProfileByUUIDResponse extends Response {
 		debug("UUID: " + uuid);
 
 		// Verify has such profile
-		String username = server.getConfig().authHandler.uuidToUsername(uuid);
+		String username = server.config.authHandler.uuidToUsername(uuid);
 		if (username == null) {
 			output.writeBoolean(false);
 			return;
@@ -32,9 +32,8 @@ public final class ProfileByUUIDResponse extends Response {
 	}
 
 	public static PlayerProfile getProfile(LaunchServer server, UUID uuid, String username) {
-		LaunchServer.Config config = server.getConfig();
-		String skinURL = config.getSkinURL(username, uuid);
-		String cloakURL = config.getCloakURL(username, uuid);
+		String skinURL = server.config.getSkinURL(username, uuid);
+		String cloakURL = server.config.getCloakURL(username, uuid);
 		return new PlayerProfile(uuid, username, skinURL, cloakURL);
 	}
 }

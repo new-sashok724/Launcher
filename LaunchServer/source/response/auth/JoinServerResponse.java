@@ -23,6 +23,6 @@ public final class JoinServerResponse extends Response {
 
 		// Try join server with auth manager
 		debug("Username: '%s', Access token: %s, Server ID: %s", username, accessToken, serverID);
-		output.writeBoolean(server.getConfig().authHandler.joinServer(username, accessToken, serverID));
+		output.writeBoolean(server.config.authHandler.joinServer(username, accessToken, serverID));
 	}
 }

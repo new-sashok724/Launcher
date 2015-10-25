@@ -23,7 +23,7 @@ public final class CheckServerResponse extends Response {
 		debug("Username: %s, Server ID: %s", id, username, serverID);
 
 		// Check server
-		UUID uuid = server.getConfig().authHandler.checkServer(username, serverID);
+		UUID uuid = server.config.authHandler.checkServer(username, serverID);
 		if (uuid == null) {
 			output.writeBoolean(false);
 			return;

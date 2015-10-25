@@ -30,17 +30,16 @@ public final class AuthResponse extends Response {
 		// Decrypt password
 		String password;
 		try {
-			password = IOHelper.decode(SecurityHelper.newRSADecryptCipher(server.getPrivateKey()).doFinal(encryptedPassword));
+			password = IOHelper.decode(SecurityHelper.newRSADecryptCipher(server.privateKey).doFinal(encryptedPassword));
 		} catch (IllegalBlockSizeException | BadPaddingException ignored) {
 			throw new RequestException("Password decryption error");
 		}
 
 		// Authenticate
 		debug("Login: '%s', Password: '%s'", id, login, echo(password.length()));
-		LaunchServer.Config config = server.getConfig();
 		String username;
 		try {
-			username = VerifyHelper.verifyUsername(config.authProvider.auth(login, password));
+			username = VerifyHelper.verifyUsername(server.config.authProvider.auth(login, password));
 		} catch (AuthException e) {
 			throw new RequestException(e);
 		} catch (Exception e) {
@@ -51,7 +50,7 @@ public final class AuthResponse extends Response {
 
 		// Authenticate on server (and get UUID)
 		String accessToken = SecurityHelper.randomStringToken();
-		UUID uuid = config.authHandler.auth(username, accessToken);
+		UUID uuid = server.config.authHandler.auth(username, accessToken);
 		if (uuid == null) {
 			throw new RequestException("Can't assign UUID");
 		}

@@ -36,7 +36,7 @@ public final class AuthResponse extends Response {
 		}
 
 		// Authenticate
-		debug("Login: '%s', Password: '%s'", id, login, echo(password.length()));
+		debug("Login: '%s', Password: '%s'", login, echo(password.length()));
 		String username;
 		try {
 			username = VerifyHelper.verifyUsername(server.config.authProvider.auth(login, password));
@@ -46,7 +46,7 @@ public final class AuthResponse extends Response {
 			LogHelper.error(e);
 			throw new RequestException("Internal auth error", e);
 		}
-		debug("Auth: '%s' -> '%s'", id, login, username);
+		debug("Auth: '%s' -> '%s'", login, username);
 
 		// Authenticate on server (and get UUID)
 		String accessToken = SecurityHelper.randomStringToken();

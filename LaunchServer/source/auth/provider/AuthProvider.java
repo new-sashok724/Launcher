@@ -9,6 +9,7 @@ import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
+import launchserver.auth.AuthException;
 
 public abstract class AuthProvider extends ConfigObject implements Flushable {
 	private static final Map<String, Adapter<AuthProvider>> AUTH_PROVIDERS = new ConcurrentHashMap<>(8);
@@ -20,6 +21,11 @@ public abstract class AuthProvider extends ConfigObject implements Flushable {
 
 	@LauncherAPI
 	public abstract String auth(String login, String password) throws Exception;
+
+	@LauncherAPI
+	public static String authError(String message) throws AuthException {
+		throw new AuthException(message);
+	}
 
 	@LauncherAPI
 	public static AuthProvider newProvider(String name, BlockConfigEntry block) {

@@ -36,12 +36,8 @@ public final class MySQLAuthProvider extends AuthProvider {
 
 				// Execute SQL query
 				try (ResultSet set = statement.executeQuery()) {
-					if (!set.next()) {
-						throw new AuthException("Incorrect username or password");
-					}
-
-					// Get username
-					return set.getString(1);
+					return set.next() ? set.getString(1) :
+						authError("Incorrect username or password");
 				}
 			}
 		}

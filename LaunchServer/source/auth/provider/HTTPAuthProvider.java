@@ -9,7 +9,6 @@ import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
-import launchserver.auth.AuthException;
 
 public final class HTTPAuthProvider extends AuthProvider {
 	private final String url;
@@ -24,11 +23,11 @@ public final class HTTPAuthProvider extends AuthProvider {
 	@Override
 	public String auth(String login, String password) throws IOException {
 		String currentResponse = IOHelper.request(new URL(getFormattedURL(login, password)));
+
+		// Match username
 		Matcher matcher = response.matcher(currentResponse);
-		if (!matcher.matches() || matcher.groupCount() < 1) {
-			throw new AuthException(currentResponse);
-		}
-		return matcher.group("username");
+		return matcher.matches() && matcher.groupCount() >= 1 ?
+			matcher.group("username") : authError(currentResponse);
 	}
 
 	@Override

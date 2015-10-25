@@ -62,7 +62,10 @@ var DigestAlgorithm = DigestAlgorithmClass.static;
 var VerifyHelper = VerifyHelperClass.static;
 
 // Helper JS class API imports
-var JSApplication = JSApplicationClass.static;
+var JSApplication = null;
+if(typeof JSApplicationClass !== 'undefined') {
+	JSApplication = JSApplicationClass.static;
+}
 
 // API wrapper
 function tryWithResources(closeable, f) {

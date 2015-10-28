@@ -53,8 +53,10 @@ public final class ServerPinger {
 	private Result doPing() throws IOException {
 		try (Socket socket = IOHelper.newSocket()) {
 			socket.connect(IOHelper.resolve(address), IOHelper.TIMEOUT);
-			try (HInput input = new HInput(socket.getInputStream()); HOutput output = new HOutput(socket.getOutputStream())) {
-				return version.compareTo(ClientProfile.Version.MC172) >= 0 ? modernPing(input, output) : legacyPing(input, output);
+			try (HInput input = new HInput(socket.getInputStream());
+				 HOutput output = new HOutput(socket.getOutputStream())) {
+				return version.compareTo(ClientProfile.Version.MC172) >= 0 ?
+					modernPing(input, output) : legacyPing(input, output);
 			}
 		}
 	}

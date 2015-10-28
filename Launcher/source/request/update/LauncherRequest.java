@@ -58,7 +58,8 @@ public final class LauncherRequest extends Request<LauncherRequest.Result> {
 			IOHelper.write(BINARY_PATH, binary);
 
 			// Start new launcher instance
-			ProcessBuilder builder = new ProcessBuilder(IOHelper.resolveJavaBin(null).toString(), "-jar", BINARY_PATH.toString());
+			ProcessBuilder builder = new ProcessBuilder(IOHelper.resolveJavaBin(null).toString(),
+				"-jar", BINARY_PATH.toString());
 			builder.inheritIO();
 			builder.start();
 

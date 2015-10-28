@@ -223,7 +223,8 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 
 	private void updateState(String filePath, long fileDownloaded, long fileSize) {
 		if (stateCallback != null) {
-			stateCallback.call(new State(filePath, fileDownloaded, fileSize, totalDownloaded, totalSize, Duration.between(startTime, Instant.now())));
+			stateCallback.call(new State(filePath, fileDownloaded, fileSize,
+				totalDownloaded, totalSize, Duration.between(startTime, Instant.now())));
 		}
 	}
 
@@ -244,8 +245,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 
 		public Action(HInput input) throws IOException {
 			type = Type.read(input);
-			name = type == Type.CD || type == Type.GET ?
-				IOHelper.verifyFileName(input.readString(255)) : null;
+			name = type == Type.CD || type == Type.GET ? IOHelper.verifyFileName(input.readString(255)) : null;
 			entry = null;
 		}
 

@@ -20,8 +20,7 @@ public final class HashedFile extends HashedEntry {
 
 	@LauncherAPI
 	public HashedFile(long size, byte[] digest) {
-		this.size = VerifyHelper.verifyLong(size,
-			VerifyHelper.L_NOT_NEGATIVE, "Illegal size: " + size);
+		this.size = VerifyHelper.verifyLong(size, VerifyHelper.L_NOT_NEGATIVE, "Illegal size: " + size);
 		this.digest = Arrays.copyOf(digest, digest.length);
 	}
 

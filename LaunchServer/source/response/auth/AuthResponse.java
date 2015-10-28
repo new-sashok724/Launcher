@@ -30,7 +30,8 @@ public final class AuthResponse extends Response {
 		// Decrypt password
 		String password;
 		try {
-			password = IOHelper.decode(SecurityHelper.newRSADecryptCipher(server.privateKey).doFinal(encryptedPassword));
+			password = IOHelper.decode(SecurityHelper.
+				newRSADecryptCipher(server.privateKey).doFinal(encryptedPassword));
 		} catch (IllegalBlockSizeException | BadPaddingException ignored) {
 			throw new RequestException("Password decryption error");
 		}
@@ -39,7 +40,10 @@ public final class AuthResponse extends Response {
 		debug("Login: '%s', Password: '%s'", login, echo(password.length()));
 		String username;
 		try {
-			username = VerifyHelper.verifyUsername(server.config.authProvider.auth(login, password));
+			username = server.config.authProvider.auth(login, password);
+			if (!VerifyHelper.isValidUsername(username)) {
+				throw new RequestException(String.format("Illegal username: '%s'", username));
+			}
 		} catch (AuthException e) {
 			throw new RequestException(e);
 		} catch (Exception e) {

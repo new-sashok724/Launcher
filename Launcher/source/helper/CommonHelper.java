@@ -1,6 +1,7 @@
 package launcher.helper;
 
 import javax.script.ScriptEngine;
+import java.util.Locale;
 
 import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import launcher.LauncherAPI;
@@ -10,6 +11,11 @@ public final class CommonHelper {
 	private static final NashornScriptEngineFactory SCRIPT_ENGINE_FACTORY = new NashornScriptEngineFactory();
 
 	private CommonHelper() {
+	}
+
+	@LauncherAPI
+	public static String low(String s) {
+		return s.toLowerCase(Locale.US);
 	}
 
 	@LauncherAPI

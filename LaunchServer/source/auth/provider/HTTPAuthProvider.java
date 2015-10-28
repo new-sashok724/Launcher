@@ -18,6 +18,9 @@ public final class HTTPAuthProvider extends AuthProvider {
 		super(block);
 		url = block.getEntryValue("url", StringConfigEntry.class);
 		response = Pattern.compile(block.getEntryValue("response", StringConfigEntry.class));
+
+		// Verify is valid URL
+		IOHelper.verifyURL(getFormattedURL("httpAuthLogin", "httpAuthPassword"));
 	}
 
 	@Override
@@ -33,11 +36,6 @@ public final class HTTPAuthProvider extends AuthProvider {
 	@Override
 	public void flush() {
 		// Do nothing
-	}
-
-	@Override
-	public void verify() {
-		IOHelper.verifyURL(getFormattedURL("httpAuthLogin", "httpAuthPassword"));
 	}
 
 	private String getFormattedURL(String login, String password) {

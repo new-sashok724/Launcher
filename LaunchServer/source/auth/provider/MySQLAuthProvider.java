@@ -11,7 +11,7 @@ import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.ListConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 import launchserver.auth.AuthException;
-import launchserver.helper.MySQLSourceConfig;
+import launchserver.auth.MySQLSourceConfig;
 
 public final class MySQLAuthProvider extends AuthProvider {
 	private final MySQLSourceConfig mySQLHolder;
@@ -21,8 +21,12 @@ public final class MySQLAuthProvider extends AuthProvider {
 	public MySQLAuthProvider(BlockConfigEntry block) {
 		super(block);
 		mySQLHolder = new MySQLSourceConfig("authProviderPool", block);
-		query = block.getEntryValue("query", StringConfigEntry.class);
-		queryParams = block.getEntry("queryParams", ListConfigEntry.class).stream(StringConfigEntry.class).toArray(String[]::new);
+
+		// Read query
+		query = VerifyHelper.verify(block.getEntryValue("query", StringConfigEntry.class),
+			VerifyHelper.NOT_EMPTY, "MySQL query can't be empty");
+		queryParams = block.getEntry("queryParams", ListConfigEntry.class).
+			stream(StringConfigEntry.class).toArray(String[]::new);
 	}
 
 	@Override
@@ -36,8 +40,7 @@ public final class MySQLAuthProvider extends AuthProvider {
 
 				// Execute SQL query
 				try (ResultSet set = statement.executeQuery()) {
-					return set.next() ? set.getString(1) :
-						authError("Incorrect username or password");
+					return set.next() ? set.getString(1) : authError("Incorrect username or password");
 				}
 			}
 		}
@@ -46,13 +49,5 @@ public final class MySQLAuthProvider extends AuthProvider {
 	@Override
 	public void flush() {
 		// Do nothing
-	}
-
-	@Override
-	public void verify() {
-		mySQLHolder.verify();
-
-		// Verify auth provider-specific
-		VerifyHelper.verify(query, VerifyHelper.NOT_EMPTY, "MySQL query can't be empty");
 	}
 }

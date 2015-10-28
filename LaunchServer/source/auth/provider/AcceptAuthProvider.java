@@ -16,9 +16,4 @@ public final class AcceptAuthProvider extends AuthProvider {
 	public void flush() {
 		// Do nothing
 	}
-
-	@Override
-	public void verify() {
-		// Do nothing
-	}
 }

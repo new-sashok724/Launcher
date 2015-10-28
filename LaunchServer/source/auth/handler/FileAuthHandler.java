@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -13,6 +12,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
+import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
@@ -68,7 +68,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 				// Generate UUID
 				uuid = genUUIDFor(username);
 				authsMap.put(uuid, auth);
-				usernamesMap.put(low(username), uuid);
+				usernamesMap.put(CommonHelper.low(username), uuid);
 			}
 
 			// Authenticate
@@ -119,7 +119,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 	public final UUID usernameToUUID(String username) {
 		lock.readLock().lock();
 		try {
-			return usernamesMap.get(low(username));
+			return usernamesMap.get(CommonHelper.low(username));
 		} finally {
 			lock.readLock().unlock();
 		}
@@ -136,11 +136,6 @@ public abstract class FileAuthHandler extends AuthHandler {
 		}
 	}
 
-	@Override
-	public final void verify() {
-		// Do nothing?
-	}
-
 	@LauncherAPI
 	public final Set<Map.Entry<UUID, Auth>> entrySet() {
 		return Collections.unmodifiableMap(authsMap).entrySet();
@@ -151,7 +146,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 		lock.writeLock().lock();
 		try {
 			authsMap.put(uuid, entry);
-			usernamesMap.put(low(entry.username), uuid);
+			usernamesMap.put(CommonHelper.low(entry.username), uuid);
 		} finally {
 			lock.writeLock().unlock();
 		}
@@ -180,10 +175,6 @@ public abstract class FileAuthHandler extends AuthHandler {
 		return uuid;
 	}
 
-	private static String low(String username) {
-		return username.toLowerCase(Locale.US);
-	}
-
 	public static final class Auth extends StreamObject {
 		private String username;
 		private String accessToken;
@@ -202,10 +193,8 @@ public abstract class FileAuthHandler extends AuthHandler {
 			}
 
 			// Set and verify access token
-			this.accessToken = accessToken == null ?
-				null : SecurityHelper.verifyToken(accessToken);
-			this.serverID = serverID == null ?
-				null : JoinServerRequest.verifyServerID(serverID);
+			this.accessToken = accessToken == null ? null : SecurityHelper.verifyToken(accessToken);
+			this.serverID = serverID == null ? null : JoinServerRequest.verifyServerID(serverID);
 		}
 
 		@LauncherAPI

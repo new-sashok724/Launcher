@@ -12,7 +12,7 @@ import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.BooleanConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
-import launchserver.helper.MySQLSourceConfig;
+import launchserver.auth.MySQLSourceConfig;
 
 public final class MySQLAuthHandler extends CachedAuthHandler {
 	private final MySQLSourceConfig mySQLHolder;
@@ -31,11 +31,18 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 	public MySQLAuthHandler(BlockConfigEntry block) {
 		super(block);
 		mySQLHolder = new MySQLSourceConfig("authHandlerPool", block);
-		table = block.getEntryValue("table", StringConfigEntry.class);
-		uuidColumn = block.getEntryValue("uuidColumn", StringConfigEntry.class);
-		usernameColumn = block.getEntryValue("usernameColumn", StringConfigEntry.class);
-		accessTokenColumn = block.getEntryValue("accessTokenColumn", StringConfigEntry.class);
-		serverIDColumn = block.getEntryValue("serverIDColumn", StringConfigEntry.class);
+
+		// Read query params
+		table = VerifyHelper.verifyIDName(
+			block.getEntryValue("table", StringConfigEntry.class));
+		uuidColumn = VerifyHelper.verifyIDName(
+			block.getEntryValue("uuidColumn", StringConfigEntry.class));
+		usernameColumn = VerifyHelper.verifyIDName(
+			block.getEntryValue("usernameColumn", StringConfigEntry.class));
+		accessTokenColumn = VerifyHelper.verifyIDName(
+			block.getEntryValue("accessTokenColumn", StringConfigEntry.class));
+		serverIDColumn = VerifyHelper.verifyIDName(
+			block.getEntryValue("serverIDColumn", StringConfigEntry.class));
 
 		// Prepare SQL queries
 		queryByUUIDSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=?",
@@ -65,16 +72,6 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 	@Override
 	public void flush() {
 		mySQLHolder.flush();
-	}
-
-	@Override
-	public void verify() {
-		mySQLHolder.verify();
-		VerifyHelper.verifyIDName(table);
-		VerifyHelper.verifyIDName(uuidColumn);
-		VerifyHelper.verifyIDName(usernameColumn);
-		VerifyHelper.verifyIDName(accessTokenColumn);
-		VerifyHelper.verifyIDName(serverIDColumn);
 	}
 
 	@Override

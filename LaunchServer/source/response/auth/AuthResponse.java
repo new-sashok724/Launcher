@@ -30,8 +30,8 @@ public final class AuthResponse extends Response {
 		// Decrypt password
 		String password;
 		try {
-			password = IOHelper.decode(SecurityHelper.
-				newRSADecryptCipher(server.privateKey).doFinal(encryptedPassword));
+			password = IOHelper.decode(SecurityHelper.newRSADecryptCipher(server.privateKey).
+				doFinal(encryptedPassword));
 		} catch (IllegalBlockSizeException | BadPaddingException ignored) {
 			throw new RequestException("Password decryption error");
 		}

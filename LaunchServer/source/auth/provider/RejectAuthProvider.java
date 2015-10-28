@@ -10,7 +10,8 @@ public final class RejectAuthProvider extends AuthProvider {
 
 	public RejectAuthProvider(BlockConfigEntry block) {
 		super(block);
-		message = block.getEntryValue("message", StringConfigEntry.class);
+		message = VerifyHelper.verify(block.getEntryValue("message", StringConfigEntry.class), VerifyHelper.NOT_EMPTY,
+			"Auth error message can't be empty");
 	}
 
 	@Override
@@ -21,10 +22,5 @@ public final class RejectAuthProvider extends AuthProvider {
 	@Override
 	public void flush() {
 		// Do nothing
-	}
-
-	@Override
-	public void verify() {
-		VerifyHelper.verify(message, VerifyHelper.NOT_EMPTY, "Auth error message can't be empty");
 	}
 }

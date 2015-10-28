@@ -13,12 +13,7 @@ public abstract class DigestAuthProvider extends AuthProvider {
 	protected DigestAuthProvider(BlockConfigEntry block) {
 		super(block);
 		digest = block.getEntryValue("digest", StringConfigEntry.class);
-	}
-
-	@Override
-	@SuppressWarnings("DesignForExtension")
-	public void verify() {
-		getDigest();
+		getDigest(); // Verify that this digest exists
 	}
 
 	@LauncherAPI

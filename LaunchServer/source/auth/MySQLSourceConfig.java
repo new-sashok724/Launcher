@@ -1,4 +1,4 @@
-package launchserver.helper;
+package launchserver.auth;
 
 import javax.sql.DataSource;
 import java.io.Flushable;
@@ -42,11 +42,17 @@ public final class MySQLSourceConfig extends ConfigObject implements Flushable {
 	public MySQLSourceConfig(String poolName, BlockConfigEntry block) {
 		super(block);
 		this.poolName = poolName;
-		address = block.getEntryValue("address", StringConfigEntry.class);
-		port = block.getEntryValue("port", IntegerConfigEntry.class);
-		username = block.getEntryValue("username", StringConfigEntry.class);
+		address = VerifyHelper.verify(block.getEntryValue("address", StringConfigEntry.class),
+			VerifyHelper.NOT_EMPTY, "MySQL address can't be empty");
+		port = VerifyHelper.verifyInt(block.getEntryValue("port", IntegerConfigEntry.class),
+			VerifyHelper.range(0, 65535), "Illegal MySQL port");
+		username = VerifyHelper.verify(block.getEntryValue("username", StringConfigEntry.class),
+			VerifyHelper.NOT_EMPTY, "MySQL username can't be empty");
 		password = block.getEntryValue("password", StringConfigEntry.class);
-		database = block.getEntryValue("database", StringConfigEntry.class);
+		database = VerifyHelper.verify(block.getEntryValue("database", StringConfigEntry.class),
+			VerifyHelper.NOT_EMPTY, "MySQL database can't be empty");
+
+		// Password shouldn't be verified
 	}
 
 	@Override
@@ -54,17 +60,6 @@ public final class MySQLSourceConfig extends ConfigObject implements Flushable {
 		if (hikari) { // Shutdown hikari pool
 			((HikariDataSource) source).close();
 		}
-	}
-
-	@Override
-	public void verify() {
-		// Verify MySQL address
-		VerifyHelper.verify(address, VerifyHelper.NOT_EMPTY, "MySQL address can't be empty");
-		VerifyHelper.verify(username, VerifyHelper.NOT_EMPTY, "MySQL username can't be empty");
-		VerifyHelper.verify(database, VerifyHelper.NOT_EMPTY, "MySQL database can't be empty");
-		VerifyHelper.verifyInt(port, VerifyHelper.range(0, 65535), "Illegal MySQL port: " + port);
-
-		// Don't verify password, it can be empty
 	}
 
 	@LauncherAPI

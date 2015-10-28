@@ -26,14 +26,6 @@ public final class NullAuthProvider extends AuthProvider {
 		}
 	}
 
-	@Override
-	public void verify() {
-		AuthProvider provider = this.provider;
-		if (provider != null) {
-			provider.verify();
-		}
-	}
-
 	@LauncherAPI
 	public void setBackend(AuthProvider provider) {
 		this.provider = provider;

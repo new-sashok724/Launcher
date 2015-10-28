@@ -21,8 +21,7 @@ public final class LauncherResponse extends Response {
 	@Override
 	public void reply() throws IOException {
 		// Resolve launcher binary
-		SignedBytesHolder bytes = (input.readBoolean() ?
-			server.launcherEXEBinary : server.launcherBinary).getBytes();
+		SignedBytesHolder bytes = (input.readBoolean() ? server.launcherEXEBinary : server.launcherBinary).getBytes();
 		if (bytes == null) {
 			throw new RequestException("Missing launcher binary");
 		}

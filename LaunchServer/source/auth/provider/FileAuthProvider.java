@@ -6,36 +6,49 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
+import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
+import launcher.serialize.config.ConfigObject;
+import launcher.serialize.config.TextConfigReader;
 import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.serialize.config.entry.ConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
-import launchserver.helper.LineReader;
 
 public final class FileAuthProvider extends DigestAuthProvider {
 	private final Path file;
 
 	// Cache
-	private final Map<String, String> cache = new HashMap<>(8192);
+	private final Map<String, Auth> auths = new HashMap<>(8192);
 	private final Object cacheLock = new Object();
 	private FileTime cacheLastModified;
 
 	public FileAuthProvider(BlockConfigEntry block) {
 		super(block);
 		file = IOHelper.toPath(block.getEntryValue("file", StringConfigEntry.class));
+
+		// Try to update cache
+		try {
+			updateCache();
+		} catch (IOException e) {
+			LogHelper.error(e);
+		}
 	}
 
 	@Override
 	public String auth(String login, String password) throws IOException {
-		String validDigest;
+		Auth auth;
 		synchronized (cacheLock) {
 			updateCache();
-			validDigest = cache.get(login);
+			auth = auths.get(CommonHelper.low(login));
 		}
-		verifyDigest(validDigest, password);
-		return login;
+
+		// Verify digest and return true username
+		verifyDigest(auth.password, password);
+		return auth.username;
 	}
 
 	@Override
@@ -50,27 +63,39 @@ public final class FileAuthProvider extends DigestAuthProvider {
 		}
 
 		// Read file
-		cache.clear();
-		LogHelper.info("Recaching users file: '%s'", file);
-		try (BufferedReader reader = new LineReader(IOHelper.newReader(file))) {
-			for (String line = reader.readLine(); line != null; line = reader.readLine()) {
-				// Get and verify split index
-				int splitIndex = VerifyHelper.verifyInt(line.indexOf(':'), VerifyHelper.NOT_NEGATIVE,
-					String.format("Illegal line in users file: '%s'", line));
+		LogHelper.info("Recaching auth provider file: '%s'", file);
+		BlockConfigEntry authFile;
+		try (BufferedReader reader = IOHelper.newReader(file)) {
+			authFile = TextConfigReader.read(reader, false);
+		}
 
-				// Split and verify username and password
-				String username = VerifyHelper.verify(line.substring(0, splitIndex).trim(),
-					VerifyHelper.NOT_EMPTY, "Empty username");
-				String password = VerifyHelper.verify(line.substring(splitIndex + 1).trim(),
-					VerifyHelper.NOT_EMPTY, "Empty pasword");
+		// Read auths from config block
+		auths.clear();
+		Set<Map.Entry<String, ConfigEntry<?>>> entrySet = authFile.getValue().entrySet();
+		for (Map.Entry<String, ConfigEntry<?>> entry : entrySet) {
+			String login = entry.getKey();
+			ConfigEntry<?> value = VerifyHelper.verify(entry.getValue(), v -> v.getType() == ConfigEntry.Type.BLOCK,
+				String.format("Illegal config entry type: '%s'", login));
 
-				// Try put to cache
-				VerifyHelper.putIfAbsent(cache, username, password,
-					String.format("Duplicate username in users file: '%s'", username));
-			}
+			// Add auth entry
+			Auth auth = new Auth((BlockConfigEntry) value);
+			VerifyHelper.putIfAbsent(auths, CommonHelper.low(login), auth,
+				String.format("Duplicate login: '%s'", login));
 		}
 
 		// Update last modified time
 		cacheLastModified = lastModified;
+	}
+
+	private static final class Auth extends ConfigObject {
+		private final String username;
+		private final String password;
+
+		private Auth(BlockConfigEntry block) {
+			super(block);
+			this.username = VerifyHelper.verifyUsername(block.getEntryValue("username", StringConfigEntry.class));
+			this.password = VerifyHelper.verify(block.getEntryValue("password", StringConfigEntry.class),
+				VerifyHelper.NOT_EMPTY, String.format("Password can't be empty: '%s'", username));
+		}
 	}
 }

@@ -47,14 +47,6 @@ public final class NullAuthHandler extends AuthHandler {
 		return getHandler().uuidToUsername(uuid);
 	}
 
-	@Override
-	public void verify() {
-		AuthHandler handler = this.handler;
-		if (handler != null) {
-			handler.verify();
-		}
-	}
-
 	@LauncherAPI
 	public void setBackend(AuthHandler handler) {
 		this.handler = handler;

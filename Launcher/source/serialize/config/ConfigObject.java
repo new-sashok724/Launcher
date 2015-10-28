@@ -21,9 +21,6 @@ public abstract class ConfigObject extends StreamObject {
 		block.write(output);
 	}
 
-	@LauncherAPI
-	public abstract void verify();
-
 	@FunctionalInterface
 	public interface Adapter<O extends ConfigObject> {
 		@LauncherAPI

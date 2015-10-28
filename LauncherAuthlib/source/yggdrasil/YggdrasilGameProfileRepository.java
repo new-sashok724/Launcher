@@ -28,7 +28,8 @@ public final class YggdrasilGameProfileRepository implements GameProfileReposito
 	public void findProfilesByNames(String[] usernames, Agent agent, ProfileLookupCallback callback) {
 		int offset = 0;
 		while (offset < usernames.length) {
-			String[] sliceUsernames = Arrays.copyOfRange(usernames, offset, Math.min(offset + BatchProfileByUsernameRequest.MAX_BATCH_SIZE, usernames.length));
+			String[] sliceUsernames = Arrays.copyOfRange(usernames, offset,
+				Math.min(offset + BatchProfileByUsernameRequest.MAX_BATCH_SIZE, usernames.length));
 			offset += BatchProfileByUsernameRequest.MAX_BATCH_SIZE;
 
 			// Batch Username-To-UUID request
@@ -52,7 +53,8 @@ public final class YggdrasilGameProfileRepository implements GameProfileReposito
 				if (pp == null) {
 					String username = sliceUsernames[i];
 					LogHelper.debug("Couldn't find profile '%s'", username);
-					callback.onProfileLookupFailed(new GameProfile((UUID) null, username), new ProfileNotFoundException("Server did not find the requested profile"));
+					callback.onProfileLookupFailed(new GameProfile((UUID) null, username),
+						new ProfileNotFoundException("Server did not find the requested profile"));
 					continue;
 				}
 

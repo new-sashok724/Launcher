@@ -74,29 +74,6 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
 		this(new BlockConfigEntry(input, ro));
 	}
 
-	@Override
-	public void verify() {
-		// Version
-		getVersion();
-		IOHelper.verifyFileName(getAssetIndex());
-
-		// Client
-		VerifyHelper.verify(getTitle(), VerifyHelper.NOT_EMPTY, "Profile title can't be empty");
-		VerifyHelper.verify(getServerAddress(), VerifyHelper.NOT_EMPTY, "Server address can't be empty");
-		VerifyHelper.verifyInt(getServerPort(), VerifyHelper.range(0, 65535), "Illegal server port: " + getServerPort());
-
-		//  Updater and client watch service
-		update.verifyOfType(ConfigEntry.Type.STRING);
-		updateVerify.verifyOfType(ConfigEntry.Type.STRING);
-		updateExclusions.verifyOfType(ConfigEntry.Type.STRING);
-
-		// Client launcher
-		jvmArgs.verifyOfType(ConfigEntry.Type.STRING);
-		classPath.verifyOfType(ConfigEntry.Type.STRING);
-		clientArgs.verifyOfType(ConfigEntry.Type.STRING);
-		VerifyHelper.verify(getTitle(), VerifyHelper.NOT_EMPTY, "Main class can't be empty");
-	}
-
 	@LauncherAPI
 	public String getAssetIndex() {
 		return assetIndex.getValue();
@@ -168,6 +145,29 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
 	@LauncherAPI
 	public void setVersion(Version version) {
 		this.version.setValue(version.name);
+	}
+
+	@LauncherAPI
+	public void verify() {
+		// Version
+		getVersion();
+		IOHelper.verifyFileName(getAssetIndex());
+
+		// Client
+		VerifyHelper.verify(getTitle(), VerifyHelper.NOT_EMPTY, "Profile title can't be empty");
+		VerifyHelper.verify(getServerAddress(), VerifyHelper.NOT_EMPTY, "Server address can't be empty");
+		VerifyHelper.verifyInt(getServerPort(), VerifyHelper.range(0, 65535), "Illegal server port: " + getServerPort());
+
+		//  Updater and client watch service
+		update.verifyOfType(ConfigEntry.Type.STRING);
+		updateVerify.verifyOfType(ConfigEntry.Type.STRING);
+		updateExclusions.verifyOfType(ConfigEntry.Type.STRING);
+
+		// Client launcher
+		jvmArgs.verifyOfType(ConfigEntry.Type.STRING);
+		classPath.verifyOfType(ConfigEntry.Type.STRING);
+		clientArgs.verifyOfType(ConfigEntry.Type.STRING);
+		VerifyHelper.verify(getTitle(), VerifyHelper.NOT_EMPTY, "Main class can't be empty");
 	}
 
 	@Override

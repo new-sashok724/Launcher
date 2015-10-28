@@ -62,7 +62,7 @@ public final class ResponseThread implements Runnable {
 			try {
 				respond(type, input, output);
 			} catch (RequestException e) {
-				LogHelper.debug(String.format("#%d Request error: %s", id, e.getMessage()));
+				LogHelper.subDebug(String.format("#%d Request error: %s", id, e.getMessage()));
 				output.writeString(e.getMessage(), 0);
 			}
 		} catch (Exception e) {

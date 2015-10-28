@@ -98,7 +98,8 @@ public final class ClientLauncher {
 
 		// Add classpath and main class
 		Collections.addAll(args, profile.object.getJvmArgs());
-		Collections.addAll(args, "-classpath", IOHelper.getCodeSource(ClientLauncher.class).toString(), ClientLauncher.class.getName());
+		Collections.addAll(args, "-classpath", IOHelper.getCodeSource(ClientLauncher.class).toString(),
+			ClientLauncher.class.getName());
 		args.add(paramsFile.toString()); // Add params file path to args
 
 		// Build client process

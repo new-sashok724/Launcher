@@ -2,12 +2,12 @@ package launchserver.auth.handler;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
 import launcher.LauncherAPI;
+import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.auth.JoinServerRequest;
@@ -45,8 +45,8 @@ public abstract class CachedAuthHandler extends AuthHandler {
 	@Override
 	public final synchronized boolean joinServer(String username, String accessToken, String serverID) throws IOException {
 		Entry entry = getEntry(username);
-		if (entry == null || !username.equals(entry.username) ||
-			!accessToken.equals(entry.accessToken) || !updateServerID(entry.uuid, serverID)) {
+		if (entry == null || !username.equals(entry.username) || !accessToken.equals(entry.accessToken) ||
+			!updateServerID(entry.uuid, serverID)) {
 			return false; // Account doesn't exist or invalid access token
 		}
 
@@ -70,7 +70,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
 	@LauncherAPI
 	protected void addEntry(Entry entry) {
 		entryCache.put(entry.uuid, entry);
-		usernamesCache.put(low(entry.username), entry.uuid);
+		usernamesCache.put(CommonHelper.low(entry.username), entry.uuid);
 	}
 
 	@LauncherAPI
@@ -97,7 +97,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
 	}
 
 	private Entry getEntry(String username) throws IOException {
-		UUID uuid = usernamesCache.get(low(username));
+		UUID uuid = usernamesCache.get(CommonHelper.low(username));
 		if (uuid != null) {
 			return getEntry(uuid);
 		}
@@ -112,10 +112,6 @@ public abstract class CachedAuthHandler extends AuthHandler {
 		return entry;
 	}
 
-	private static String low(String username) {
-		return username.toLowerCase(Locale.US);
-	}
-
 	public final class Entry {
 		@LauncherAPI public final UUID uuid;
 		private String username;
@@ -126,10 +122,8 @@ public abstract class CachedAuthHandler extends AuthHandler {
 		public Entry(UUID uuid, String username, String accessToken, String serverID) {
 			this.uuid = Objects.requireNonNull(uuid, "uuid");
 			this.username = Objects.requireNonNull(username, "username");
-			this.accessToken = accessToken == null ?
-				null : SecurityHelper.verifyToken(accessToken);
-			this.serverID = serverID == null ?
-				null : JoinServerRequest.verifyServerID(serverID);
+			this.accessToken = accessToken == null ? null : SecurityHelper.verifyToken(accessToken);
+			this.serverID = serverID == null ? null : JoinServerRequest.verifyServerID(serverID);
 		}
 	}
 }

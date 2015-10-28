@@ -147,8 +147,7 @@ public final class LaunchServer implements Runnable {
 		config.verify();
 
 		// Set launcher EXE binary
-		launcherEXEBinary = config.launch4J ?
-			new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
+		launcherEXEBinary = config.launch4J ? new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
 		syncLauncherBinaries();
 
 		// Sync updates dir
@@ -397,6 +396,7 @@ public final class LaunchServer implements Runnable {
 			try (BufferedReader reader = IOHelper.newReader(file)) {
 				profile = new ClientProfile(TextConfigReader.read(reader, true));
 			}
+			profile.verify();
 
 			// Add SIGNED profile to result list
 			result.add(new SignedObjectHolder<>(profile, privateKey));
@@ -426,13 +426,22 @@ public final class LaunchServer implements Runnable {
 		private Config(BlockConfigEntry block) {
 			super(block);
 			address = block.getEntry("address", StringConfigEntry.class);
-			port = block.getEntryValue("port", IntegerConfigEntry.class);
+			port = VerifyHelper.verifyInt(block.getEntryValue("port", IntegerConfigEntry.class),
+				VerifyHelper.range(0, 65535), "Illegal LaunchServer port");
 			bindAddress = block.hasEntry("bindAddress") ?
 				block.getEntryValue("bindAddress", StringConfigEntry.class) : getAddress();
 
 			// Skin system
 			skinsURL = block.getEntryValue("skinsURL", StringConfigEntry.class);
+			String skinURL = getSkinURL("skinUsername", ZERO_UUID);
+			if (skinURL != null) {
+				IOHelper.verifyURL(skinURL);
+			}
 			cloaksURL = block.getEntryValue("cloaksURL", StringConfigEntry.class);
+			String cloakURL = getCloakURL("cloakUsername", ZERO_UUID);
+			if (cloakURL != null) {
+				IOHelper.verifyURL(cloakURL);
+			}
 
 			// Set auth handler and provider
 			String authHandlerName = block.getEntryValue("authHandler", StringConfigEntry.class);
@@ -442,25 +451,6 @@ public final class LaunchServer implements Runnable {
 
 			// Set launch4J config
 			launch4J = block.getEntryValue("launch4J", BooleanConfigEntry.class);
-		}
-
-		@Override
-		public void verify() {
-			VerifyHelper.verifyInt(port, VerifyHelper.range(0, 65535), "Illegal LaunchServer port: " + port);
-
-			// Verify textures info
-			String skinURL = getSkinURL("skinUsername", ZERO_UUID);
-			if (skinURL != null) {
-				IOHelper.verifyURL(skinURL);
-			}
-			String cloakURL = getCloakURL("cloakUsername", ZERO_UUID);
-			if (cloakURL != null) {
-				IOHelper.verifyURL(cloakURL);
-			}
-
-			// Verify auth handler and provider
-			authHandler.verify();
-			authProvider.verify();
 		}
 
 		@LauncherAPI
@@ -491,6 +481,11 @@ public final class LaunchServer implements Runnable {
 		@LauncherAPI
 		public void setAddress(String address) {
 			this.address.setValue(address);
+		}
+
+		@LauncherAPI
+		public void verify() {
+			VerifyHelper.verify(getAddress(), VerifyHelper.NOT_EMPTY, "LaunchServer address can't be empty");
 		}
 
 		@LauncherAPI

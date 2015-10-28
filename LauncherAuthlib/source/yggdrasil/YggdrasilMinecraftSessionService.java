@@ -69,7 +69,8 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
 	@Override
 	public Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> getTextures(GameProfile profile, boolean requireSecure) {
 		LogHelper.debug("getTextures, Username: '%s'", profile.getName());
-		Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textures = new EnumMap<>(MinecraftProfileTexture.Type.class);
+		Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> textures =
+			new EnumMap<>(MinecraftProfileTexture.Type.class);
 
 		// Add skin URL to textures map
 		Iterator<Property> skinURL = profile.getProperties().get(ClientLauncher.SKIN_URL_PROPERTY).iterator();
@@ -96,7 +97,7 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
 	@Override
 	public GameProfile hasJoinedServer(GameProfile profile, String serverID) throws AuthenticationUnavailableException {
 		String username = profile.getName();
-		LogHelper.debug("checkServer, Username: '%s', server ID: %s", username, serverID);
+		LogHelper.debug("checkServer, Username: '%s', Server ID: %s", username, serverID);
 
 		// Make checkServer request
 		PlayerProfile pp;
@@ -119,7 +120,8 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
 
 		// Join server
 		String username = profile.getName();
-		LogHelper.debug("joinServer, Username: '%s', access token: %s, server ID: %s", username, accessToken, serverID);
+		LogHelper.debug("joinServer, Username: '%s', Access token: %s, Server ID: %s",
+				username, accessToken, serverID);
 
 		// Make joinServer request
 		boolean success;

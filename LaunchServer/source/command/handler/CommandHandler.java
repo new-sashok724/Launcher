@@ -24,7 +24,6 @@ import launchserver.command.auth.UsernameToUUIDCommand;
 import launchserver.command.basic.BuildCommand;
 import launchserver.command.basic.ClearCommand;
 import launchserver.command.basic.DebugCommand;
-import launchserver.command.basic.EvalCommand;
 import launchserver.command.basic.GCCommand;
 import launchserver.command.basic.HelpCommand;
 import launchserver.command.basic.RebindCommand;
@@ -48,7 +47,6 @@ public abstract class CommandHandler implements Runnable {
 		registerCommand("build", new BuildCommand(server));
 		registerCommand("stop", new StopCommand(server));
 		registerCommand("rebind", new RebindCommand(server));
-		registerCommand("eval", new EvalCommand(server));
 		registerCommand("debug", new DebugCommand(server));
 		registerCommand("clear", new ClearCommand(server));
 		registerCommand("gc", new GCCommand(server));

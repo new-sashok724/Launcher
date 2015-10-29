@@ -42,7 +42,7 @@ public final class AuthResponse extends Response {
 		try {
 			username = server.config.authProvider.auth(login, password);
 			if (!VerifyHelper.isValidUsername(username)) {
-				throw new RequestException(String.format("Illegal username: '%s'", username));
+				throw new AuthException(String.format("Illegal username: '%s'", username));
 			}
 		} catch (AuthException e) {
 			throw new RequestException(e);

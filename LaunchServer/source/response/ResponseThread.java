@@ -48,8 +48,7 @@ public final class ResponseThread implements Runnable {
 		Exception savedError = null;
 
 		// Process connection
-		LogHelper.debug("Connection #%d from %s", id,
-			IOHelper.getIP(socket.getRemoteSocketAddress()));
+		LogHelper.debug("Connection #%d from %s", id, IOHelper.getIP(socket.getRemoteSocketAddress()));
 		try (HInput input = new HInput(socket.getInputStream());
 			 HOutput output = new HOutput(socket.getOutputStream())) {
 			Request.Type type = readHandshake(input, output);

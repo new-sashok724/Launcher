@@ -9,11 +9,11 @@ import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
-import launcher.request.RequestException;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
 import launchserver.auth.AuthException;
+import launchserver.auth.provider.AuthProvider;
 import launchserver.response.Response;
 import launchserver.response.profile.ProfileByUUIDResponse;
 
@@ -33,7 +33,8 @@ public final class AuthResponse extends Response {
 			password = IOHelper.decode(SecurityHelper.newRSADecryptCipher(server.privateKey).
 				doFinal(encryptedPassword));
 		} catch (IllegalBlockSizeException | BadPaddingException ignored) {
-			throw new RequestException("Password decryption error");
+			requestError("Password decryption error");
+			return;
 		}
 
 		// Authenticate
@@ -42,21 +43,26 @@ public final class AuthResponse extends Response {
 		try {
 			username = server.config.authProvider.auth(login, password);
 			if (!VerifyHelper.isValidUsername(username)) {
-				throw new AuthException(String.format("Illegal username: '%s'", username));
+				AuthProvider.authError(String.format("Illegal username: '%s'", username));
 			}
 		} catch (AuthException e) {
-			throw new RequestException(e);
+			requestError(e.getMessage());
+			return;
 		} catch (Exception e) {
 			LogHelper.error(e);
-			throw new RequestException("Internal auth error", e);
+			requestError("Internal auth error");
+			return;
 		}
 		debug("Auth: '%s' -> '%s'", login, username);
 
 		// Authenticate on server (and get UUID)
 		String accessToken = SecurityHelper.randomStringToken();
-		UUID uuid = server.config.authHandler.auth(username, accessToken);
-		if (uuid == null) {
-			throw new RequestException("Can't assign UUID");
+		UUID uuid;
+		try {
+			uuid =server.config.authHandler.auth(username, accessToken);
+		} catch (AuthException e) {
+			requestError(e.getMessage());
+			return;
 		}
 		writeNoError(output);
 

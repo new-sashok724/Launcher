@@ -11,6 +11,7 @@ import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
+import launchserver.auth.AuthException;
 
 public abstract class AuthHandler extends ConfigObject implements Flushable {
 	private static final Map<String, Adapter<AuthHandler>> AUTH_HANDLERS = new ConcurrentHashMap<>(4);
@@ -34,6 +35,11 @@ public abstract class AuthHandler extends ConfigObject implements Flushable {
 
 	@LauncherAPI
 	public abstract String uuidToUsername(UUID uuid) throws IOException;
+
+	@LauncherAPI
+	public static UUID authError(String message) throws AuthException {
+		throw new AuthException(message);
+	}
 
 	@LauncherAPI
 	public static AuthHandler newHandler(String name, BlockConfigEntry block) {

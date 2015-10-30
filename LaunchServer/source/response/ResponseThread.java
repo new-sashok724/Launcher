@@ -26,9 +26,6 @@ import launchserver.response.update.UpdateListResponse;
 import launchserver.response.update.UpdateResponse;
 
 public final class ResponseThread implements Runnable {
-	private static final boolean LOG_CONNECTIONS = Boolean.getBoolean("launcher.logConnections");
-
-	// Instance
 	private final LaunchServer server;
 	private final long id;
 	private final Socket socket;
@@ -46,9 +43,11 @@ public final class ResponseThread implements Runnable {
 	public void run() {
 		boolean cancelled = false;
 		Exception savedError = null;
+		if (!server.serverSocketHandler.logConnections) {
+			LogHelper.debug("Connection #%d from %s", id, IOHelper.getIP(socket.getRemoteSocketAddress()));
+		}
 
 		// Process connection
-		LogHelper.debug("Connection #%d from %s", id, IOHelper.getIP(socket.getRemoteSocketAddress()));
 		try (HInput input = new HInput(socket.getInputStream());
 			 HOutput output = new HOutput(socket.getOutputStream())) {
 			Request.Type type = readHandshake(input, output);
@@ -104,8 +103,8 @@ public final class ResponseThread implements Runnable {
 	}
 
 	private void respond(Request.Type type, HInput input, HOutput output) throws Exception {
-		if (LOG_CONNECTIONS) {
-			LogHelper.info("Connection from %s: %s", IOHelper.getIP(socket.getRemoteSocketAddress()), type.name());
+		if (server.serverSocketHandler.logConnections) {
+			LogHelper.info("Connection %d from %s: %s", id, IOHelper.getIP(socket.getRemoteSocketAddress()), type.name());
 		} else {
 			LogHelper.subDebug("#%d Type: %s", id, type.name());
 		}

@@ -4,8 +4,8 @@ import launcher.helper.LogHelper;
 import launchserver.LaunchServer;
 import launchserver.command.Command;
 
-public final class DebugCommand extends Command {
-	public DebugCommand(LaunchServer server) {
+public final class LogConnectionsCommand extends Command {
+	public LogConnectionsCommand(LaunchServer server) {
 		super(server);
 	}
 
@@ -16,7 +16,7 @@ public final class DebugCommand extends Command {
 
 	@Override
 	public String getUsageDescription() {
-		return "Enable or disable debug logging at runtime";
+		return "Enable or disable logging connections";
 	}
 
 	@Override
@@ -24,10 +24,10 @@ public final class DebugCommand extends Command {
 		boolean newValue;
 		if (args.length >= 1) {
 			newValue = Boolean.parseBoolean(args[0]);
-			LogHelper.setDebugEnabled(newValue);
+			server.serverSocketHandler.logConnections = newValue;
 		} else {
-			newValue = LogHelper.isDebugEnabled();
+			newValue = server.serverSocketHandler.logConnections;
 		}
-		LogHelper.subInfo("Debug enabled: " + newValue);
+		LogHelper.subInfo("Log connections: " + newValue);
 	}
 }

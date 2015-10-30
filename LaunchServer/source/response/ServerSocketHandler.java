@@ -30,6 +30,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 	private final LaunchServer server;
 	private final AtomicReference<ServerSocket> serverSocket = new AtomicReference<>();
 	private final ExecutorService threadPool = Executors.newCachedThreadPool(THREAD_FACTORY);
+	@LauncherAPI public volatile boolean logConnections = Boolean.getBoolean("launcher.logConnections");
 
 	// API
 	private final Map<String, Response.Factory> customResponses = new ConcurrentHashMap<>(2);

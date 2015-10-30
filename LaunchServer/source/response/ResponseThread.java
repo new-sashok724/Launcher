@@ -104,7 +104,7 @@ public final class ResponseThread implements Runnable {
 
 	private void respond(Request.Type type, HInput input, HOutput output) throws Exception {
 		if (server.serverSocketHandler.logConnections) {
-			LogHelper.info("Connection %d from %s: %s", id, IOHelper.getIP(socket.getRemoteSocketAddress()), type.name());
+			LogHelper.info("Connection #%d from %s: %s", id, IOHelper.getIP(socket.getRemoteSocketAddress()), type.name());
 		} else {
 			LogHelper.subDebug("#%d Type: %s", id, type.name());
 		}

@@ -17,6 +17,9 @@ import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 
 public final class MySQLSourceConfig extends ConfigObject implements Flushable {
+	@LauncherAPI public static final int TIMEOUT = VerifyHelper.verifyInt(
+		Integer.parseUnsignedInt(System.getProperty("launcher.mysql.timeout", Integer.toString(10))),
+		VerifyHelper.POSITIVE, "launcher.mysql.timeout can't be <= 0");
 	private static final int MAX_POOL_SIZE = VerifyHelper.verifyInt(
 		Integer.parseUnsignedInt(System.getProperty("launcher.mysql.maxPoolSize", Integer.toString(10))),
 		VerifyHelper.POSITIVE, "launcher.mysql.maxPoolSize can't be <= 0");
@@ -67,8 +70,12 @@ public final class MySQLSourceConfig extends ConfigObject implements Flushable {
 		if (source == null) { // New data source
 			MysqlDataSource mysqlSource = new MysqlDataSource();
 			mysqlSource.setUseUnicode(true);
-			mysqlSource.setLoginTimeout(IOHelper.TIMEOUT);
 			mysqlSource.setCachePrepStmts(true);
+
+			// Set timeouts and cache
+			mysqlSource.setEnableQueryTimeouts(true);
+			mysqlSource.setLoginTimeout(TIMEOUT);
+			mysqlSource.setConnectTimeout(TIMEOUT * 1000);
 			mysqlSource.setPrepStmtCacheSize(STMT_CACHE_SIZE);
 			mysqlSource.setPrepStmtCacheSqlLimit(IOHelper.BUFFER_SIZE);
 
@@ -91,7 +98,7 @@ public final class MySQLSourceConfig extends ConfigObject implements Flushable {
 
 				// Set pool settings
 				hikariSource.setPoolName(poolName);
-				hikariSource.setMaximumPoolSize(MAX_POOL_SIZE);
+				hikariSource.setMaximumPoolSize(TIMEOUT);
 
 				// Replace source with hds
 				source = hikariSource;

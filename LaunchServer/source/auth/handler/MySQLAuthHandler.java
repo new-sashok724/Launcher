@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.UUID;
 
 import launcher.helper.LogHelper;
@@ -59,7 +60,8 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 			LogHelper.info("Fetching all AuthHandler entries");
 			String query = String.format("SELECT %s, %s, %s, %s FROM %s",
 				uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table);
-			try (Connection c = mySQLHolder.getConnection(); ResultSet set = c.createStatement().executeQuery(query)) {
+			try (Connection c = mySQLHolder.getConnection(); Statement statement = c.createStatement();
+				 ResultSet set = statement.executeQuery(query)) {
 				for (Entry entry = constructEntry(set); entry != null; entry = constructEntry(set)) {
 					addEntry(entry);
 				}
@@ -86,11 +88,13 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 
 	@Override
 	protected boolean updateAuth(UUID uuid, String username, String accessToken) throws IOException {
-		try (Connection c = mySQLHolder.getConnection();
-			 PreparedStatement s = c.prepareStatement(updateAuthSQL)) {
+		try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(updateAuthSQL)) {
 			s.setString(1, username); // Username case
 			s.setString(2, accessToken);
 			s.setString(3, uuid.toString());
+
+			// Execute update
+			s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
 			return s.executeUpdate() > 0;
 		} catch (SQLException e) {
 			throw new IOException(e);
@@ -99,10 +103,12 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 
 	@Override
 	protected boolean updateServerID(UUID uuid, String serverID) throws IOException {
-		try (Connection c = mySQLHolder.getConnection();
-			 PreparedStatement s = c.prepareStatement(updateServerIDSQL)) {
+		try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(updateServerIDSQL)) {
 			s.setString(1, serverID);
 			s.setString(2, uuid.toString());
+
+			// Execute update
+			s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
 			return s.executeUpdate() > 0;
 		} catch (SQLException e) {
 			throw new IOException(e);
@@ -117,6 +123,9 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 	private Entry query(String sql, String value) throws IOException {
 		try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(sql)) {
 			s.setString(1, value);
+
+			// Execute query
+			s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
 			try (ResultSet set = s.executeQuery()) {
 				return constructEntry(set);
 			}

@@ -45,7 +45,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 
 		// Read auth handler file
 		if (IOHelper.isFile(file)) {
-			LogHelper.info("Reading auth handler file");
+			LogHelper.info("Reading auth handler file: '%s'", file);
 			try {
 				readAuthFile();
 			} catch (IOException e) {

@@ -31,17 +31,16 @@ public final class MySQLAuthProvider extends AuthProvider {
 
 	@Override
 	public String auth(String login, String password) throws SQLException, AuthException {
-		try (Connection c = mySQLHolder.getConnection()) {
-			try (PreparedStatement statement = c.prepareStatement(query)) {
-				String[] replaceParams = { "login", login, "password", password };
-				for (int i = 0; i < queryParams.length; i++) {
-					statement.setString(i + 1, CommonHelper.replace(queryParams[i], replaceParams));
-				}
+		try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(query)) {
+			String[] replaceParams = { "login", login, "password", password };
+			for (int i = 0; i < queryParams.length; i++) {
+				s.setString(i + 1, CommonHelper.replace(queryParams[i], replaceParams));
+			}
 
-				// Execute SQL query
-				try (ResultSet set = statement.executeQuery()) {
-					return set.next() ? set.getString(1) : authError("Incorrect username or password");
-				}
+			// Execute SQL query
+			s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
+			try (ResultSet set = s.executeQuery()) {
+				return set.next() ? set.getString(1) : authError("Incorrect username or password");
 			}
 		}
 	}

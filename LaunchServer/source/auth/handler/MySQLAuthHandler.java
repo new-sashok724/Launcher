@@ -46,13 +46,13 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 			block.getEntryValue("serverIDColumn", StringConfigEntry.class));
 
 		// Prepare SQL queries
-		queryByUUIDSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=?",
+		queryByUUIDSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=? LIMIT 1",
 			uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table, uuidColumn);
-		queryByUsernameSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=?",
+		queryByUsernameSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=? LIMIT 1",
 			uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table, usernameColumn);
-		updateAuthSQL = String.format("UPDATE %s SET %s=?, %s=? WHERE %s=?",
+		updateAuthSQL = String.format("UPDATE %s SET %s=?, %s=? WHERE %s=? LIMIT 1",
 			table, usernameColumn, accessTokenColumn, uuidColumn);
-		updateServerIDSQL = String.format("UPDATE %s SET %s=? WHERE %s=?",
+		updateServerIDSQL = String.format("UPDATE %s SET %s=? WHERE %s=? LIMIT 1",
 			table, serverIDColumn, uuidColumn);
 
 		// Fetch all entries

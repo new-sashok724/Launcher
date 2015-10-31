@@ -29,7 +29,7 @@ public final class IndexAssetCommand extends Command {
 
 	@Override
 	public String getArgsDescription() {
-		return "<dir> <output-dir>";
+		return "<dir> <index> <output-dir>";
 	}
 
 	@Override
@@ -39,9 +39,10 @@ public final class IndexAssetCommand extends Command {
 
 	@Override
 	public void invoke(String... args) throws Exception {
-		verifyArgs(args, 2);
+		verifyArgs(args, 3);
 		String inputAssetDirName = IOHelper.verifyFileName(args[0]);
-		String outputAssetDirName = IOHelper.verifyFileName(args[1]);
+		String indexFileName = IOHelper.verifyFileName(args[1]);
+		String outputAssetDirName = IOHelper.verifyFileName(args[2]);
 		Path inputAssetDir = LaunchServer.UPDATES_DIR.resolve(inputAssetDirName);
 		Path outputAssetDir = LaunchServer.UPDATES_DIR.resolve(outputAssetDirName);
 		if (outputAssetDir.equals(inputAssetDir)) {
@@ -50,9 +51,7 @@ public final class IndexAssetCommand extends Command {
 
 		// Create new asset dir
 		LogHelper.subInfo("Creating indexed asset dir: '%s'", outputAssetDirName);
-		if (!IOHelper.isDir(outputAssetDir)) {
-			Files.createDirectory(outputAssetDir);
-		}
+		Files.createDirectory(outputAssetDir);
 
 		// Index objects
 		LogHelper.subInfo("Indexing objects");
@@ -60,8 +59,8 @@ public final class IndexAssetCommand extends Command {
 		IOHelper.walk(inputAssetDir, new IndexAssetVisitor(objects, inputAssetDir, outputAssetDir), false);
 
 		// Write index file
-		LogHelper.subInfo("Writing asset index file: '%s'", outputAssetDirName);
-		try (BufferedWriter writer = IOHelper.newWriter(resolveIndexFile(outputAssetDir, outputAssetDirName))) {
+		LogHelper.subInfo("Writing asset index file: '%s'", indexFileName);
+		try (BufferedWriter writer = IOHelper.newWriter(resolveIndexFile(outputAssetDir, indexFileName))) {
 			JSONObject root = new JSONObject();
 			root.put(OBJECTS_DIR, objects);
 			root.write(writer);

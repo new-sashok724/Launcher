@@ -45,7 +45,7 @@ public final class UnindexAssetCommand extends Command {
 		Files.createDirectory(outputAssetDir);
 
 		// Read JSON file
-		LogHelper.subInfo("Reading asset index file: '%s'", inputAssetDirName);
+		LogHelper.subInfo("Reading asset index file: '%s'", indexFileName);
 		JSONObject objects;
 		try (BufferedReader reader = IOHelper.newReader(IndexAssetCommand.resolveIndexFile(inputAssetDir, indexFileName))) {
 			objects = new JSONObject(new JSONTokener(reader)).getJSONObject(IndexAssetCommand.OBJECTS_DIR);

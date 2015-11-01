@@ -34,7 +34,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 	// Storage
-	private final Map<UUID, Auth> authsMap = new HashMap<>(IOHelper.BUFFER_SIZE);
+	private final Map<UUID, Entry> authsMap = new HashMap<>(IOHelper.BUFFER_SIZE);
 	private final Map<String, UUID> usernamesMap = new HashMap<>(IOHelper.BUFFER_SIZE);
 
 	@LauncherAPI
@@ -59,20 +59,20 @@ public abstract class FileAuthHandler extends AuthHandler {
 		lock.writeLock().lock();
 		try {
 			UUID uuid = usernameToUUID(username);
-			Auth auth = authsMap.get(uuid);
+			Entry entry = authsMap.get(uuid);
 
 			// Not registered? Fix it!
-			if (auth == null) {
-				auth = new Auth(username);
+			if (entry == null) {
+				entry = new Entry(username);
 
 				// Generate UUID
 				uuid = genUUIDFor(username);
-				authsMap.put(uuid, auth);
+				authsMap.put(uuid, entry);
 				usernamesMap.put(CommonHelper.low(username), uuid);
 			}
 
 			// Authenticate
-			auth.auth(username, accessToken);
+			entry.auth(username, accessToken);
 			return uuid;
 		} finally {
 			lock.writeLock().unlock();
@@ -84,10 +84,10 @@ public abstract class FileAuthHandler extends AuthHandler {
 		lock.readLock().lock();
 		try {
 			UUID uuid = usernameToUUID(username);
-			Auth auth = authsMap.get(uuid);
+			Entry entry = authsMap.get(uuid);
 
 			// Check server (if has such account of course)
-			return auth != null && auth.checkServer(username, serverID) ? uuid : null;
+			return entry != null && entry.checkServer(username, serverID) ? uuid : null;
 		} finally {
 			lock.readLock().unlock();
 		}
@@ -108,8 +108,8 @@ public abstract class FileAuthHandler extends AuthHandler {
 	public final boolean joinServer(String username, String accessToken, String serverID) {
 		lock.writeLock().lock();
 		try {
-			Auth auth = authsMap.get(usernameToUUID(username));
-			return auth != null && auth.joinServer(username, accessToken, serverID);
+			Entry entry = authsMap.get(usernameToUUID(username));
+			return entry != null && entry.joinServer(username, accessToken, serverID);
 		} finally {
 			lock.writeLock().unlock();
 		}
@@ -129,23 +129,26 @@ public abstract class FileAuthHandler extends AuthHandler {
 	public final String uuidToUsername(UUID uuid) {
 		lock.readLock().lock();
 		try {
-			Auth auth = authsMap.get(uuid);
-			return auth == null ? null : auth.username;
+			Entry entry = authsMap.get(uuid);
+			return entry == null ? null : entry.username;
 		} finally {
 			lock.readLock().unlock();
 		}
 	}
 
 	@LauncherAPI
-	public final Set<Map.Entry<UUID, Auth>> entrySet() {
+	public final Set<Map.Entry<UUID, Entry>> entrySet() {
 		return Collections.unmodifiableMap(authsMap).entrySet();
 	}
 
 	@LauncherAPI
-	protected final void addAuth(UUID uuid, Auth entry) throws IOException {
+	protected final void addAuth(UUID uuid, Entry entry) throws IOException {
 		lock.writeLock().lock();
 		try {
-			authsMap.put(uuid, entry);
+			Entry previous = authsMap.put(uuid, entry);
+			if (previous != null) { // In case of username changing
+				usernamesMap.remove(CommonHelper.low(previous.username));
+			}
 			usernamesMap.put(CommonHelper.low(entry.username), uuid);
 		} finally {
 			lock.writeLock().unlock();
@@ -160,7 +163,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 
 	private UUID genUUIDFor(String username) {
 		if (offlineUUIDs) {
-			UUID md5UUID = PlayerProfile.md5UUID(username);
+			UUID md5UUID = PlayerProfile.offlineUUID(username);
 			if (!authsMap.containsKey(md5UUID)) {
 				return md5UUID;
 			}
@@ -175,18 +178,18 @@ public abstract class FileAuthHandler extends AuthHandler {
 		return uuid;
 	}
 
-	public static final class Auth extends StreamObject {
+	public static final class Entry extends StreamObject {
 		private String username;
 		private String accessToken;
 		private String serverID;
 
 		@LauncherAPI
-		public Auth(String username) {
+		public Entry(String username) {
 			this.username = VerifyHelper.verifyUsername(username);
 		}
 
 		@LauncherAPI
-		public Auth(String username, String accessToken, String serverID) {
+		public Entry(String username, String accessToken, String serverID) {
 			this(username);
 			if (accessToken == null && serverID != null) {
 				throw new IllegalArgumentException("Can't set access token while server ID is null");
@@ -198,7 +201,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 		}
 
 		@LauncherAPI
-		public Auth(HInput input) throws IOException {
+		public Entry(HInput input) throws IOException {
 			username = VerifyHelper.verifyUsername(input.readASCII(16));
 			if (input.readBoolean()) {
 				accessToken = SecurityHelper.verifyToken(input.readASCII(-SecurityHelper.TOKEN_STRING_LENGTH));

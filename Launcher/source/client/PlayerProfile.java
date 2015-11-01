@@ -55,12 +55,12 @@ public final class PlayerProfile extends StreamObject {
 	}
 
 	@LauncherAPI
-	public static UUID md5UUID(String username) {
-		return UUID.nameUUIDFromBytes(IOHelper.encodeASCII("OfflinePlayer:" + username));
+	public static PlayerProfile newOfflineProfile(String username) {
+		return new PlayerProfile(offlineUUID(username), username, null, null);
 	}
 
 	@LauncherAPI
-	public static PlayerProfile newOfflineProfile(String username) {
-		return new PlayerProfile(md5UUID(username), username, null, null);
+	public static UUID offlineUUID(String username) {
+		return UUID.nameUUIDFromBytes(IOHelper.encodeASCII("OfflinePlayer:" + username));
 	}
 }

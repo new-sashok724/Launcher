@@ -10,17 +10,17 @@ import launcher.helper.IOHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 
-public final class HTTPAuthProvider extends AuthProvider {
+public final class URLAuthProvider extends AuthProvider {
 	private final String url;
 	private final Pattern response;
 
-	public HTTPAuthProvider(BlockConfigEntry block) {
+	public URLAuthProvider(BlockConfigEntry block) {
 		super(block);
 		url = block.getEntryValue("url", StringConfigEntry.class);
 		response = Pattern.compile(block.getEntryValue("response", StringConfigEntry.class));
 
 		// Verify is valid URL
-		IOHelper.verifyURL(getFormattedURL("httpAuthLogin", "httpAuthPassword"));
+		IOHelper.verifyURL(getFormattedURL("urlAuthLogin", "urlAuthPassword"));
 	}
 
 	@Override

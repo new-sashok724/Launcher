@@ -69,7 +69,10 @@ public abstract class CachedAuthHandler extends AuthHandler {
 
 	@LauncherAPI
 	protected void addEntry(Entry entry) {
-		entryCache.put(entry.uuid, entry);
+		Entry previous = entryCache.put(entry.uuid, entry);
+		if(previous != null) { // In case of username changing
+			usernamesCache.remove(CommonHelper.low(previous.username));
+		}
 		usernamesCache.put(CommonHelper.low(entry.username), entry.uuid);
 	}
 

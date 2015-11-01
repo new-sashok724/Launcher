@@ -44,7 +44,7 @@ public final class TextFileAuthHandler extends FileAuthHandler {
 				authBlock.getEntryValue("serverID", StringConfigEntry.class) : null;
 
 			// Add auth entry
-			addAuth(uuid, new Auth(username, accessToken, serverID));
+			addAuth(uuid, new Entry(username, accessToken, serverID));
 		}
 	}
 
@@ -53,11 +53,11 @@ public final class TextFileAuthHandler extends FileAuthHandler {
 		boolean next = false;
 
 		// Write auth blocks to map
-		Set<Map.Entry<UUID, Auth>> entrySet = entrySet();
+		Set<Map.Entry<UUID, Entry>> entrySet = entrySet();
 		Map<String, ConfigEntry<?>> map = new LinkedHashMap<>(entrySet.size());
-		for (Map.Entry<UUID, Auth> entry : entrySet) {
+		for (Map.Entry<UUID, Entry> entry : entrySet) {
 			UUID uuid = entry.getKey();
-			Auth auth = entry.getValue();
+			Entry auth = entry.getValue();
 
 			// Set auth entry data
 			Map<String, ConfigEntry<?>> authMap = new LinkedHashMap<>(entrySet.size());

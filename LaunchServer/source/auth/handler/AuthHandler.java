@@ -57,6 +57,9 @@ public abstract class AuthHandler extends ConfigObject implements Flushable {
 
 	static {
 		registerHandler("null", NullAuthHandler::new);
+		registerHandler("memory", MemoryAuthHandler::new);
+
+		// Auth handler that doesn't do nothing :D
 		registerHandler("binaryFile", BinaryFileAuthHandler::new);
 		registerHandler("textFile", TextFileAuthHandler::new);
 		registerHandler("mysql", MySQLAuthHandler::new);

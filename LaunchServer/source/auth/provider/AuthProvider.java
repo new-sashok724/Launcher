@@ -45,8 +45,10 @@ public abstract class AuthProvider extends ConfigObject implements Flushable {
 		registerProvider("null", NullAuthProvider::new);
 		registerProvider("accept", AcceptAuthProvider::new);
 		registerProvider("reject", RejectAuthProvider::new);
+
+		// Auth providers that doesn't do nothing :D
 		registerProvider("mysql", MySQLAuthProvider::new);
-		registerProvider("http", HTTPAuthProvider::new);
 		registerProvider("file", FileAuthProvider::new);
+		registerProvider("url", URLAuthProvider::new);
 	}
 }

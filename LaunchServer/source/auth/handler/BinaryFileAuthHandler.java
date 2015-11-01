@@ -21,18 +21,18 @@ public final class BinaryFileAuthHandler extends FileAuthHandler {
 			int count = input.readLength(0);
 			for (int i = 0; i < count; i++) {
 				UUID uuid = input.readUUID();
-				Auth auth = new Auth(input);
-				addAuth(uuid, auth);
+				Entry entry = new Entry(input);
+				addAuth(uuid, entry);
 			}
 		}
 	}
 
 	@Override
 	protected void writeAuthFile() throws IOException {
-		Set<Map.Entry<UUID, Auth>> entrySet = entrySet();
+		Set<Map.Entry<UUID, Entry>> entrySet = entrySet();
 		try (HOutput output = new HOutput(IOHelper.newOutput(file))) {
 			output.writeLength(entrySet.size(), 0);
-			for (Map.Entry<UUID, Auth> entry : entrySet) {
+			for (Map.Entry<UUID, Entry> entry : entrySet) {
 				output.writeUUID(entry.getKey());
 				entry.getValue().write(output);
 			}

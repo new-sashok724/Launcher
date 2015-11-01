@@ -1,5 +1,8 @@
 package launcher.helper;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -201,6 +204,11 @@ public final class IOHelper {
 	}
 
 	@LauncherAPI
+	public static boolean isValidTextureBounds(int width, int height) {
+		return width % 64 == 0 && height * 2 == width && width <= 1024;
+	}
+
+	@LauncherAPI
 	public static void move(Path source, Path target) throws IOException {
 		createParentDirs(target);
 		Files.move(source, target, COPY_OPTIONS);
@@ -372,6 +380,26 @@ public final class IOHelper {
 	}
 
 	@LauncherAPI
+	public static BufferedImage readTexture(Object input) throws IOException {
+		ImageReader reader = ImageIO.getImageReadersByMIMEType("image/png").next();
+		try {
+			reader.setInput(ImageIO.createImageInputStream(input), false, false);
+
+			// Verify texture bounds
+			int width = reader.getWidth(0);
+			int height = reader.getHeight(0);
+			if (!isValidTextureBounds(width, height)) {
+				throw new IOException(String.format("Invalid texture bounds: %dx%d", width, height));
+			}
+
+			// Read image
+			return reader.read(0);
+		} finally {
+			reader.dispose();
+		}
+	}
+
+	@LauncherAPI
 	public static String request(URL url) throws IOException {
 		return decode(read(url)).trim();
 	}
@@ -534,6 +562,12 @@ public final class IOHelper {
 			throw new IOException("Illegal length: " + length);
 		}
 		return length;
+	}
+
+	@LauncherAPI
+	public static BufferedImage verifyTexture(BufferedImage skin) {
+		return VerifyHelper.verify(skin, i -> isValidTextureBounds(i.getWidth(), i.getHeight()),
+			String.format("Invalid texture bounds: %dx%d", skin.getWidth(), skin.getHeight()));
 	}
 
 	@LauncherAPI

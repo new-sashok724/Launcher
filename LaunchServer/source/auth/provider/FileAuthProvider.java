@@ -22,7 +22,7 @@ public final class FileAuthProvider extends DigestAuthProvider {
 	private final Path file;
 
 	// Cache
-	private final Map<String, Auth> auths = new HashMap<>(8192);
+	private final Map<String, Entry> entries = new HashMap<>(IOHelper.BUFFER_SIZE);
 	private final Object cacheLock = new Object();
 	private FileTime cacheLastModified;
 
@@ -40,15 +40,15 @@ public final class FileAuthProvider extends DigestAuthProvider {
 
 	@Override
 	public String auth(String login, String password) throws IOException {
-		Auth auth;
+		Entry entry;
 		synchronized (cacheLock) {
 			updateCache();
-			auth = auths.get(CommonHelper.low(login));
+			entry = entries.get(CommonHelper.low(login));
 		}
 
 		// Verify digest and return true username
-		verifyDigest(auth.password, password);
-		return auth.username;
+		verifyDigest(entry.password, password);
+		return entry.username;
 	}
 
 	@Override
@@ -69,8 +69,8 @@ public final class FileAuthProvider extends DigestAuthProvider {
 			authFile = TextConfigReader.read(reader, false);
 		}
 
-		// Read auths from config block
-		auths.clear();
+		// Read entries from config block
+		entries.clear();
 		Set<Map.Entry<String, ConfigEntry<?>>> entrySet = authFile.getValue().entrySet();
 		for (Map.Entry<String, ConfigEntry<?>> entry : entrySet) {
 			String login = entry.getKey();
@@ -78,8 +78,8 @@ public final class FileAuthProvider extends DigestAuthProvider {
 				String.format("Illegal config entry type: '%s'", login));
 
 			// Add auth entry
-			Auth auth = new Auth((BlockConfigEntry) value);
-			VerifyHelper.putIfAbsent(auths, CommonHelper.low(login), auth,
+			Entry auth = new Entry((BlockConfigEntry) value);
+			VerifyHelper.putIfAbsent(entries, CommonHelper.low(login), auth,
 				String.format("Duplicate login: '%s'", login));
 		}
 
@@ -87,11 +87,11 @@ public final class FileAuthProvider extends DigestAuthProvider {
 		cacheLastModified = lastModified;
 	}
 
-	private static final class Auth extends ConfigObject {
+	private static final class Entry extends ConfigObject {
 		private final String username;
 		private final String password;
 
-		private Auth(BlockConfigEntry block) {
+		private Entry(BlockConfigEntry block) {
 			super(block);
 			this.username = VerifyHelper.verifyUsername(block.getEntryValue("username", StringConfigEntry.class));
 			this.password = VerifyHelper.verify(block.getEntryValue("password", StringConfigEntry.class),

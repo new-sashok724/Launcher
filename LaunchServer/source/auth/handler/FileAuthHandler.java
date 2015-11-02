@@ -34,7 +34,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 	// Storage
-	private final Map<UUID, Entry> authsMap = new HashMap<>(IOHelper.BUFFER_SIZE);
+	private final Map<UUID, Entry> entryMap = new HashMap<>(IOHelper.BUFFER_SIZE);
 	private final Map<String, UUID> usernamesMap = new HashMap<>(IOHelper.BUFFER_SIZE);
 
 	@LauncherAPI
@@ -59,7 +59,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 		lock.writeLock().lock();
 		try {
 			UUID uuid = usernameToUUID(username);
-			Entry entry = authsMap.get(uuid);
+			Entry entry = entryMap.get(uuid);
 
 			// Not registered? Fix it!
 			if (entry == null) {
@@ -67,7 +67,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 
 				// Generate UUID
 				uuid = genUUIDFor(username);
-				authsMap.put(uuid, entry);
+				entryMap.put(uuid, entry);
 				usernamesMap.put(CommonHelper.low(username), uuid);
 			}
 
@@ -84,7 +84,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 		lock.readLock().lock();
 		try {
 			UUID uuid = usernameToUUID(username);
-			Entry entry = authsMap.get(uuid);
+			Entry entry = entryMap.get(uuid);
 
 			// Check server (if has such account of course)
 			return entry != null && entry.checkServer(username, serverID) ? uuid : null;
@@ -97,7 +97,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 	public final void flush() throws IOException {
 		lock.readLock().lock();
 		try {
-			LogHelper.info("Writing auth handler file (%d entries)", authsMap.size());
+			LogHelper.info("Writing auth handler file (%d entries)", entryMap.size());
 			writeAuthFile();
 		} finally {
 			lock.readLock().unlock();
@@ -108,7 +108,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 	public final boolean joinServer(String username, String accessToken, String serverID) {
 		lock.writeLock().lock();
 		try {
-			Entry entry = authsMap.get(usernameToUUID(username));
+			Entry entry = entryMap.get(usernameToUUID(username));
 			return entry != null && entry.joinServer(username, accessToken, serverID);
 		} finally {
 			lock.writeLock().unlock();
@@ -129,7 +129,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 	public final String uuidToUsername(UUID uuid) {
 		lock.readLock().lock();
 		try {
-			Entry entry = authsMap.get(uuid);
+			Entry entry = entryMap.get(uuid);
 			return entry == null ? null : entry.username;
 		} finally {
 			lock.readLock().unlock();
@@ -138,14 +138,14 @@ public abstract class FileAuthHandler extends AuthHandler {
 
 	@LauncherAPI
 	public final Set<Map.Entry<UUID, Entry>> entrySet() {
-		return Collections.unmodifiableMap(authsMap).entrySet();
+		return Collections.unmodifiableMap(entryMap).entrySet();
 	}
 
 	@LauncherAPI
 	protected final void addAuth(UUID uuid, Entry entry) throws IOException {
 		lock.writeLock().lock();
 		try {
-			Entry previous = authsMap.put(uuid, entry);
+			Entry previous = entryMap.put(uuid, entry);
 			if (previous != null) { // In case of username changing
 				usernamesMap.remove(CommonHelper.low(previous.username));
 			}
@@ -164,7 +164,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 	private UUID genUUIDFor(String username) {
 		if (offlineUUIDs) {
 			UUID md5UUID = PlayerProfile.offlineUUID(username);
-			if (!authsMap.containsKey(md5UUID)) {
+			if (!entryMap.containsKey(md5UUID)) {
 				return md5UUID;
 			}
 			LogHelper.warning("Offline UUID collision, using random: '%s'", username);
@@ -174,7 +174,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 		UUID uuid;
 		do {
 			uuid = new UUID(random.nextLong(), random.nextLong());
-		} while (authsMap.containsKey(uuid));
+		} while (entryMap.containsKey(uuid));
 		return uuid;
 	}
 

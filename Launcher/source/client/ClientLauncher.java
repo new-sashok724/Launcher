@@ -204,10 +204,10 @@ public final class ClientLauncher {
 					properties.put(SKIN_DIGEST_PROPERTY, new JSONArray(Collections.singleton(
 						SecurityHelper.toHex(pp.skin.digest))));
 				}
-				if (pp.skin != null) {
+				if (pp.cloak != null) {
 					properties.put(CLOAK_URL_PROPERTY, new JSONArray(Collections.singleton(pp.cloak.url)));
 					properties.put(CLOAK_DIGEST_PROPERTY, new JSONArray(Collections.singleton(
-						SecurityHelper.toHex(pp.skin.digest))));
+						SecurityHelper.toHex(pp.cloak.digest))));
 				}
 				Collections.addAll(args, "--userProperties", properties.toString());
 

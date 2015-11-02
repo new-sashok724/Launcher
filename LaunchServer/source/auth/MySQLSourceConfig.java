@@ -18,10 +18,10 @@ import launcher.serialize.config.entry.StringConfigEntry;
 
 public final class MySQLSourceConfig extends ConfigObject implements Flushable {
 	@LauncherAPI public static final int TIMEOUT = VerifyHelper.verifyInt(
-		Integer.parseUnsignedInt(System.getProperty("launcher.mysql.timeout", Integer.toString(10))),
+		Integer.parseUnsignedInt(System.getProperty("launcher.mysql.timeout", Integer.toString(5))),
 		VerifyHelper.POSITIVE, "launcher.mysql.timeout can't be <= 0");
 	private static final int MAX_POOL_SIZE = VerifyHelper.verifyInt(
-		Integer.parseUnsignedInt(System.getProperty("launcher.mysql.maxPoolSize", Integer.toString(10))),
+		Integer.parseUnsignedInt(System.getProperty("launcher.mysql.maxPoolSize", Integer.toString(25))),
 		VerifyHelper.POSITIVE, "launcher.mysql.maxPoolSize can't be <= 0");
 	private static final int STMT_CACHE_SIZE = VerifyHelper.verifyInt(
 		Integer.parseUnsignedInt(System.getProperty("launcher.mysql.stmtCacheSize", Integer.toString(250))),

@@ -6,6 +6,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -37,6 +38,7 @@ import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.client.ClientLauncher;
 import launcher.client.ClientProfile;
+import launcher.client.PlayerProfile;
 import launcher.hasher.HashedDir;
 import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
@@ -412,16 +414,16 @@ public final class LaunchServer implements Runnable {
 		private final StringConfigEntry address;
 		private final String bindAddress;
 
+		// Skin system
+		@LauncherAPI public final String skinsURL;
+		@LauncherAPI public final String cloaksURL;
+
 		// Auth
 		@LauncherAPI public final AuthHandler authHandler;
 		@LauncherAPI public final AuthProvider authProvider;
 
 		// EXE binary building
 		@LauncherAPI public final boolean launch4J;
-
-		// Skin system
-		private final String skinsURL;
-		private final String cloaksURL;
 
 		private Config(BlockConfigEntry block) {
 			super(block);
@@ -433,12 +435,12 @@ public final class LaunchServer implements Runnable {
 
 			// Skin system
 			skinsURL = block.getEntryValue("skinsURL", StringConfigEntry.class);
-			String skinURL = getSkinURL("skinUsername", ZERO_UUID);
+			String skinURL = getTextureURL(skinsURL, "skinUsername", ZERO_UUID);
 			if (skinURL != null) {
 				IOHelper.verifyURL(skinURL);
 			}
 			cloaksURL = block.getEntryValue("cloaksURL", StringConfigEntry.class);
-			String cloakURL = getCloakURL("cloakUsername", ZERO_UUID);
+			String cloakURL = getTextureURL(cloaksURL, "cloakUsername", ZERO_UUID);
 			if (cloakURL != null) {
 				IOHelper.verifyURL(cloakURL);
 			}
@@ -464,13 +466,13 @@ public final class LaunchServer implements Runnable {
 		}
 
 		@LauncherAPI
-		public String getCloakURL(String username, UUID uuid) {
-			return getTextureURL(cloaksURL, username, uuid);
+		public PlayerProfile.Texture getCloak(String username, UUID uuid) {
+			return getTexture(getTextureURL(cloaksURL, username, uuid));
 		}
 
 		@LauncherAPI
-		public String getSkinURL(String username, UUID uuid) {
-			return getTextureURL(skinsURL, username, uuid);
+		public PlayerProfile.Texture getSkin(String username, UUID uuid) {
+			return getTexture(getTextureURL(skinsURL, username, uuid));
 		}
 
 		@LauncherAPI
@@ -486,6 +488,18 @@ public final class LaunchServer implements Runnable {
 		@LauncherAPI
 		public void verify() {
 			VerifyHelper.verify(getAddress(), VerifyHelper.NOT_EMPTY, "LaunchServer address can't be empty");
+		}
+
+		@LauncherAPI
+		public static PlayerProfile.Texture getTexture(String url) {
+			try {
+				return new PlayerProfile.Texture(url);
+			} catch (FileNotFoundException e) {
+				return null;
+			} catch (IOException e) {
+				LogHelper.error(new IOException(String.format("Can't digest texture: '%s'", url), e));
+				return null;
+			}
 		}
 
 		@LauncherAPI

@@ -32,8 +32,8 @@ public final class ProfileByUUIDResponse extends Response {
 	}
 
 	public static PlayerProfile getProfile(LaunchServer server, UUID uuid, String username) {
-		String skinURL = server.config.getSkinURL(username, uuid);
-		String cloakURL = server.config.getCloakURL(username, uuid);
+		PlayerProfile.Texture skinURL = server.config.getSkin(username, uuid);
+		PlayerProfile.Texture cloakURL = server.config.getCloak(username, uuid);
 		return new PlayerProfile(uuid, username, skinURL, cloakURL);
 	}
 }

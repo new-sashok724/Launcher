@@ -230,13 +230,20 @@ public final class IOHelper {
 	}
 
 	@LauncherAPI
-	public static InputStream newInput(URL url) throws IOException {
+	public static InputStream newInput(URL url, int timeout) throws IOException {
 		URLConnection connection = url.openConnection();
 		if (connection instanceof HttpURLConnection) {
-			connection.setReadTimeout(TIMEOUT);
-			connection.setConnectTimeout(TIMEOUT);
+			connection.setReadTimeout(timeout);
+			connection.setConnectTimeout(timeout);
 		}
+		connection.setDoInput(true);
+		connection.setDoOutput(false);
 		return connection.getInputStream();
+	}
+
+	@LauncherAPI
+	public static InputStream newInput(URL url) throws IOException {
+		return newInput(url, TIMEOUT);
 	}
 
 	@LauncherAPI

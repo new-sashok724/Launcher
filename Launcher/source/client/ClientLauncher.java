@@ -55,8 +55,10 @@ public final class ClientLauncher {
 	private static final Pattern UUID_PATTERN = Pattern.compile("-", Pattern.LITERAL);
 
 	// Authlib constants
-	@LauncherAPI public static final String SKIN_URL_PROPERTY = "l_skinURL";
-	@LauncherAPI public static final String CLOAK_URL_PROPERTY = "l_cloakURL";
+	@LauncherAPI public static final String SKIN_URL_PROPERTY = "skinURL";
+	@LauncherAPI public static final String SKIN_DIGEST_PROPERTY = "skinDigest";
+	@LauncherAPI public static final String CLOAK_URL_PROPERTY = "cloakURL";
+	@LauncherAPI public static final String CLOAK_DIGEST_PROPERTY = "cloakDigest";
 
 	// Used to determine from clientside is launched from launcher
 	private static final AtomicBoolean LAUNCHED = new AtomicBoolean(false);
@@ -197,11 +199,15 @@ public final class ClientLauncher {
 				// Add user properties
 				Collections.addAll(args, "--userType", "mojang");
 				JSONObject properties = new JSONObject();
-				if (pp.skinURL != null) {
-					properties.put(SKIN_URL_PROPERTY, new JSONArray(Collections.singleton(pp.skinURL)));
+				if (pp.skin != null) {
+					properties.put(SKIN_URL_PROPERTY, new JSONArray(Collections.singleton(pp.skin.url)));
+					properties.put(SKIN_DIGEST_PROPERTY, new JSONArray(Collections.singleton(
+						SecurityHelper.toHex(pp.skin.digest))));
 				}
-				if (pp.cloakURL != null) {
-					properties.put(CLOAK_URL_PROPERTY, new JSONArray(Collections.singleton(pp.cloakURL)));
+				if (pp.skin != null) {
+					properties.put(CLOAK_URL_PROPERTY, new JSONArray(Collections.singleton(pp.cloak.url)));
+					properties.put(CLOAK_DIGEST_PROPERTY, new JSONArray(Collections.singleton(
+						SecurityHelper.toHex(pp.skin.digest))));
 				}
 				Collections.addAll(args, "--userProperties", properties.toString());
 

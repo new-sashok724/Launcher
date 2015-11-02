@@ -97,17 +97,17 @@ public final class IndexAssetCommand extends Command {
 			String name = IOHelper.toString(inputAssetDir.relativize(file));
 			LogHelper.subInfo("Indexing: '%s'", name);
 
-			// Calculate SHA-1 hash sum and get size
-			String hash = SecurityHelper.toHex(SecurityHelper.digest(SecurityHelper.DigestAlgorithm.SHA1, file));
+			// Calculate SHA-1 digest and get size
+			String digest = SecurityHelper.toHex(SecurityHelper.digest(SecurityHelper.DigestAlgorithm.SHA1, file));
 
 			// Add to objects
 			JSONObject object = new JSONObject();
 			object.put("size", attrs.size());
-			object.put("hash", hash);
+			object.put("hash", digest);
 			objects.put(name, object);
 
 			// Copy file
-			IOHelper.copy(file, resolveObjectFile(outputAssetDir, hash));
+			IOHelper.copy(file, resolveObjectFile(outputAssetDir, digest));
 			return super.visitFile(file, attrs);
 		}
 	}

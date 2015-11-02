@@ -492,10 +492,11 @@ public final class LaunchServer implements Runnable {
 
 		@LauncherAPI
 		public static PlayerProfile.Texture getTexture(String url) {
+			LogHelper.debug("Getting texture: '%s'", url);
 			try {
 				return new PlayerProfile.Texture(url);
 			} catch (FileNotFoundException e) {
-				return null;
+				return null; // Simply not found
 			} catch (IOException e) {
 				LogHelper.error(new IOException(String.format("Can't digest texture: '%s'", url), e));
 				return null;

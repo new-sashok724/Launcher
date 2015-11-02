@@ -467,12 +467,14 @@ public final class LaunchServer implements Runnable {
 
 		@LauncherAPI
 		public PlayerProfile.Texture getCloak(String username, UUID uuid) {
-			return getTexture(getTextureURL(cloaksURL, username, uuid));
+			String url = getTextureURL(cloaksURL, username, uuid);
+			return url == null ? null : getTexture(url);
 		}
 
 		@LauncherAPI
 		public PlayerProfile.Texture getSkin(String username, UUID uuid) {
-			return getTexture(getTextureURL(skinsURL, username, uuid));
+			String url = getTextureURL(skinsURL, username, uuid);
+			return url == null ? null : getTexture(url);
 		}
 
 		@LauncherAPI

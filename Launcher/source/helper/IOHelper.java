@@ -60,8 +60,17 @@ public final class IOHelper {
 	@LauncherAPI public static final Charset ASCII_CHARSET = StandardCharsets.US_ASCII;
 
 	// Constants
-	@LauncherAPI public static final int TIMEOUT = 30000;
-	@LauncherAPI public static final int BUFFER_SIZE = 0x10000;
+	@LauncherAPI public static final int SOCKET_TIMEOUT = VerifyHelper.verifyInt(
+		Integer.parseUnsignedInt(System.getProperty("launcher.socketTimeout", Integer.toString(30000))),
+		VerifyHelper.POSITIVE, "launcher.socketTimeout can't be <= 0");
+	@LauncherAPI public static final int HTTP_TIMEOUT = VerifyHelper.verifyInt(
+		Integer.parseUnsignedInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
+		VerifyHelper.POSITIVE, "launcher.httpTimeout can't be <= 0");
+	@LauncherAPI public static final int BUFFER_SIZE = VerifyHelper.verifyInt(
+		Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(0x10000))),
+		VerifyHelper.POSITIVE, "launcher.bufferSize can't be <= 0");
+
+	// Platform-dependent
 	@LauncherAPI public static final String CROSS_SEPARATOR = "/";
 	@LauncherAPI public static final FileSystem FS = FileSystems.getDefault();
 	@LauncherAPI public static final String PLATFORM_SEPARATOR = FS.getSeparator();
@@ -230,20 +239,15 @@ public final class IOHelper {
 	}
 
 	@LauncherAPI
-	public static InputStream newInput(URL url, int timeout) throws IOException {
+	public static InputStream newInput(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
 		if (connection instanceof HttpURLConnection) {
-			connection.setReadTimeout(timeout);
-			connection.setConnectTimeout(timeout);
+			connection.setReadTimeout(HTTP_TIMEOUT);
+			connection.setConnectTimeout(HTTP_TIMEOUT);
 		}
 		connection.setDoInput(true);
 		connection.setDoOutput(false);
 		return connection.getInputStream();
-	}
-
-	@LauncherAPI
-	public static InputStream newInput(URL url) throws IOException {
-		return newInput(url, TIMEOUT);
 	}
 
 	@LauncherAPI
@@ -475,7 +479,7 @@ public final class IOHelper {
 		socket.setReuseAddress(true);
 
 		// Set socket options
-		socket.setSoTimeout(TIMEOUT);
+		socket.setSoTimeout(SOCKET_TIMEOUT);
 		socket.setTrafficClass(0b11100);
 		socket.setSendBufferSize(BUFFER_SIZE);
 		socket.setReceiveBufferSize(BUFFER_SIZE);

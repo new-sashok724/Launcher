@@ -1,7 +1,6 @@
 package launcher.client;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
 import java.util.UUID;
@@ -15,11 +14,6 @@ import launcher.serialize.HOutput;
 import launcher.serialize.stream.StreamObject;
 
 public final class PlayerProfile extends StreamObject {
-	@LauncherAPI public static final int TEXTURE_TIMEOUT = VerifyHelper.verifyInt(
-		Integer.parseUnsignedInt(System.getProperty("launcher.textureTimeout", Integer.toString(5000))),
-		VerifyHelper.POSITIVE, "launcher.textureTimeout can't be <= 0");
-
-	// Instance
 	@LauncherAPI public final UUID uuid;
 	@LauncherAPI public final String username;
 	@LauncherAPI public final Texture skin, cloak;
@@ -79,9 +73,7 @@ public final class PlayerProfile extends StreamObject {
 		@LauncherAPI
 		public Texture(String url) throws IOException {
 			this.url = IOHelper.verifyURL(url);
-			try (InputStream input = IOHelper.newInput(new URL(url), TEXTURE_TIMEOUT)) {
-				digest = SecurityHelper.digest(SecurityHelper.DigestAlgorithm.SHA256, input);
-			}
+			digest = SecurityHelper.digest(SecurityHelper.DigestAlgorithm.SHA256, new URL(url));
 		}
 
 		@LauncherAPI

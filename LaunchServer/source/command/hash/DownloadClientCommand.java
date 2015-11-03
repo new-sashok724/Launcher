@@ -48,7 +48,8 @@ public final class DownloadClientCommand extends Command {
 
 		// Download required client
 		LogHelper.subInfo("Downloading client, it may take some time");
-		DownloadAssetCommand.unpack(new URL(String.format(CLIENT_URL_MASK, version.name)), clientDir);
+		DownloadAssetCommand.unpack(new URL(String.format(CLIENT_URL_MASK,
+			IOHelper.urlEncode(version.name))), clientDir);
 
 		// Create profile file
 		LogHelper.subInfo("Creaing profile file: '%s'", dirName);
@@ -59,7 +60,8 @@ public final class DownloadClientCommand extends Command {
 		}
 		client.setTitle(dirName);
 		client.block.getEntry("dir", StringConfigEntry.class).setValue(dirName);
-		try (BufferedWriter writer = IOHelper.newWriter(IOHelper.resolveIncremental(LaunchServer.PROFILES_DIR, dirName, "cfg"))) {
+		try (BufferedWriter writer = IOHelper.newWriter(IOHelper.resolveIncremental(LaunchServer.PROFILES_DIR,
+			dirName, "cfg"))) {
 			TextConfigWriter.write(client.block, writer, true);
 		}
 

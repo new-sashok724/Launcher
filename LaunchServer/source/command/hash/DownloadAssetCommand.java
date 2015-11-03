@@ -44,7 +44,7 @@ public final class DownloadAssetCommand extends Command {
 
 		// Download required asset
 		LogHelper.subInfo("Downloading asset, it may take some time");
-		unpack(new URL(String.format(ASSET_URL_MASK, version.name)), assetDir);
+		unpack(new URL(String.format(ASSET_URL_MASK, IOHelper.urlEncode(version.name))), assetDir);
 
 		// Finished
 		server.syncUpdatesDir(Collections.singleton(dirName));

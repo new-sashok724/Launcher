@@ -510,7 +510,9 @@ public final class LaunchServer implements Runnable {
 			if (url.isEmpty()) {
 				return null;
 			}
-			return CommonHelper.replace(url, "username", username, "uuid", uuid.toString(), "hash", ClientLauncher.toHash(uuid));
+			return CommonHelper.replace(url, "username", IOHelper.urlEncode(username),
+				"uuid", IOHelper.urlEncode(uuid.toString()),
+				"hash", IOHelper.urlEncode(ClientLauncher.toHash(uuid)));
 		}
 	}
 }

@@ -39,6 +39,6 @@ public final class URLAuthProvider extends AuthProvider {
 	}
 
 	private String getFormattedURL(String login, String password) {
-		return CommonHelper.replace(url, "login", login, "password", password);
+		return CommonHelper.replace(url, "login", IOHelper.urlEncode(login), "password", IOHelper.urlEncode(password));
 	}
 }

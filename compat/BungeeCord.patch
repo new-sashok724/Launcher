@@ -44,7 +44,7 @@ index b7cb81e..6be2273 100644
              return;
          }
 diff --git a/pom.xml b/pom.xml
-index 1376c1a..c3821d8 100644
+index 1376c1a..92550b6 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -66,8 +66,8 @@
@@ -437,7 +437,7 @@ index c13d2e6..b1a380b 100644
  
      private void finish()
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
-index 9311ef7..a281e3f 100644
+index 9311ef7..dead91f 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
 @@ -3,6 +3,17 @@ package net.md_5.bungee.connection;
@@ -458,40 +458,24 @@ index 9311ef7..a281e3f 100644
  @Data
  @AllArgsConstructor
  public class LoginResult
-@@ -11,6 +22,38 @@ public class LoginResult
+@@ -11,6 +22,22 @@ public class LoginResult
      private String id;
      private Property[] properties;
  
 +    public LoginResult(PlayerProfile pp) {
 +        id = ClientLauncher.toHash(pp.uuid);
 +        List<Property> properitesList = new LinkedList<>();
-+        String skinHash = hash(pp.skinURL);
-+        if(skinHash != null) {
-+            properitesList.add(new Property(ClientLauncher.SKIN_URL_PROPERTY, pp.skinURL, ""));
-+            properitesList.add(new Property("l_skinHash", skinHash, ""));
++        if(pp.skin != null) {
++            properitesList.add(new Property(ClientLauncher.SKIN_URL_PROPERTY, pp.skin.url, ""));
++            properitesList.add(new Property(ClientLauncher.SKIN_DIGEST_PROPERTY,
++                SecurityHelper.toHex(pp.skin.digest), ""));
 +        }
-+        String cloakHash = hash(pp.cloakURL);
-+        if(cloakHash != null) {
-+            properitesList.add(new Property(ClientLauncher.CLOAK_URL_PROPERTY, pp.cloakURL, ""));
-+            properitesList.add(new Property("l_cloakHash", cloakHash, ""));
++        if(pp.cloak != null) {
++            properitesList.add(new Property(ClientLauncher.CLOAK_URL_PROPERTY, pp.cloak.url, ""));
++            properitesList.add(new Property(ClientLauncher.CLOAK_DIGEST_PROPERTY,
++                 SecurityHelper.toHex(pp.cloak.digest), ""));
 +        }
 +        properties = properitesList.toArray(new Property[properitesList.size()]);
-+    }
-+
-+    private static String hash(String url) {
-+        if (url == null) {
-+            return null;
-+        }
-+
-+        // Try get digest of the texture
-+        try {
-+            return SecurityHelper.toHex(SecurityHelper.digest(SecurityHelper.DigestAlgorithm.SHA256, new URL(url)));
-+        } catch (FileNotFoundException e) {
-+            return null; // Just didn't has texture
-+        } catch (IOException e) {
-+            LogHelper.error("Can't hash texture: %s, %s", url, e.toString());
-+            return null;
-+        }
 +    }
 +
      @Data

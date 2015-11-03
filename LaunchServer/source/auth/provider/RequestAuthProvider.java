@@ -10,11 +10,11 @@ import launcher.helper.IOHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 
-public final class URLAuthProvider extends AuthProvider {
+public final class RequestAuthProvider extends AuthProvider {
 	private final String url;
 	private final Pattern response;
 
-	public URLAuthProvider(BlockConfigEntry block) {
+	public RequestAuthProvider(BlockConfigEntry block) {
 		super(block);
 		url = block.getEntryValue("url", StringConfigEntry.class);
 		response = Pattern.compile(block.getEntryValue("response", StringConfigEntry.class));

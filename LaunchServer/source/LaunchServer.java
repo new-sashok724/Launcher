@@ -6,7 +6,6 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -30,15 +29,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.CRC32;
 
 import launcher.Launcher;
 import launcher.LauncherAPI;
-import launcher.client.ClientLauncher;
 import launcher.client.ClientProfile;
-import launcher.client.PlayerProfile;
 import launcher.hasher.HashedDir;
 import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
@@ -70,6 +66,7 @@ import launchserver.command.handler.JLineCommandHandler;
 import launchserver.command.handler.StdCommandHandler;
 import launchserver.response.Response;
 import launchserver.response.ServerSocketHandler;
+import launchserver.texture.TextureProvider;
 
 public final class LaunchServer implements Runnable {
 	// Constant paths
@@ -370,6 +367,7 @@ public final class LaunchServer implements Runnable {
 		bindings.put("AuthProviderClass", AuthProvider.class);
 		bindings.put("DigestAuthProviderClass", AuthProvider.class);
 		bindings.put("AuthExceptionClass", AuthException.class);
+		bindings.put("TextureProviderClass", TextureProvider.class);
 
 		// Set command class bindings
 		bindings.put("CommandClass", Command.class);
@@ -407,20 +405,14 @@ public final class LaunchServer implements Runnable {
 	}
 
 	public static final class Config extends ConfigObject {
-		private static final UUID ZERO_UUID = new UUID(0, 0);
-
-		// Instance
 		@LauncherAPI public final int port;
 		private final StringConfigEntry address;
 		private final String bindAddress;
 
-		// Skin system
-		@LauncherAPI public final String skinsURL;
-		@LauncherAPI public final String cloaksURL;
-
-		// Auth
+		// Handlers & Providers
 		@LauncherAPI public final AuthHandler authHandler;
 		@LauncherAPI public final AuthProvider authProvider;
+		@LauncherAPI public final TextureProvider textureProvider;
 
 		// EXE binary building
 		@LauncherAPI public final boolean launch4J;
@@ -433,23 +425,13 @@ public final class LaunchServer implements Runnable {
 			bindAddress = block.hasEntry("bindAddress") ?
 				block.getEntryValue("bindAddress", StringConfigEntry.class) : getAddress();
 
-			// Skin system
-			skinsURL = block.getEntryValue("skinsURL", StringConfigEntry.class);
-			String skinURL = getTextureURL(skinsURL, "skinUsername", ZERO_UUID);
-			if (skinURL != null) {
-				IOHelper.verifyURL(skinURL);
-			}
-			cloaksURL = block.getEntryValue("cloaksURL", StringConfigEntry.class);
-			String cloakURL = getTextureURL(cloaksURL, "cloakUsername", ZERO_UUID);
-			if (cloakURL != null) {
-				IOHelper.verifyURL(cloakURL);
-			}
-
-			// Set auth handler and provider
-			String authHandlerName = block.getEntryValue("authHandler", StringConfigEntry.class);
-			authHandler = AuthHandler.newHandler(authHandlerName, block.getEntry("authHandlerConfig", BlockConfigEntry.class));
-			String authProviderName = block.getEntryValue("authProvider", StringConfigEntry.class);
-			authProvider = AuthProvider.newProvider(authProviderName, block.getEntry("authProviderConfig", BlockConfigEntry.class));
+			// Set handlers & providers
+			authHandler = AuthHandler.newHandler(block.getEntryValue("authHandler", StringConfigEntry.class),
+				block.getEntry("authHandlerConfig", BlockConfigEntry.class));
+			authProvider = AuthProvider.newProvider(block.getEntryValue("authProvider", StringConfigEntry.class),
+				block.getEntry("authProviderConfig", BlockConfigEntry.class));
+			textureProvider = TextureProvider.newProvider(block.getEntryValue("textureProvider", StringConfigEntry.class),
+				block.getEntry("textureProviderConfig", BlockConfigEntry.class));
 
 			// Set launch4J config
 			launch4J = block.getEntryValue("launch4J", BooleanConfigEntry.class);
@@ -466,18 +448,6 @@ public final class LaunchServer implements Runnable {
 		}
 
 		@LauncherAPI
-		public PlayerProfile.Texture getCloak(String username, UUID uuid) {
-			String url = getTextureURL(cloaksURL, username, uuid);
-			return url == null ? null : getTexture(url);
-		}
-
-		@LauncherAPI
-		public PlayerProfile.Texture getSkin(String username, UUID uuid) {
-			String url = getTextureURL(skinsURL, username, uuid);
-			return url == null ? null : getTexture(url);
-		}
-
-		@LauncherAPI
 		public SocketAddress getSocketAddress() {
 			return new InetSocketAddress(bindAddress, port);
 		}
@@ -490,29 +460,6 @@ public final class LaunchServer implements Runnable {
 		@LauncherAPI
 		public void verify() {
 			VerifyHelper.verify(getAddress(), VerifyHelper.NOT_EMPTY, "LaunchServer address can't be empty");
-		}
-
-		@LauncherAPI
-		public static PlayerProfile.Texture getTexture(String url) {
-			LogHelper.debug("Getting texture: '%s'", url);
-			try {
-				return new PlayerProfile.Texture(url);
-			} catch (FileNotFoundException e) {
-				return null; // Simply not found
-			} catch (IOException e) {
-				LogHelper.error(new IOException(String.format("Can't digest texture: '%s'", url), e));
-				return null;
-			}
-		}
-
-		@LauncherAPI
-		public static String getTextureURL(String url, String username, UUID uuid) {
-			if (url.isEmpty()) {
-				return null;
-			}
-			return CommonHelper.replace(url, "username", IOHelper.urlEncode(username),
-				"uuid", IOHelper.urlEncode(uuid.toString()),
-				"hash", IOHelper.urlEncode(ClientLauncher.toHash(uuid)));
 		}
 	}
 }

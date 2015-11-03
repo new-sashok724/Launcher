@@ -8,6 +8,7 @@ var CachedAuthHandler = CachedAuthHandlerClass.static;
 var AuthProvider = AuthProviderClass.static;
 var DigestAuthProvider = DigestAuthProviderClass.static;
 var AuthException = AuthExceptionClass.static;
+var TextureProvider = TextureProviderClass.static;
 
 // Command class API imports
 var Command = CommandClass.static;

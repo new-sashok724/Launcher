@@ -2,6 +2,7 @@ var Launcher = LauncherClass.static;
 
 // Hasher class API imports
 var PlayerProfile = PlayerProfileClass.static;
+var PlayerProfileTexture = PlayerProfileTextureClass.static;
 var ClientProfile = ClientProfileClass.static;
 var ClientProfileVersion = ClientProfileVersionClass.static;
 var ClientLauncher = ClientLauncherClass.static;
@@ -63,7 +64,7 @@ var VerifyHelper = VerifyHelperClass.static;
 
 // Helper JS class API imports
 var JSApplication = null;
-if(typeof JSApplicationClass !== 'undefined') {
+if (typeof JSApplicationClass !== 'undefined') {
 	JSApplication = JSApplicationClass.static;
 }
 
@@ -77,11 +78,18 @@ function tryWithResources(closeable, f) {
 }
 
 function newTask(r) {
-	return new javafx.concurrent.Task() { call: r };
+	return new javafx.concurrent.Task()
+	{
+		call: r
+	}
+	;
 }
 
 function newRequestTask(request) {
-	return newTask(function() request.request());
+	return newTask(function ()
+	request.request()
+)
+	;
 }
 
 function startTask(task) {

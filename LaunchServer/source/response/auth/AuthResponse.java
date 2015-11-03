@@ -44,6 +44,7 @@ public final class AuthResponse extends Response {
 			username = server.config.authProvider.auth(login, password);
 			if (!VerifyHelper.isValidUsername(username)) {
 				AuthProvider.authError(String.format("Illegal username: '%s'", username));
+				return;
 			}
 		} catch (AuthException e) {
 			requestError(e.getMessage());
@@ -59,7 +60,7 @@ public final class AuthResponse extends Response {
 		String accessToken = SecurityHelper.randomStringToken();
 		UUID uuid;
 		try {
-			uuid =server.config.authHandler.auth(username, accessToken);
+			uuid = server.config.authHandler.auth(username, accessToken);
 		} catch (AuthException e) {
 			requestError(e.getMessage());
 			return;

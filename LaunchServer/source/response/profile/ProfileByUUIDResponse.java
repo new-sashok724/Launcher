@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import launcher.client.PlayerProfile;
+import launcher.helper.LogHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
@@ -32,8 +33,25 @@ public final class ProfileByUUIDResponse extends Response {
 	}
 
 	public static PlayerProfile getProfile(LaunchServer server, UUID uuid, String username) {
-		PlayerProfile.Texture skinURL = server.config.getSkin(username, uuid);
-		PlayerProfile.Texture cloakURL = server.config.getCloak(username, uuid);
-		return new PlayerProfile(uuid, username, skinURL, cloakURL);
+		// Get skin texture
+		PlayerProfile.Texture skin;
+		try {
+			skin = server.config.textureProvider.getSkinTexture(uuid, username);
+		} catch (IOException e) {
+			LogHelper.error(new IOException(String.format("Can't get skin texture: '%s'", username), e));
+			skin = null;
+		}
+
+		// Get cloak texture
+		PlayerProfile.Texture cloak;
+		try {
+			cloak = server.config.textureProvider.getCloakTexture(uuid, username);
+		} catch (IOException e) {
+			LogHelper.error(new IOException(String.format("Can't get cloak texture: '%s'", username), e));
+			cloak = null;
+		}
+
+		// Return combined profile
+		return new PlayerProfile(uuid, username, skin, cloak);
 	}
 }

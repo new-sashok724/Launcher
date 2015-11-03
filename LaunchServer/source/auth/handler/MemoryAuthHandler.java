@@ -53,7 +53,7 @@ public final class MemoryAuthHandler extends CachedAuthHandler {
 
 		// Find username end
 		int length = 0;
-		while(length < bytes.length && bytes[length] != 0) {
+		while (length < bytes.length && bytes[length] != 0) {
 			length++;
 		}
 

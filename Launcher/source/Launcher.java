@@ -123,6 +123,7 @@ public final class Launcher {
 
 		// Set client class bindings
 		bindings.put("PlayerProfileClass", PlayerProfile.class);
+		bindings.put("PlayerProfileTextureClass", PlayerProfile.Texture.class);
 		bindings.put("ClientProfileClass", ClientProfile.class);
 		bindings.put("ClientProfileVersionClass", ClientProfile.Version.class);
 		bindings.put("ClientLauncherClass", ClientLauncher.class);

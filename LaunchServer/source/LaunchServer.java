@@ -323,7 +323,7 @@ public final class LaunchServer implements Runnable {
 	private void shutdownHook() {
 		serverSocketHandler.close();
 
-		// Flush auth handler and provider
+		// Flush handlers & providers
 		try {
 			config.authHandler.flush();
 		} catch (IOException e) {
@@ -331,6 +331,11 @@ public final class LaunchServer implements Runnable {
 		}
 		try {
 			config.authProvider.flush();
+		} catch (IOException e) {
+			LogHelper.error(e);
+		}
+		try {
+			config.textureProvider.flush();
 		} catch (IOException e) {
 			LogHelper.error(e);
 		}

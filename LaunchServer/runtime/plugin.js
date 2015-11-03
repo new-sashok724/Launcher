@@ -5,22 +5,18 @@ LogHelper.info("[plugin.js] Test message");
 
 // Register command
 server.commandHandler.registerCommand("test", new (Java.extend(Command, {
-	getArgsDescription: function () {
-		return "[anything]";
-	},
-	getUsageDescription: function () {
-		return "plugin.js test command";
-	},
+	getArgsDescription: function() { return "[anything]"; },
+	getUsageDescription: function() { return "plugin.js test command"; },
 
-	invoke: function (args) {
+	invoke: function(args) {
 		LogHelper.info("[plugin.js] Command invoked! Args: " +
-			java.util.Arrays.toString(args));
+				java.util.Arrays.toString(args));
 	}
 }))(server));
 
 // Register custom response
-server.serverSocketHandler.registerCustomResponse("test", function (server, id, input, output) {
-	return new (Java.extend(Response, function () {
+server.serverSocketHandler.registerCustomResponse("test", function(server, id, input, output) {
+	return new (Java.extend(Response, function() {
 		LogHelper.info("[plugin.js] Custom response invoked!");
 		output.writeInt(0x724);
 	}))(server, id, input, output);
@@ -35,5 +31,5 @@ server.serverSocketHandler.registerCustomResponse("test", function (server, id, 
  }
  });
  var answer = new TestCustomRequest().request();
- LogHelper.info(Integer.toHexString(answer));
+ LogHelper.info(java.lang.Integer.toHexString(answer));
  */

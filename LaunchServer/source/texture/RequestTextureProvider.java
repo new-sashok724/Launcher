@@ -41,7 +41,7 @@ public final class RequestTextureProvider extends TextureProvider {
 
 	@Override
 	public PlayerProfile.Texture getSkinTexture(UUID uuid, String username) throws IOException {
-		return getTexture(getTextureURL(cloakURL, uuid, username));
+		return getTexture(getTextureURL(skinURL, uuid, username));
 	}
 
 	private static PlayerProfile.Texture getTexture(String url) throws IOException {

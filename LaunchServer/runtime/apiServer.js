@@ -7,6 +7,7 @@ var FileAuthHandler = FileAuthHandlerClass.static;
 var CachedAuthHandler = CachedAuthHandlerClass.static;
 var AuthProvider = AuthProviderClass.static;
 var DigestAuthProvider = DigestAuthProviderClass.static;
+var MySQLSourceConfig = MySQLSourceConfigClass.static;
 var AuthException = AuthExceptionClass.static;
 var TextureProvider = TextureProviderClass.static;
 

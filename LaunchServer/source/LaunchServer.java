@@ -51,6 +51,7 @@ import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 import launcher.serialize.signed.SignedObjectHolder;
 import launchserver.auth.AuthException;
+import launchserver.auth.MySQLSourceConfig;
 import launchserver.auth.handler.AuthHandler;
 import launchserver.auth.handler.CachedAuthHandler;
 import launchserver.auth.handler.FileAuthHandler;
@@ -371,6 +372,7 @@ public final class LaunchServer implements Runnable {
 		bindings.put("CachedAuthHandlerClass", CachedAuthHandler.class);
 		bindings.put("AuthProviderClass", AuthProvider.class);
 		bindings.put("DigestAuthProviderClass", AuthProvider.class);
+		bindings.put("MySQLSourceConfigClass", MySQLSourceConfig.class);
 		bindings.put("AuthExceptionClass", AuthException.class);
 		bindings.put("TextureProviderClass", TextureProvider.class);
 

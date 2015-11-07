@@ -98,7 +98,10 @@ public final class MySQLSourceConfig extends ConfigObject implements Flushable {
 
 				// Set pool settings
 				hikariSource.setPoolName(poolName);
-				hikariSource.setMaximumPoolSize(TIMEOUT);
+				hikariSource.setMaximumPoolSize(MAX_POOL_SIZE);
+				hikariSource.setLoginTimeout(TIMEOUT);
+				hikariSource.setValidationTimeout(TIMEOUT);
+				hikariSource.setConnectionTimeout(TIMEOUT * 1000L);
 
 				// Replace source with hds
 				source = hikariSource;

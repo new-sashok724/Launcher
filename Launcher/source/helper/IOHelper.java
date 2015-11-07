@@ -587,7 +587,7 @@ public final class IOHelper {
 			new URL(url).toURI();
 			return url;
 		} catch (MalformedURLException | URISyntaxException e) {
-			throw new IllegalArgumentException(e);
+			throw new IllegalArgumentException("Invalid URL", e);
 		}
 	}
 

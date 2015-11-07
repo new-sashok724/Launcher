@@ -178,8 +178,8 @@ public final class LaunchServer implements Runnable {
 			LogHelper.info("Loading plugin.js script");
 			try {
 				loadScript(IOHelper.toURL(scriptFile));
-			} catch (Throwable exc) {
-				LogHelper.error(exc);
+			} catch (Exception e) {
+				throw new RuntimeException("Error while loading plugin.js", e);
 			}
 		}
 

@@ -26,7 +26,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
 	public final synchronized UUID auth(String username, String accessToken) throws IOException {
 		Entry entry = getEntry(username);
 		if (entry == null || !updateAuth(entry.uuid, entry.username, accessToken)) {
-			return authError(String.format("Account doesn't exist: '%s'", username));
+			return authError(String.format("UUID is null for username '%s'", username));
 		}
 
 		// Update cached access token (and username case)

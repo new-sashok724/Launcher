@@ -45,6 +45,7 @@ public final class JoinServerRequest extends Request<Boolean> {
 		output.flush();
 
 		// Read response
+		readError(input);
 		return input.readBoolean();
 	}
 

@@ -38,6 +38,7 @@ public final class CheckServerRequest extends Request<PlayerProfile> {
 		output.flush();
 
 		// Read response
+		readError(input);
 		return input.readBoolean() ? new PlayerProfile(input) : null;
 	}
 }

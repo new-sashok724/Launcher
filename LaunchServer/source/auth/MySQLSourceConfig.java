@@ -98,7 +98,7 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
 				// Set pool settings
 				hikariSource.setPoolName(poolName);
 				hikariSource.setMaximumPoolSize(MAX_POOL_SIZE);
-				hikariSource.setValidationTimeout(TIMEOUT * 1000);
+				hikariSource.setValidationTimeout(TIMEOUT * 1000L);
 
 				// Replace source with hds
 				source = hikariSource;

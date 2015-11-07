@@ -51,7 +51,7 @@ public final class AuthResponse extends Response {
 			return;
 		} catch (Exception e) {
 			LogHelper.error(e);
-			requestError("Internal auth error");
+			requestError("Internal auth provider error");
 			return;
 		}
 		debug("Auth: '%s' -> '%s'", login, username);
@@ -63,6 +63,10 @@ public final class AuthResponse extends Response {
 			uuid = server.config.authHandler.auth(username, accessToken);
 		} catch (AuthException e) {
 			requestError(e.getMessage());
+			return;
+		} catch (Exception e) {
+			LogHelper.error(e);
+			requestError("Internal auth handler error");
 			return;
 		}
 		writeNoError(output);

@@ -34,7 +34,7 @@ public final class RequestAuthProvider extends AuthProvider {
 	}
 
 	@Override
-	public void flush() {
+	public void close() {
 		// Do nothing
 	}
 

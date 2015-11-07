@@ -19,10 +19,10 @@ public final class NullAuthProvider extends AuthProvider {
 	}
 
 	@Override
-	public void flush() throws IOException {
+	public void close() throws IOException {
 		AuthProvider provider = this.provider;
 		if (provider != null) {
-			provider.flush();
+			provider.close();
 		}
 	}
 

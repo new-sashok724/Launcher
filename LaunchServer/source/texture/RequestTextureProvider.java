@@ -30,7 +30,7 @@ public final class RequestTextureProvider extends TextureProvider {
 	}
 
 	@Override
-	public void flush() throws IOException {
+	public void close() {
 		// Do nothing
 	}
 

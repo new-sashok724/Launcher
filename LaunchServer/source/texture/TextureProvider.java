@@ -1,6 +1,5 @@
 package launchserver.texture;
 
-import java.io.Flushable;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +12,7 @@ import launcher.helper.VerifyHelper;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
 
-public abstract class TextureProvider extends ConfigObject implements Flushable {
+public abstract class TextureProvider extends ConfigObject implements AutoCloseable {
 	private static final Map<String, Adapter<TextureProvider>> TEXTURE_PROVIDERS = new ConcurrentHashMap<>(2);
 
 	@LauncherAPI
@@ -34,6 +33,9 @@ public abstract class TextureProvider extends ConfigObject implements Flushable 
 			String.format("Unknown texture provider: '%s'", name));
 		return authHandlerAdapter.convert(block);
 	}
+
+	@Override
+	public abstract void close() throws IOException;
 
 	@LauncherAPI
 	public static void registerProvider(String name, Adapter<TextureProvider> adapter) {

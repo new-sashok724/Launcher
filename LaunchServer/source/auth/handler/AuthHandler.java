@@ -1,6 +1,5 @@
 package launchserver.auth.handler;
 
-import java.io.Flushable;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -13,13 +12,16 @@ import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launchserver.auth.AuthException;
 
-public abstract class AuthHandler extends ConfigObject implements Flushable {
+public abstract class AuthHandler extends ConfigObject implements AutoCloseable {
 	private static final Map<String, Adapter<AuthHandler>> AUTH_HANDLERS = new ConcurrentHashMap<>(4);
 
 	@LauncherAPI
 	protected AuthHandler(BlockConfigEntry block) {
 		super(block);
 	}
+
+	@Override
+	public abstract void close() throws IOException;
 
 	@LauncherAPI
 	public abstract UUID auth(String username, String accessToken) throws IOException;

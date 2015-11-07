@@ -1,6 +1,6 @@
 package launchserver.auth.provider;
 
-import java.io.Flushable;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,13 +11,16 @@ import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launchserver.auth.AuthException;
 
-public abstract class AuthProvider extends ConfigObject implements Flushable {
+public abstract class AuthProvider extends ConfigObject implements AutoCloseable {
 	private static final Map<String, Adapter<AuthProvider>> AUTH_PROVIDERS = new ConcurrentHashMap<>(8);
 
 	@LauncherAPI
 	protected AuthProvider(BlockConfigEntry block) {
 		super(block);
 	}
+
+	@Override
+	public abstract void close() throws IOException;
 
 	@LauncherAPI
 	public abstract String auth(String login, String password) throws Exception;

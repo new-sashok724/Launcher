@@ -17,7 +17,7 @@ public final class MemoryAuthHandler extends CachedAuthHandler {
 	}
 
 	@Override
-	public void flush() throws IOException {
+	public void close() {
 		// Do nothing
 	}
 

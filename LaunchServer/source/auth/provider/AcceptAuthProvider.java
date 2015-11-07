@@ -13,7 +13,7 @@ public final class AcceptAuthProvider extends AuthProvider {
 	}
 
 	@Override
-	public void flush() {
+	public void close() {
 		// Do nothing
 	}
 }

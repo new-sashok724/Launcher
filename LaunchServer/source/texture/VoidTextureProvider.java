@@ -1,6 +1,5 @@
 package launchserver.texture;
 
-import java.io.IOException;
 import java.util.UUID;
 
 import launcher.client.PlayerProfile;
@@ -12,7 +11,7 @@ public final class VoidTextureProvider extends TextureProvider {
 	}
 
 	@Override
-	public void flush() throws IOException {
+	public void close() {
 		// Do nothing
 	}
 

@@ -324,19 +324,19 @@ public final class LaunchServer implements Runnable {
 	private void shutdownHook() {
 		serverSocketHandler.close();
 
-		// Flush handlers & providers
+		// Close handlers & providers
 		try {
-			config.authHandler.flush();
+			config.authHandler.close();
 		} catch (IOException e) {
 			LogHelper.error(e);
 		}
 		try {
-			config.authProvider.flush();
+			config.authProvider.close();
 		} catch (IOException e) {
 			LogHelper.error(e);
 		}
 		try {
-			config.textureProvider.flush();
+			config.textureProvider.close();
 		} catch (IOException e) {
 			LogHelper.error(e);
 		}

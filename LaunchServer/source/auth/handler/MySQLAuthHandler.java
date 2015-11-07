@@ -72,8 +72,8 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 	}
 
 	@Override
-	public void flush() {
-		mySQLHolder.flush();
+	public void close() {
+		mySQLHolder.close();
 	}
 
 	@Override

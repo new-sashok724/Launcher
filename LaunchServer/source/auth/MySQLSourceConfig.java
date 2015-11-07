@@ -1,7 +1,6 @@
 package launchserver.auth;
 
 import javax.sql.DataSource;
-import java.io.Flushable;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -16,7 +15,7 @@ import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 
-public final class MySQLSourceConfig extends ConfigObject implements Flushable {
+public final class MySQLSourceConfig extends ConfigObject implements AutoCloseable {
 	@LauncherAPI public static final int TIMEOUT = VerifyHelper.verifyInt(
 		Integer.parseUnsignedInt(System.getProperty("launcher.mysql.timeout", Integer.toString(5))),
 		VerifyHelper.POSITIVE, "launcher.mysql.timeout can't be <= 0");
@@ -59,7 +58,7 @@ public final class MySQLSourceConfig extends ConfigObject implements Flushable {
 	}
 
 	@Override
-	public synchronized void flush() {
+	public synchronized void close() {
 		if (hikari) { // Shutdown hikari pool
 			((HikariDataSource) source).close();
 		}

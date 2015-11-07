@@ -16,10 +16,10 @@ public final class NullTextureProvider extends TextureProvider {
 	}
 
 	@Override
-	public void flush() throws IOException {
+	public void close() throws IOException {
 		TextureProvider provider = this.provider;
 		if (provider != null) {
-			provider.flush();
+			provider.close();
 		}
 	}
 

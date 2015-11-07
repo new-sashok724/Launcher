@@ -25,10 +25,10 @@ public final class NullAuthHandler extends AuthHandler {
 	}
 
 	@Override
-	public void flush() throws IOException {
+	public void close() throws IOException {
 		AuthHandler handler = this.handler;
 		if (handler != null) {
-			handler.flush();
+			handler.close();
 		}
 	}
 

@@ -20,7 +20,7 @@ public final class RejectAuthProvider extends AuthProvider {
 	}
 
 	@Override
-	public void flush() {
+	public void close() {
 		// Do nothing
 	}
 }

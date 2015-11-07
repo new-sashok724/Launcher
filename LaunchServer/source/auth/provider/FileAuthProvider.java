@@ -52,7 +52,7 @@ public final class FileAuthProvider extends DigestAuthProvider {
 	}
 
 	@Override
-	public void flush() {
+	public void close() {
 		// Do nothing
 	}
 

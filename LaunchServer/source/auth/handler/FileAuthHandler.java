@@ -94,7 +94,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 	}
 
 	@Override
-	public final void flush() throws IOException {
+	public final void close() throws IOException {
 		lock.readLock().lock();
 		try {
 			LogHelper.info("Writing auth handler file (%d entries)", entryMap.size());

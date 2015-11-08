@@ -64,7 +64,7 @@ var VerifyHelper = VerifyHelperClass.static;
 
 // Helper JS class API imports
 var JSApplication = null;
-if(typeof JSApplicationClass !== 'undefined') {
+if (typeof JSApplicationClass !== 'undefined') {
 	JSApplication = JSApplicationClass.static;
 }
 

@@ -50,8 +50,8 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
 			uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table, uuidColumn);
 		queryByUsernameSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=? LIMIT 1",
 			uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table, usernameColumn);
-		updateAuthSQL = String.format("UPDATE %s SET %s=?, %s=? WHERE %s=? LIMIT 1",
-			table, usernameColumn, accessTokenColumn, uuidColumn);
+		updateAuthSQL = String.format("UPDATE %s SET %s=?, %s=?, %s=NULL WHERE %s=? LIMIT 1",
+			table, usernameColumn, accessTokenColumn, serverIDColumn, uuidColumn);
 		updateServerIDSQL = String.format("UPDATE %s SET %s=? WHERE %s=? LIMIT 1",
 			table, serverIDColumn, uuidColumn);
 

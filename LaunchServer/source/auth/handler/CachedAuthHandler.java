@@ -32,6 +32,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
 		// Update cached access token (and username case)
 		entry.username = username;
 		entry.accessToken = accessToken;
+		entry.serverID = null;
 		return entry.uuid;
 	}
 

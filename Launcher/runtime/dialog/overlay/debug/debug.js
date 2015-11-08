@@ -23,7 +23,7 @@ var debug = {
 		debug.action = debug.overlay.lookup("#action");
 		debug.action.setOnAction(function(event) {
 			var process = debug.process;
-			if(process !== null && process.isAlive()) {
+			if (process !== null && process.isAlive()) {
 				process.destroyForcibly();
 				debug.updateActionButton(true);
 				return;
@@ -74,7 +74,7 @@ function debugProcess(process) {
 			java.nio.charset.Charset.defaultCharset());
 		var appendFunction = function(line)
 			javafx.application.Platform.runLater(function() debug.append(line));
-		for(var length = reader.read(buffer); length >= 0; length = reader.read(buffer)) {
+		for (var length = reader.read(buffer); length >= 0; length = reader.read(buffer)) {
 			appendFunction(new java.lang.String(buffer, 0, length));
 		}
 		

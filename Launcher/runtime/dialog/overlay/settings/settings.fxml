@@ -3,6 +3,7 @@
 <?import java.net.URL?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Slider?>
@@ -24,17 +25,17 @@
 	<!-- RAM settings -->
 	<TextFlow layoutX="20.0" layoutY="70.0">
 		<Text>Выделение памяти: </Text>
-		<Text fx:id="ramLabel">...</Text>
+		<Text fx:id="ramLabel" />
 	</TextFlow>
 	<Slider fx:id="ramSlider" layoutX="20.0" layoutY="90.0" prefWidth="460.0" />
 	<Separator layoutX="20.0" layoutY="135.0" prefWidth="460.0" />
 
 	<!-- Dir settings -->
-	<TextFlow layoutX="20.0" layoutY="140.0">
+	<TextFlow layoutX="20.0" layoutY="135.0">
 		<Text>Директория загрузок: </Text>
-		<Text fx:id="dirLabel">...</Text>
+		<Hyperlink fx:id="dirLabel" />
 	</TextFlow>
-	<Button fx:id="openDir" layoutX="20.0" layoutY="160.0" prefWidth="225.0" prefHeight="30.0" text="Открыть директорию" />
+	<Button fx:id="changeDir" layoutX="20.0" layoutY="160.0" prefWidth="225.0" prefHeight="30.0" text="Сменить директорию" />
 	<Button fx:id="deleteDir" layoutX="255.0" layoutY="160.0" prefWidth="225.0" prefHeight="30.0" text="Удалить всё содержимое" />
 	<Separator layoutX="20.0" layoutY="200.0" prefWidth="460.0" />
 

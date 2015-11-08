@@ -1,6 +1,7 @@
 var settings = {
 	file: dir.resolve("settings.bin"), // Settings file
 	login: null, rsaPassword: null, profile: 0, // Auth
+	updatesDir: null, // Client download
 	autoEnter: false, fullScreen: false, ram: 0, // Client
 
 	/* Settings and overlay functions */
@@ -26,13 +27,13 @@ var settings = {
 	// Internal functions
 	read: function(input) {
 		var magic = input.readInt();
-		if(magic != config.settingsMagic) {
+		if (magic != config.settingsMagic) {
 			throw new java.io.IOException("Settings magic mismatch: " + java.lang.Integer.toString(magic, 16));
 		}
 		
 		// Launcher settings
 		var debug = input.readBoolean();
-		if(!LogHelper.isDebugEnabled() && debug) {
+		if (!LogHelper.isDebugEnabled() && debug) {
 			LogHelper.setDebugEnabled(true);
 		}
 
@@ -41,10 +42,13 @@ var settings = {
 		settings.rsaPassword = input.readBoolean() ? input.readByteArray(IOHelper.BUFFER_SIZE) : null;
 		settings.profile = input.readLength(0);
 
+		// Client download settings
+		settings.updatesDir = IOHelper.toPath(input.readString(0));
+		
 		// Client settings
 		settings.autoEnter = input.readBoolean();
 		settings.fullScreen = input.readBoolean();
-		settings.setRAM(input.readLength(0));
+		settings.setRAM(input.readLength(JVMHelper.RAM));
 
 		// Apply CLI params
 		cliParams.applySettings();
@@ -58,14 +62,17 @@ var settings = {
 
 		// Auth settings
 		output.writeBoolean(settings.login !== null);
-		if(settings.login !== null) {
+		if (settings.login !== null) {
 			output.writeString(settings.login, 255);
 		}
 		output.writeBoolean(settings.rsaPassword !== null);
-		if(settings.rsaPassword !== null) {
+		if (settings.rsaPassword !== null) {
 			output.writeByteArray(settings.rsaPassword, IOHelper.BUFFER_SIZE);
 		}
 		output.writeLength(settings.profile, 0);
+		
+		// Client download settings
+		output.writeString(IOHelper.toString(settings.updatesDir), 0);
 
 		// Client settings
 		output.writeBoolean(settings.autoEnter);
@@ -78,6 +85,9 @@ var settings = {
 		settings.login = null;
 		settings.rsaPassword = null;
 		settings.profile = 0;
+
+		// Client download settings
+		settings.updatesDir = defaultUpdatesDir;
 
 		// Client settings
 		settings.autoEnter = config.autoEnterDefault;
@@ -139,16 +149,28 @@ var settings = {
 
 		// Lookup dir label
 		settings.dirLabel = settings.overlay.lookup("#dirLabel");
+		settings.dirLabel.setOnAction(function(event)
+			app.getHostServices().showDocument(settings.updatesDir.toUri()));
 		settings.updateDirLabel();
 
-		// Lookup open dir button
-		settings.overlay.lookup("#openDir").setOnAction(function(event)
-			app.getHostServices().showDocument(updatesDir.toUri()));
+		// Lookup change dir button
+		settings.overlay.lookup("#changeDir").setOnAction(function(event) {
+			var chooser = new javafx.stage.DirectoryChooser();
+			chooser.setTitle("Сменить директорию загрузок");
+			chooser.setInitialDirectory(dir.toFile());
+			
+			// Set new result
+			var newDir = chooser.showDialog(stage);
+			if (newDir !== null) {
+				settings.updatesDir = newDir.toPath();
+				settings.updateDirLabel();
+			}
+		});
 
 		// Lookup delete dir button
 		var deleteDirButton = settings.overlay.lookup("#deleteDir");
 		deleteDirButton.setOnAction(function(event) {
-			if(!settings.deleteDirPressedAgain) {
+			if (!settings.deleteDirPressedAgain) {
 				settings.deleteDirPressedAgain = true;
 				deleteDirButton.setText("Подтвердить вменяемость");
 				return;
@@ -188,59 +210,75 @@ var settings = {
 	},
 
 	updateDirLabel: function() {
-		settings.dirLabel.setText(IOHelper.toString(updatesDir));
+		settings.dirLabel.setText(IOHelper.toString(settings.updatesDir));
 	}
 };
 
 /* ====================== CLI PARAMS ===================== */
 var cliParams = {
 	login: null, password: null, profile: -1, autoLogin: false, // Auth
+	updatesDir: null, // Client download
 	autoEnter: null, fullScreen: null, ram: -1, // Client
 
 	init: function(params) {
 		var named = params.getNamed();
 		var unnamed = params.getUnnamed();
 
-		// Set auth cli params
+		// Read auth cli params
 		cliParams.login = named.get("login");
 		cliParams.password = named.get("password");
-		if(named.containsKey("profile")) {
-			cliParams.profile = java.lang.Integer.parseUnsignedInt(named.get("profile"));
+		var profile = named.get("profile");
+		if (profile !== null) {
+			cliParams.profile = java.lang.Integer.parseInt(profile);
 		}
 		cliParams.autoLogin = unnamed.contains("--autoLogin");
+		
+		// Read client download cli params
+		var updatesDir = named.get("updatesDir");
+		if (updatesDir !== null) {
+			cliParams.updatesDir = IOHelper.toPath(named.get("updatesDir"));
+		}
 
-		// Set client cli params
-		if(named.containsKey("autoEnter")) {
-			cliParams.autoEnter = java.lang.Boolean.parseBoolean(named.get("autoEnter"));
+		// Read client cli params
+		var autoEnter = named.get("autoEnter");
+		if (autoEnter !== null) {
+			cliParams.autoEnter = java.lang.Boolean.parseBoolean(autoEnter);
 		}
-		if(named.containsKey("fullScreen")) {
-			cliParams.fullScreen = java.lang.Boolean.parseBoolean(named.get("fullScreen"));
+		var fullScreen = named.get("fullScreen");
+		if (fullScreen !== null) {
+			cliParams.fullScreen = java.lang.Boolean.parseBoolean(fullScreen);
 		}
-		if(named.containsKey("ram")) {
-			cliParams.ram = java.lang.Integer.parseUnsignedInt(named.get("ram"));
+		var ram = named.get("ram");
+		if (ram !== null) {
+			cliParams.ram = java.lang.Integer.parseInt(ram);
 		}
 	},
 
 	applySettings: function() {
-		// Update auth settings
-		if(cliParams.login !== null) {
+		// Apply auth settings
+		if (cliParams.login !== null) {
 			settings.login = cliParams.login;
 		}
-		if(cliParams.password !== null) {
+		if (cliParams.password !== null) {
 			settings.setPassword(cliParams.password);
 		}
-		if(cliParams.profile >= 0) {
+		if (cliParams.profile >= 0) {
 			settings.profile = cliParams.profile;
 		}
+		
+		// Apply client download settings
+		if (cliParams.updatesDir !== null) {
+			settings.updatesDir = cliParams.updatesDir;
+		}
 
-		// Update client settings
-		if(cliParams.autoEnter !== null) {
+		// Apply client settings
+		if (cliParams.autoEnter !== null) {
 			settings.autoLogin = cliParams.autoEnter;
 		}
-		if(cliParams.fullScreen !== null) {
+		if (cliParams.fullScreen !== null) {
 			settings.fullScreen = cliParams.fullScreen;
 		}
-		if(cliParams.ram >= 0) {
+		if (cliParams.ram >= 0) {
 			settings.setRAM(cliParams.ram);
 		}
 	}

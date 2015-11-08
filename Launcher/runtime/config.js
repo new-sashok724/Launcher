@@ -10,7 +10,7 @@ var config = {
 	linkURL: new java.net.URL("http://bit.ly/1SP0Rl8"), // URL for link under "Auth" button
 
 	// Settings defaults
-	settingsMagic: 0xBEEF, // Ancient magic, don't touch
+	settingsMagic: 0xC0DE5, // Ancient magic, don't touch
 	autoEnterDefault: false, // Should autoEnter be enabled by default?
 	fullScreenDefault: false, // Should fullScreen be enabled by default?
 	ramDefault: 1024, // Default RAM amount (0 for auto)
@@ -23,10 +23,10 @@ var config = {
 
 // ====== DON'T TOUCH! ====== //
 var dir = IOHelper.HOME_DIR.resolve(config.dir);
-if(!IOHelper.isDir(dir)) {
+if (!IOHelper.isDir(dir)) {
 	java.nio.file.Files.createDirectory(dir);
 }
-var updatesDir = dir.resolve("updates");
-if(!IOHelper.isDir(updatesDir)) {
-	java.nio.file.Files.createDirectory(updatesDir);
+var defaultUpdatesDir = dir.resolve("updates");
+if (!IOHelper.isDir(defaultUpdatesDir)) {
+	java.nio.file.Files.createDirectory(defaultUpdatesDir);
 }

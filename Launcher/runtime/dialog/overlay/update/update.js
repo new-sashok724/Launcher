@@ -64,7 +64,7 @@ var update = {
 		task.setOnSucceeded(function(event) {
 			update.description.textProperty().unbind();
 			update.progress.progressProperty().unbind();
-			if(callback !== null) {
+			if (callback !== null) {
 				callback(task.getValue());
 			}
 		});
@@ -73,7 +73,7 @@ var update = {
 
 /* Export functions */
 function makeUpdateRequest(dirName, dir, matcher, callback) {
-	var request = new UpdateRequest(dirName, updatesDir.resolve(dirName), matcher);
+	var request = new UpdateRequest(dirName, dir, matcher);
 	var task = newRequestTask(request);
 	update.setTaskProperties(task, request, callback);
 	task.updateMessage("Состояние: Хеширование");

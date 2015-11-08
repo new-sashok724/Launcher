@@ -19,7 +19,7 @@ var LauncherApp = Java.extend(JSApplication, {
 		stage.setTitle(config.title);
 
 		// Set icons
-		for each(var icon in config.icons) {
+		for each (var icon in config.icons) {
 			var iconURL = Launcher.getResourceURL(icon).toString();
 			stage.getIcons().add(new javafx.scene.image.Image(iconURL));
 		}
@@ -56,7 +56,7 @@ function setRootParent(parent) {
 function start(args) {
 	// Set JVM dir name
 	LogHelper.debug("Setting JVM dir name");
-	switch(JVMHelper.OS_TYPE) {
+	switch (JVMHelper.OS_TYPE) {
 		case JVMHelperOS.MUSTDIE: jvmDirName = JVMHelper.OS_BITS === 32 ? config.jvmMustdie32Dir : // 32-bit Mustdie
 			jvmDirName = JVMHelper.OS_BITS === 64 ? config.jvmMustdie64Dir : config.jvmUnknownDir; break; // 64-bit Mustdie
 		case JVMHelperOS.LINUX: jvmDirName = JVMHelper.OS_BITS === 32 ? config.jvmLinux32Dir : // 32-bit Linux
@@ -67,7 +67,6 @@ function start(args) {
 
 	// Set font rendering properties
 	LogHelper.debug("Setting FX properties");
-	java.lang.System.setProperty("prism.text", "t2k");
 	java.lang.System.setProperty("prism.lcdtext", "false");
 
 	// Start laucher JavaFX stage

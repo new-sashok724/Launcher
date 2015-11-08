@@ -35,13 +35,13 @@ var processing = {
 		task.setOnFailed(function(event) {
 			processing.description.textProperty().unbind();
 			processing.setError(task.getException());
-			if(hide) {
+			if (hide) {
 				overlay.hide(2500, null);
 			}
 		});
 		task.setOnSucceeded(function(event) {
 			processing.description.textProperty().unbind();
-			if(callback !== null) {
+			if (callback !== null) {
 				callback(task.getValue());
 			}
 		});

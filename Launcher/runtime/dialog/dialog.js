@@ -33,14 +33,14 @@ function initAuthPane(pane) {
 	// Lookup login field
 	loginField = pane.lookup("#login");
 	loginField.setOnAction(goAuth);
-	if(settings.login !== null) {
+	if (settings.login !== null) {
 		loginField.setText(settings.login);
 	}
 
 	// Lookup password field
 	passwordField = pane.lookup("#password");
 	passwordField.setOnAction(goAuth);
-	if(settings.rsaPassword !== null) {
+	if (settings.rsaPassword !== null) {
 		passwordField.getStyleClass().add("hasSaved");
 		passwordField.setPromptText("*** Сохранённый ***");
 	}
@@ -67,28 +67,28 @@ function initAuthPane(pane) {
 /* ======== Handler functions ======== */
 function goAuth(event) {
 	// Verify there's no other overlays
-	if(overlay.current !== null) {
+	if (overlay.current !== null) {
 		return;
 	}
 
 	// Get profile
 	var profile = profilesBox.getSelectionModel().getSelectedItem();
-	if(profile === null) {
+	if (profile === null) {
 		return; // No profile selected
 	}
 
 	// Get login
 	var login = loginField.getText();
-	if(login.isEmpty()) {
+	if (login.isEmpty()) {
 		return; // Maybe throw exception?)
 	}
 
 	// Get password
 	var rsaPassword;
 	var password = passwordField.getText();
-	if(!password.isEmpty()) {
+	if (!password.isEmpty()) {
 		rsaPassword = settings.setPassword(password);
-	} else if(settings.rsaPassword !== null) {
+	} else if (settings.rsaPassword !== null) {
 		rsaPassword = settings.rsaPassword;
 	} else {
 		return; // No password - no auth, sorry :C
@@ -104,7 +104,7 @@ function goAuth(event) {
 
 function goSettings(event) {
 	// Verify there's no other overlays
-	if(overlay.current !== null) {
+	if (overlay.current !== null) {
 		return;
 	}
 
@@ -112,7 +112,7 @@ function goSettings(event) {
 	overlay.show(settings.overlay, null);
 }
 
-/*  ======== Processing functions ======== */
+/* ======== Processing functions ======== */
 function verifyLauncher(e) {
 	processing.resetOverlay();
 	overlay.show(processing.overlay, function(event) makeLauncherRequest(function(result) {
@@ -122,7 +122,7 @@ function verifyLauncher(e) {
 
 		// Hide overlay
 		overlay.hide(0, function() {
-			if(cliParams.autoLogin) {
+			if (cliParams.autoLogin) {
 				goAuth(null);
 			}
 		});
@@ -139,15 +139,15 @@ function doAuth(profile, login, rsaPassword) {
 function doUpdate(profile, pp, accessToken) {
 	update.resetOverlay("Обновление файлов JVM");
 	overlay.swap(0, update.overlay, function(event) {
-		var jvmDir = updatesDir.resolve(jvmDirName);
+		var jvmDir = settings.updatesDir.resolve(jvmDirName);
 		makeUpdateRequest(jvmDirName, jvmDir, null, function(jvmHDir) {
 			update.resetOverlay("Обновление файлов ресурсов");
 			var assetDirName = profile.object.block.getEntryValue("assetDir", StringConfigEntryClass);
-			var assetDir = updatesDir.resolve(assetDirName);
+			var assetDir = settings.updatesDir.resolve(assetDirName);
 			makeUpdateRequest(assetDirName, assetDir, null, function(assetHDir) {
 				update.resetOverlay("Обновление файлов клиента");
 				var clientDirName = profile.object.block.getEntryValue("dir", StringConfigEntryClass);
-				var clientDir = updatesDir.resolve(clientDirName);
+				var clientDir = settings.updatesDir.resolve(clientDirName);
 				makeUpdateRequest(clientDirName, clientDir, profile.object.getUpdateMatcher(), function(clientHDir)
 					doLaunchClient(jvmDir, jvmHDir, clientHDir, assetDir, clientDir, profile, pp, accessToken)
 				);
@@ -165,7 +165,7 @@ function doLaunchClient(jvmDir, jvmHDir, clientHDir, assetDir, clientDir, profil
 }
 
 function doDebugClient(process) {
-	if(!LogHelper.isDebugEnabled()) {
+	if (!LogHelper.isDebugEnabled()) {
 		javafx.application.Platform.exit();
 		return;
 	}
@@ -175,11 +175,11 @@ function doDebugClient(process) {
 	overlay.swap(0, debug.overlay, function(event) debugProcess(process));
 }
 
-/*  ======== Server handler functions ======== */
+/* ======== Server handler functions ======== */
 function updateProfilesList() {
 	// Set profiles items
 	profilesBox.setItems(javafx.collections.FXCollections.observableList(profiles));
-	for each(var profile in profiles) {
+	for each (var profile in profiles) {
 		pingers[profile.object] = new ServerPinger(profile.object.getServerSocketAddress(), profile.object.getVersion());
 	}
 
@@ -206,7 +206,7 @@ function newProfileCell(listView) {
 		updateItem: function(item, empty) {
 			Java.super(cell).updateItem(item, empty);
 			cell.setGraphic(empty ? null : statusBox);
-			if(empty) { // No need to update state
+			if (empty) { // No need to update state
 				return;
 			}
 
@@ -239,7 +239,7 @@ function setServerStatus(status, statusCircle, color, description) {
 /* ======== Overlay helper functions ======== */
 function fade(region, delay, from, to, onFinished) {
 	var transition = new javafx.animation.FadeTransition(javafx.util.Duration.millis(100), region);
-	if(onFinished !== null) {
+	if (onFinished !== null) {
 		transition.setOnFinished(onFinished);
 	}
 
@@ -290,7 +290,7 @@ var overlay = {
 				
 				// Reset overlay state
 				overlay.current = null;
-				if(onFinished !== null) {
+				if (onFinished !== null) {
 					onFinished();
 				}
 			});

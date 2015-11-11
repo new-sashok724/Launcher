@@ -51,7 +51,7 @@ public abstract class Request<R> {
 	protected final void readError(HInput input) throws IOException {
 		String error = input.readString(0);
 		if (!error.isEmpty()) {
-			throw new RequestException(error);
+			requestError(error);
 		}
 	}
 
@@ -67,8 +67,13 @@ public abstract class Request<R> {
 
 		// Verify is accepted
 		if (!input.readBoolean()) {
-			throw new RequestException("Serverside not accepted this connection");
+			requestError("Serverside not accepted this connection");
 		}
+	}
+
+	@LauncherAPI
+	public static void requestError(String message) throws RequestException {
+		throw new RequestException(message);
 	}
 
 	@LauncherAPI

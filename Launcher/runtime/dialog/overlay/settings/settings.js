@@ -1,8 +1,13 @@
 var settings = {
 	file: dir.resolve("settings.bin"), // Settings file
 	login: null, rsaPassword: null, profile: 0, // Auth
-	updatesDir: null, // Client download
-	autoEnter: false, fullScreen: false, ram: 0, // Client
+	updatesDir: null, autoEnter: false, fullScreen: false, ram: 0, // Client
+	
+	// Offline cache
+	offline: false,
+	lastSign: null,
+	lastProfiles: new java.util.LinkedList(),
+	lastHDirs: new java.util.HashMap(16),
 
 	/* Settings and overlay functions */
 	load: function() {
@@ -42,13 +47,27 @@ var settings = {
 		settings.rsaPassword = input.readBoolean() ? input.readByteArray(IOHelper.BUFFER_SIZE) : null;
 		settings.profile = input.readLength(0);
 
-		// Client download settings
-		settings.updatesDir = IOHelper.toPath(input.readString(0));
-		
 		// Client settings
+		settings.updatesDir = IOHelper.toPath(input.readString(0));
 		settings.autoEnter = input.readBoolean();
 		settings.fullScreen = input.readBoolean();
 		settings.setRAM(input.readLength(JVMHelper.RAM));
+		
+		// Offline cache
+		var publicKey = Launcher.getConfig().publicKey;
+		settings.lastSign = input.readBoolean() ? input.readByteArray(-SecurityHelper.RSA_KEY_LENGTH) : null;
+		settings.lastProfiles.clear();
+		var lastProfilesCount = input.readLength(0);
+		for (var i = 0; i < lastProfilesCount; i++) {
+			settings.lastProfiles.add(new SignedObjectHolder(input, publicKey, ClientProfile.RO_ADAPTER));
+		}
+		settings.lastHDirs.clear();
+		var lastHDirsCount = input.readLength(0);
+		for (var i = 0; i < lastHDirsCount; i++) {
+			var name = IOHelper.verifyFileName(input.readString(255));
+			VerifyHelper.putIfAbsent(settings.lastHDirs, name, new SignedObjectHolder(input, publicKey, function(i) new HashedDir(i)),
+				java.lang.String.format("Duplicate offline hashed dir: '%s'", name));
+		}
 
 		// Apply CLI params
 		cliParams.applySettings();
@@ -71,13 +90,26 @@ var settings = {
 		}
 		output.writeLength(settings.profile, 0);
 		
-		// Client download settings
-		output.writeString(IOHelper.toString(settings.updatesDir), 0);
-
 		// Client settings
+		output.writeString(IOHelper.toString(settings.updatesDir), 0);
 		output.writeBoolean(settings.autoEnter);
 		output.writeBoolean(settings.fullScreen);
 		output.writeLength(settings.ram, JVMHelper.RAM);
+		
+		// Offline cache
+		output.writeBoolean(settings.lastSign !== null);
+		if (settings.lastSign !== null) {
+			output.writeByteArray(settings.lastSign, -SecurityHelper.RSA_KEY_LENGTH);
+		}
+		output.writeLength(settings.lastProfiles.size(), 0);
+		for each (var profile in settings.lastProfiles) {
+			profile.write(output);
+		}
+		output.writeLength(settings.lastHDirs.size(), 0);
+		for each (var entry in settings.lastHDirs.entrySet()) {
+			output.writeString(entry.getKey(), 0);
+			entry.getValue().write(output);
+		}
 	},
 
 	setDefault: function() {
@@ -86,13 +118,16 @@ var settings = {
 		settings.rsaPassword = null;
 		settings.profile = 0;
 
-		// Client download settings
-		settings.updatesDir = defaultUpdatesDir;
-
 		// Client settings
+		settings.updatesDir = defaultUpdatesDir;
 		settings.autoEnter = config.autoEnterDefault;
 		settings.fullScreen = config.fullScreenDefault;
 		settings.setRAM(config.ramDefault);
+		
+		// Offline cache
+		settings.lastSign = null;
+		settings.lastProfiles.clear();
+		settings.lastHDirs.clear();
 
 		// Apply CLI params
 		cliParams.applySettings();
@@ -217,8 +252,8 @@ var settings = {
 /* ====================== CLI PARAMS ===================== */
 var cliParams = {
 	login: null, password: null, profile: -1, autoLogin: false, // Auth
-	updatesDir: null, // Client download
-	autoEnter: null, fullScreen: null, ram: -1, // Client
+	updatesDir: null, autoEnter: null, fullScreen: null, ram: -1, // Client
+	offline: false, // Offline
 
 	init: function(params) {
 		var named = params.getNamed();
@@ -233,13 +268,11 @@ var cliParams = {
 		}
 		cliParams.autoLogin = unnamed.contains("--autoLogin");
 		
-		// Read client download cli params
+		// Read client cli params
 		var updatesDir = named.get("updatesDir");
 		if (updatesDir !== null) {
 			cliParams.updatesDir = IOHelper.toPath(named.get("updatesDir"));
 		}
-
-		// Read client cli params
 		var autoEnter = named.get("autoEnter");
 		if (autoEnter !== null) {
 			cliParams.autoEnter = java.lang.Boolean.parseBoolean(autoEnter);
@@ -252,10 +285,16 @@ var cliParams = {
 		if (ram !== null) {
 			cliParams.ram = java.lang.Integer.parseInt(ram);
 		}
+		
+		// Read offline cli param
+		var offline = named.get("offline");
+		if (offline !== null) {
+			cliParams.offline = java.lang.Boolean.parseBoolean(offline);
+		}
 	},
 
 	applySettings: function() {
-		// Apply auth settings
+		// Apply auth params
 		if (cliParams.login !== null) {
 			settings.login = cliParams.login;
 		}
@@ -266,12 +305,10 @@ var cliParams = {
 			settings.profile = cliParams.profile;
 		}
 		
-		// Apply client download settings
+		// Apply client params
 		if (cliParams.updatesDir !== null) {
 			settings.updatesDir = cliParams.updatesDir;
 		}
-
-		// Apply client settings
 		if (cliParams.autoEnter !== null) {
 			settings.autoLogin = cliParams.autoEnter;
 		}
@@ -280,6 +317,11 @@ var cliParams = {
 		}
 		if (cliParams.ram >= 0) {
 			settings.setRAM(cliParams.ram);
+		}
+		
+		// Apply offline param
+		if (cliParams.offline !== null) {
+			settings.offline = cliParams.offline;
 		}
 	}
 };

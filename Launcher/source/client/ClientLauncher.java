@@ -71,6 +71,10 @@ public final class ClientLauncher {
 		return LAUNCHED.get();
 	}
 
+	public static String jvmProperty(String name, String value) {
+		return String.format("-D%s=%s", name, value);
+	}
+
 	@LauncherAPI
 	public static Process launch(Path jvmDir, SignedObjectHolder<HashedDir> jvmHDir, SignedObjectHolder<HashedDir> clientHDir, SignedObjectHolder<ClientProfile> profile, Params params, boolean pipeOutput) throws Throwable {
 		// Write params file (instead of CLI; Mustdie32 API can't handle command line > 32767 chars)
@@ -238,10 +242,6 @@ public final class ClientLauncher {
 			Collections.addAll(args, "--width", Integer.toString(params.width));
 			Collections.addAll(args, "--height", Integer.toString(params.height));
 		}
-	}
-
-	private static String jvmProperty(String name, String value) {
-		return String.format("-D%s=%s", name, value);
 	}
 
 	private static void launch(ClientProfile profile, Params params) throws Throwable {

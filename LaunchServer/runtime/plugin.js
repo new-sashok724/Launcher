@@ -9,8 +9,7 @@ server.commandHandler.registerCommand("test", new (Java.extend(Command, {
 	getUsageDescription: function() { return "plugin.js test command"; },
 
 	invoke: function(args) {
-		LogHelper.info("[plugin.js] Command invoked! Args: " +
-				java.util.Arrays.toString(args));
+		LogHelper.info("[plugin.js] Command invoked! Args: " + java.util.Arrays.toString(args));
 	}
 }))(server));
 

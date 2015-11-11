@@ -9,9 +9,11 @@ import java.util.List;
 
 import launcher.Launcher;
 import launcher.LauncherAPI;
+import launcher.client.ClientLauncher;
 import launcher.client.ClientProfile;
 import launcher.helper.IOHelper;
 import launcher.helper.JVMHelper;
+import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.Request;
 import launcher.serialize.HInput;
@@ -57,8 +59,9 @@ public final class LauncherRequest extends Request<LauncherRequest.Result> {
 			SecurityHelper.verifySign(binary, sign, publicKey);
 			IOHelper.write(BINARY_PATH, binary);
 
-			// Start new launcher instance
+			// Start new launcher instance (java -jar works for Launch4J's EXE too)
 			ProcessBuilder builder = new ProcessBuilder(IOHelper.resolveJavaBin(null).toString(),
+				ClientLauncher.jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())),
 				"-jar", BINARY_PATH.toString());
 			builder.inheritIO();
 			builder.start();

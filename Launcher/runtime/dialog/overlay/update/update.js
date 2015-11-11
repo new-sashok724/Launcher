@@ -71,10 +71,35 @@ var update = {
 	}
 };
 
+function offlineUpdateRequest(dirName, dir, matcher) {
+	return function() {
+		var hdir = settings.lastHDirs.get(dirName);
+		if (hdir === null) {
+			Request.requestError(String.format("Директории '%s' нет в кэше", dirName));
+			return;
+		}
+		
+		// Verify dir with matcher
+		var verifyMatcher = matcher === null ? null : matcher.verifyOnly();
+		var currentHDir = new HashedDir(dir, verifyMatcher);
+		if (!hdir.object.diff(currentHDir, verifyMatcher).isSame()) {
+			Request.requestError(String.format("Директория '%s' была изменена", dirName));
+			return;
+		}
+		
+		// Return last hdir
+		return hdir;
+	};
+}
+
 /* Export functions */
 function makeUpdateRequest(dirName, dir, matcher, callback) {
-	var request = new UpdateRequest(dirName, dir, matcher);
-	var task = newRequestTask(request);
+	var request = settings.offline ? { setStateCallback: function(stateCallback) { /* Ignored */ } } :
+		new UpdateRequest(dirName, dir, matcher);
+	var task = settings.offline ? newTask(offlineUpdateRequest(dirName, dir, matcher)) :
+		newRequestTask(request);
+	
+	// Set task properties and start
 	update.setTaskProperties(task, request, callback);
 	task.updateMessage("Состояние: Хеширование");
 	task.updateProgress(-1, -1);

@@ -30,13 +30,15 @@ var processing = {
 		processing.description.setText(e.toString());
 	},
 
-	setTaskProperties: function(task, callback, hide) {
+	setTaskProperties: function(task, callback, errorCallback, hide) {
 		processing.description.textProperty().bind(task.messageProperty());
 		task.setOnFailed(function(event) {
 			processing.description.textProperty().unbind();
 			processing.setError(task.getException());
 			if (hide) {
-				overlay.hide(2500, null);
+				overlay.hide(2500, errorCallback);
+			} else if (errorCallback !== null) {
+				errorCallback();
 			}
 		});
 		task.setOnSucceeded(function(event) {
@@ -48,17 +50,61 @@ var processing = {
 	}
 };
 
+function offlineLauncherRequest() {
+	if (settings.lastSign === null || settings.lastProfiles.isEmpty()) {
+		Request.requestError("Запуск в оффлайн-режиме невозможен");
+		return;
+	}
+	
+	// Verify launcher signature
+	SecurityHelper.verifySign(LauncherRequest.BINARY_PATH,
+		settings.lastSign, Launcher.getConfig().publicKey);
+	
+	// Return last sign and profiles
+	return {
+		sign: settings.lastSign,
+		profiles: settings.lastProfiles
+	};
+}
+
+function offlineAuthRequest(login) {
+	return function() {
+		if (!VerifyHelper.isValidUsername(login)) {
+			Request.requestError("Имя пользователя некорректно");
+			return;
+		}
+		
+		// Return offline profile and random access token
+		return {
+			pp: PlayerProfile.newOfflineProfile(login),
+			accessToken: SecurityHelper.randomStringToken()
+		}
+	};
+}
+
 /* Export functions */
 function makeLauncherRequest(callback) {
-	var task = newRequestTask(new LauncherRequest());
-	processing.setTaskProperties(task, callback, false);
+	var task = settings.offline ? newTask(offlineLauncherRequest) :
+		newRequestTask(new LauncherRequest());
+		
+	// Set task properties and start
+	processing.setTaskProperties(task, callback, function() {
+		if (settings.offline) {
+			return;
+		}
+		
+		// Repeat request, but in offline mode
+		settings.offline = true;
+		overlay.swap(2500, processing.overlay, function() makeLauncherRequest(callback));
+	}, false);
 	task.updateMessage("Обновление списка серверов");
 	startTask(task);
 }
 
-function makeAuthRequest(username, rsaPassword, callback) {
-	var task = newRequestTask(new AuthRequest(username, rsaPassword));
-	processing.setTaskProperties(task, callback, true);
+function makeAuthRequest(login, rsaPassword, callback) {
+	var task = rsaPassword === null ? newTask(offlineAuthRequest(login)) :
+		newRequestTask(new AuthRequest(login, rsaPassword));
+	processing.setTaskProperties(task, callback, null, true);
 	task.updateMessage("Авторизация на сервере");
 	startTask(task);
 }
@@ -66,7 +112,7 @@ function makeAuthRequest(username, rsaPassword, callback) {
 function launchClient(jvmDir, jvmHDir, clientHDir, profile, params, callback) {
 	var task = newTask(function() ClientLauncher.launch(jvmDir, jvmHDir,
 		clientHDir, profile, params, LogHelper.isDebugEnabled()));
-	processing.setTaskProperties(task, callback, true);
+	processing.setTaskProperties(task, callback, null, true);
 	task.updateMessage("Запуск выбранного клиента");
 	startTask(task);
 }

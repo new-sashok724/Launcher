@@ -9,6 +9,9 @@ import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 
 public final class FileNameMatcher {
+	private static final Entry[] NO_ENTRIES = new Entry[0];
+
+	// Instance
 	private final Entry[] update;
 	private final Entry[] verify;
 	private final Entry[] exclusions;
@@ -20,6 +23,12 @@ public final class FileNameMatcher {
 		this.exclusions = toEntries(exclusions);
 	}
 
+	private FileNameMatcher(Entry[] update, Entry[] verify, Entry[] exclusions) {
+		this.update = update;
+		this.verify = verify;
+		this.exclusions = exclusions;
+	}
+
 	@LauncherAPI
 	public boolean shouldUpdate(Collection<String> path) {
 		return (anyMatch(update, path) || anyMatch(verify, path)) && !anyMatch(exclusions, path);
@@ -28,6 +37,11 @@ public final class FileNameMatcher {
 	@LauncherAPI
 	public boolean shouldVerify(Collection<String> path) {
 		return anyMatch(verify, path) && !anyMatch(exclusions, path);
+	}
+
+	@LauncherAPI
+	public FileNameMatcher verifyOnly() {
+		return new FileNameMatcher(NO_ENTRIES, verify, exclusions);
 	}
 
 	private static boolean anyMatch(Entry[] entries, Collection<String> path) {

@@ -4,7 +4,7 @@ var loginField, passwordField, savePasswordBox, profilesBox;
 var movePoint = null; // Point2D
 
 // State variables
-var sign, profiles, pingers = {};
+var pingers = {};
 
 function initDialog() {
 	// Lookup news WebView
@@ -64,6 +64,26 @@ function initAuthPane(pane) {
 	pane.lookup("#goSettings").setOnAction(goSettings);
 }
 
+function initOffline() {
+	// Update title
+	stage.setTitle(config.title + " [Offline]");
+	
+	// Set login field as username field
+	loginField.setPromptText("Имя пользователя");
+	if (!VerifyHelper.isValidUsername(settings.login)) {
+		loginField.setText(""); // Reset if not valid
+	}
+	
+	// Disable password field
+	passwordField.setDisable(true);
+	passwordField.setPromptText("Недоступно");
+	passwordField.setText("");
+	
+	// Switch news view to offline page
+	var offlineURL = Launcher.getResourceURL("dialog/offline/offline.html");
+	news.getEngine().load(offlineURL.toString());
+}
+
 /* ======== Handler functions ======== */
 function goAuth(event) {
 	// Verify there's no other overlays
@@ -83,22 +103,24 @@ function goAuth(event) {
 		return; // Maybe throw exception?)
 	}
 
-	// Get password
-	var rsaPassword;
-	var password = passwordField.getText();
-	if (!password.isEmpty()) {
-		rsaPassword = settings.setPassword(password);
-	} else if (settings.rsaPassword !== null) {
-		rsaPassword = settings.rsaPassword;
-	} else {
-		return; // No password - no auth, sorry :C
+	// Get password if online-mode
+	var rsaPassword = null;
+	if (!passwordField.isDisable()) {
+		var password = passwordField.getText();
+		if (!password.isEmpty()) {
+			rsaPassword = settings.setPassword(password);
+		} else if (settings.rsaPassword !== null) {
+			rsaPassword = settings.rsaPassword;
+		} else {
+			return; // No password - no auth, sorry :C
+		}
+
+		// Remember or reset password
+		settings.rsaPassword = savePasswordBox.isSelected() ? rsaPassword : null;
 	}
 
-	// Store login and password
-	settings.login = login;
-	settings.rsaPassword = savePasswordBox.isSelected() ? rsaPassword : null;
-
 	// Show auth overlay
+	settings.login = login;
 	doAuth(profile, login, rsaPassword);
 }
 
@@ -116,11 +138,16 @@ function goSettings(event) {
 function verifyLauncher(e) {
 	processing.resetOverlay();
 	overlay.show(processing.overlay, function(event) makeLauncherRequest(function(result) {
-		sign = result.sign;
-		profiles = result.profiles;
-		updateProfilesList();
+		settings.lastSign = result.sign;
+		settings.lastProfiles = result.profiles;
+		
+		// Init offline if set
+		if (settings.offline) {
+			initOffline();
+		}
 
-		// Hide overlay
+		// Update profiles list and hide overlay
+		updateProfilesList(result.profiles);
 		overlay.hide(0, function() {
 			if (cliParams.autoLogin) {
 				goAuth(null);
@@ -141,16 +168,25 @@ function doUpdate(profile, pp, accessToken) {
 	overlay.swap(0, update.overlay, function(event) {
 		var jvmDir = settings.updatesDir.resolve(jvmDirName);
 		makeUpdateRequest(jvmDirName, jvmDir, null, function(jvmHDir) {
+			settings.lastHDirs.put(jvmDirName, jvmHDir);
+			
+			// Update assets
 			update.resetOverlay("Обновление файлов ресурсов");
 			var assetDirName = profile.object.block.getEntryValue("assetDir", StringConfigEntryClass);
 			var assetDir = settings.updatesDir.resolve(assetDirName);
 			makeUpdateRequest(assetDirName, assetDir, null, function(assetHDir) {
+				settings.lastHDirs.put(assetDirName, assetHDir);
+				
+				// Update clients
 				update.resetOverlay("Обновление файлов клиента");
 				var clientDirName = profile.object.block.getEntryValue("dir", StringConfigEntryClass);
 				var clientDir = settings.updatesDir.resolve(clientDirName);
-				makeUpdateRequest(clientDirName, clientDir, profile.object.getUpdateMatcher(), function(clientHDir)
-					doLaunchClient(jvmDir, jvmHDir, clientHDir, assetDir, clientDir, profile, pp, accessToken)
-				);
+				makeUpdateRequest(clientDirName, clientDir, profile.object.getUpdateMatcher(), function(clientHDir) {
+					settings.lastHDirs.put(clientDirName, clientHDir);
+					
+					// Launch client
+					doLaunchClient(jvmDir, jvmHDir, clientHDir, assetDir, clientDir, profile, pp, accessToken);
+				});
 			});
 		});
 	});
@@ -159,7 +195,7 @@ function doUpdate(profile, pp, accessToken) {
 function doLaunchClient(jvmDir, jvmHDir, clientHDir, assetDir, clientDir, profile, pp, accessToken) {
 	processing.resetOverlay();
 	overlay.swap(0, processing.overlay, function(event)
-		launchClient(jvmDir, jvmHDir, clientHDir, profile, new ClientLauncherParams(sign, assetDir, clientDir, // Dirs
+		launchClient(jvmDir, jvmHDir, clientHDir, profile, new ClientLauncherParams(settings.lastSign, assetDir, clientDir,
 			pp, accessToken, settings.autoEnter, settings.fullScreen, settings.ram, 0, 0), doDebugClient)
 	);
 }
@@ -176,7 +212,7 @@ function doDebugClient(process) {
 }
 
 /* ======== Server handler functions ======== */
-function updateProfilesList() {
+function updateProfilesList(profiles) {
 	// Set profiles items
 	profilesBox.setItems(javafx.collections.FXCollections.observableList(profiles));
 	for each (var profile in profiles) {
@@ -303,8 +339,10 @@ var overlay = {
 			dimPane.requestFocus();
 
 			// Hide old overlay
-			var child = dimPane.getChildren();
-			child.set(child.indexOf(overlay.current), newOverlay);
+			if (overlay.current !== newOverlay) {
+				var child = dimPane.getChildren();
+				child.set(child.indexOf(overlay.current), newOverlay);
+			}
 			
 			// Fix overlay position
 			newOverlay.setLayoutX((dimPane.getPrefWidth() - newOverlay.getPrefWidth()) / 2.0);

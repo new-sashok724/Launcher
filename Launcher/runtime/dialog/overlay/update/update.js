@@ -75,7 +75,7 @@ function offlineUpdateRequest(dirName, dir, matcher) {
 	return function() {
 		var hdir = settings.lastHDirs.get(dirName);
 		if (hdir === null) {
-			Request.requestError(String.format("Директории '%s' нет в кэше", dirName));
+			Request.requestError(java.lang.String.format("Директории '%s' нет в кэше", dirName));
 			return;
 		}
 		
@@ -83,7 +83,7 @@ function offlineUpdateRequest(dirName, dir, matcher) {
 		var verifyMatcher = matcher === null ? null : matcher.verifyOnly();
 		var currentHDir = new HashedDir(dir, verifyMatcher);
 		if (!hdir.object.diff(currentHDir, verifyMatcher).isSame()) {
-			Request.requestError(String.format("Директория '%s' была изменена", dirName));
+			Request.requestError(java.lang.String.format("Директория '%s' была изменена", dirName));
 			return;
 		}
 		

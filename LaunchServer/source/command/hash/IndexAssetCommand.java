@@ -9,6 +9,9 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.WriterConfig;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
@@ -16,7 +19,6 @@ import launcher.helper.SecurityHelper;
 import launchserver.LaunchServer;
 import launchserver.command.Command;
 import launchserver.command.CommandException;
-import org.json.JSONObject;
 
 public final class IndexAssetCommand extends Command {
 	public static final String INDEXES_DIR = "indexes";
@@ -54,16 +56,14 @@ public final class IndexAssetCommand extends Command {
 		Files.createDirectory(outputAssetDir);
 
 		// Index objects
+		JsonObject objects = Json.object();
 		LogHelper.subInfo("Indexing objects");
-		JSONObject objects = new JSONObject();
 		IOHelper.walk(inputAssetDir, new IndexAssetVisitor(objects, inputAssetDir, outputAssetDir), false);
 
 		// Write index file
 		LogHelper.subInfo("Writing asset index file: '%s'", indexFileName);
 		try (BufferedWriter writer = IOHelper.newWriter(resolveIndexFile(outputAssetDir, indexFileName))) {
-			JSONObject root = new JSONObject();
-			root.put(OBJECTS_DIR, objects);
-			root.write(writer);
+			Json.object().add(OBJECTS_DIR, objects).writeTo(writer, WriterConfig.MINIMAL);
 		}
 
 		// Finished
@@ -82,11 +82,11 @@ public final class IndexAssetCommand extends Command {
 	}
 
 	private static final class IndexAssetVisitor extends SimpleFileVisitor<Path> {
-		private final JSONObject objects;
+		private final JsonObject objects;
 		private final Path inputAssetDir;
 		private final Path outputAssetDir;
 
-		private IndexAssetVisitor(JSONObject objects, Path inputAssetDir, Path outputAssetDir) {
+		private IndexAssetVisitor(JsonObject objects, Path inputAssetDir, Path outputAssetDir) {
 			this.objects = objects;
 			this.inputAssetDir = inputAssetDir;
 			this.outputAssetDir = outputAssetDir;
@@ -97,17 +97,12 @@ public final class IndexAssetCommand extends Command {
 			String name = IOHelper.toString(inputAssetDir.relativize(file));
 			LogHelper.subInfo("Indexing: '%s'", name);
 
-			// Calculate SHA-1 digest and get size
+			// Add to index and copy file
 			String digest = SecurityHelper.toHex(SecurityHelper.digest(SecurityHelper.DigestAlgorithm.SHA1, file));
-
-			// Add to objects
-			JSONObject object = new JSONObject();
-			object.put("size", attrs.size());
-			object.put("hash", digest);
-			objects.put(name, object);
-
-			// Copy file
+			objects.add(name, Json.object().add("size", attrs.size()).add("hash", digest));
 			IOHelper.copy(file, resolveObjectFile(outputAssetDir, digest));
+
+			// Continue visiting
 			return super.visitFile(file, attrs);
 		}
 	}

@@ -5,13 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launchserver.LaunchServer;
 import launchserver.command.Command;
 import launchserver.command.CommandException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 public final class UnindexAssetCommand extends Command {
 	public UnindexAssetCommand(LaunchServer server) {
@@ -45,22 +45,20 @@ public final class UnindexAssetCommand extends Command {
 		Files.createDirectory(outputAssetDir);
 
 		// Read JSON file
+		JsonObject objects;
 		LogHelper.subInfo("Reading asset index file: '%s'", indexFileName);
-		JSONObject objects;
 		try (BufferedReader reader = IOHelper.newReader(IndexAssetCommand.resolveIndexFile(inputAssetDir, indexFileName))) {
-			objects = new JSONObject(new JSONTokener(reader)).getJSONObject(IndexAssetCommand.OBJECTS_DIR);
+			objects = Json.parse(reader).asObject().get(IndexAssetCommand.OBJECTS_DIR).asObject();
 		}
 
 		// Restore objects
-		LogHelper.subInfo("Unindexing %d objects", objects.length());
-		for (String name : objects.keySet()) {
+		LogHelper.subInfo("Unindexing %d objects", objects.size());
+		for (JsonObject.Member member : objects) {
+			String name = member.getName();
 			LogHelper.subInfo("Unindexing: '%s'", name);
 
-			// Get JSON object
-			JSONObject object = objects.getJSONObject(name);
-			String hash = object.getString("hash");
-
 			// Copy hashed file to target
+			String hash = member.getValue().asObject().get("hash").asString();
 			Path source = IndexAssetCommand.resolveObjectFile(inputAssetDir, hash);
 			IOHelper.copy(source, outputAssetDir.resolve(name));
 		}

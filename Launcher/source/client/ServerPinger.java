@@ -9,13 +9,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.regex.Pattern;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
-import org.json.JSONObject;
 
 public final class ServerPinger {
 	// Constants
@@ -157,11 +158,11 @@ public final class ServerPinger {
 		}
 
 		// Parse JSON response
-		JSONObject object = new JSONObject(response);
-		String description = object.getString("description");
-		JSONObject playersObject = object.getJSONObject("players");
-		int online = playersObject.getInt("online");
-		int max = playersObject.getInt("max");
+		JsonObject object = Json.parse(response).asObject();
+		String description = object.get("description").asString();
+		JsonObject playersObject = object.get("players").asObject();
+		int online = playersObject.get("online").asInt();
+		int max = playersObject.get("max").asInt();
 
 		// Return ping status
 		return new Result(online, max, description, response);

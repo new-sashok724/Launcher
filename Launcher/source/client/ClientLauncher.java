@@ -23,6 +23,9 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.WriterConfig;
 import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.hasher.DirWatcher;
@@ -39,8 +42,6 @@ import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.signed.SignedObjectHolder;
 import launcher.serialize.stream.StreamObject;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 public final class ClientLauncher {
 	private static final Set<PosixFilePermission> BIN_POSIX_PERMISSIONS = Collections.unmodifiableSet(EnumSet.of(
@@ -202,18 +203,16 @@ public final class ClientLauncher {
 			if (version.compareTo(ClientProfile.Version.MC1710) >= 0) {
 				// Add user properties
 				Collections.addAll(args, "--userType", "mojang");
-				JSONObject properties = new JSONObject();
+				JsonObject properties = Json.object();
 				if (pp.skin != null) {
-					properties.put(SKIN_URL_PROPERTY, new JSONArray(Collections.singleton(pp.skin.url)));
-					properties.put(SKIN_DIGEST_PROPERTY, new JSONArray(Collections.singleton(
-						SecurityHelper.toHex(pp.skin.digest))));
+					properties.add(SKIN_URL_PROPERTY, Json.array(pp.skin.url));
+					properties.add(SKIN_DIGEST_PROPERTY, Json.array(SecurityHelper.toHex(pp.skin.digest)));
 				}
 				if (pp.cloak != null) {
-					properties.put(CLOAK_URL_PROPERTY, new JSONArray(Collections.singleton(pp.cloak.url)));
-					properties.put(CLOAK_DIGEST_PROPERTY, new JSONArray(Collections.singleton(
-						SecurityHelper.toHex(pp.cloak.digest))));
+					properties.add(CLOAK_URL_PROPERTY, Json.array(pp.cloak.url));
+					properties.add(CLOAK_DIGEST_PROPERTY, Json.array(SecurityHelper.toHex(pp.cloak.digest)));
 				}
-				Collections.addAll(args, "--userProperties", properties.toString());
+				Collections.addAll(args, "--userProperties", properties.toString(WriterConfig.MINIMAL));
 
 				// Add asset index
 				Collections.addAll(args, "--assetIndex", profile.getAssetIndex());

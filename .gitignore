@@ -1,5 +1,6 @@
 .idea
 !.idea/artifacts/*
+!.idea/libraries/*
 !.idea/compiler.xml
 !.idea/encodings.xml
 !.idea/misc.xml

@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="hikaricp-2.4.0">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/build/libraries/hikaricp/slf4j-simple-1.7.12.jar!/" />
+      <root url="jar://$PROJECT_DIR$/build/libraries/hikaricp/slf4j-api-1.7.12.jar!/" />
+      <root url="jar://$PROJECT_DIR$/build/libraries/hikaricp/javassist-3.20.0-GA.jar!/" />
+      <root url="jar://$PROJECT_DIR$/build/libraries/hikaricp/HikariCP-2.4.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/build/libraries/hikaricp/javassist-3.20.0-GA-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/build/libraries/hikaricp/HikariCP-2.4.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

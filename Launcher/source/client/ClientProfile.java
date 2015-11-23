@@ -21,6 +21,8 @@ import launcher.serialize.stream.StreamObject;
 @SuppressWarnings("ComparableImplementedButEqualsNotOverridden")
 public final class ClientProfile extends ConfigObject implements Comparable<ClientProfile> {
 	@LauncherAPI public static final StreamObject.Adapter<ClientProfile> RO_ADAPTER = input -> new ClientProfile(input, true);
+	private static final FileNameMatcher ASSET_MATCHER = new FileNameMatcher(
+		new String[0], new String[] { "indexes", "objects" }, new String[0]);
 
 	// Version
 	private final StringConfigEntry version;
@@ -80,6 +82,11 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
 	}
 
 	@LauncherAPI
+	public FileNameMatcher getAssetUpdateMatcher() {
+		return getVersion().compareTo(Version.MC1710) >= 0 ? ASSET_MATCHER : null;
+	}
+
+	@LauncherAPI
 	public String[] getClassPath() {
 		return classPath.stream(StringConfigEntry.class).toArray(String[]::new);
 	}
@@ -125,7 +132,7 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
 	}
 
 	@LauncherAPI
-	public FileNameMatcher getUpdateMatcher() {
+	public FileNameMatcher getClientUpdateMatcher() {
 		String[] updateArray = update.stream(StringConfigEntry.class).toArray(String[]::new);
 		String[] verifyArray = updateVerify.stream(StringConfigEntry.class).toArray(String[]::new);
 		String[] exclusionsArray = updateExclusions.stream(StringConfigEntry.class).toArray(String[]::new);

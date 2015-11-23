@@ -210,6 +210,22 @@ index 334a8ea..0000000
 -        ctx.pipeline().remove( this );
 -    }
 -}
+diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/Varint21FrameDecoder.java b/protocol/src/main/java/net/md_5/bungee/protocol/Varint21FrameDecoder.java
+index 0f3b5b6..870bf0f 100644
+--- a/protocol/src/main/java/net/md_5/bungee/protocol/Varint21FrameDecoder.java
++++ b/protocol/src/main/java/net/md_5/bungee/protocol/Varint21FrameDecoder.java
+@@ -29,11 +29,6 @@ public class Varint21FrameDecoder extends ByteToMessageDecoder
+             if ( buf[i] >= 0 )
+             {
+                 int length = DefinedPacket.readVarInt( Unpooled.wrappedBuffer( buf ) );
+-                if ( length == 0 )
+-                {
+-                    throw new CorruptedFrameException( "Empty Packet!" );
+-                }
+-
+                 if ( in.readableBytes() < length )
+                 {
+                     in.resetReaderIndex();
 diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/LegacyHandshake.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/LegacyHandshake.java
 deleted file mode 100644
 index 50d7381..0000000

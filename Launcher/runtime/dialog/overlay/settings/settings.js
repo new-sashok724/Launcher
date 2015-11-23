@@ -234,7 +234,7 @@ var settings = {
 	deleteUpdatesDir: function() {
 		processing.description.setText("Удаление директории загрузок");
 		overlay.swap(0, processing.overlay, function(event) {
-			var task = newTask(function() IOHelper.deleteDir(updatesDir, false));
+			var task = newTask(function() IOHelper.deleteDir(settings.updatesDir, false));
 			task.setOnSucceeded(function(event) overlay.swap(0, settings.overlay, null));
 			task.setOnFailed(function(event) {
 				processing.setError(task.getException());

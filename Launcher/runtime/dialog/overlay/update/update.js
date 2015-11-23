@@ -79,15 +79,8 @@ function offlineUpdateRequest(dirName, dir, matcher) {
 			return;
 		}
 		
-		// Verify dir with matcher
-		var verifyMatcher = matcher === null ? null : matcher.verifyOnly();
-		var currentHDir = new HashedDir(dir, verifyMatcher);
-		if (!hdir.object.diff(currentHDir, verifyMatcher).isSame()) {
-			Request.requestError(java.lang.String.format("Директория '%s' была изменена", dirName));
-			return;
-		}
-		
-		// Return last hdir
+		// Verify dir with matcher using ClientLauncher's API
+		ClientLauncher.verifyHDir(dir, hdir, matcher);
 		return hdir;
 	};
 }

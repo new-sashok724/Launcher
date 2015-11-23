@@ -170,33 +170,33 @@ function doUpdate(profile, pp, accessToken) {
 		makeUpdateRequest(jvmDirName, jvmDir, null, function(jvmHDir) {
 			settings.lastHDirs.put(jvmDirName, jvmHDir);
 			
-			// Update assets
+			// Update asset dir
 			update.resetOverlay("Обновление файлов ресурсов");
 			var assetDirName = profile.object.block.getEntryValue("assetDir", StringConfigEntryClass);
 			var assetDir = settings.updatesDir.resolve(assetDirName);
-			makeUpdateRequest(assetDirName, assetDir, null, function(assetHDir) {
+			var assetMatcher = profile.object.getAssetUpdateMatcher();
+			makeUpdateRequest(assetDirName, assetDir, assetMatcher, function(assetHDir) {
 				settings.lastHDirs.put(assetDirName, assetHDir);
 				
-				// Update clients
+				// Update client dir
 				update.resetOverlay("Обновление файлов клиента");
 				var clientDirName = profile.object.block.getEntryValue("dir", StringConfigEntryClass);
 				var clientDir = settings.updatesDir.resolve(clientDirName);
-				makeUpdateRequest(clientDirName, clientDir, profile.object.getUpdateMatcher(), function(clientHDir) {
+				var clientMatcher = profile.object.getClientUpdateMatcher();
+				makeUpdateRequest(clientDirName, clientDir, clientMatcher, function(clientHDir) {
 					settings.lastHDirs.put(clientDirName, clientHDir);
-					
-					// Launch client
-					doLaunchClient(jvmDir, jvmHDir, clientHDir, assetDir, clientDir, profile, pp, accessToken);
+					doLaunchClient(jvmDir, jvmHDir, assetDir, assetHDir, clientDir, clientHDir, profile, pp, accessToken);
 				});
 			});
 		});
 	});
 }
 
-function doLaunchClient(jvmDir, jvmHDir, clientHDir, assetDir, clientDir, profile, pp, accessToken) {
+function doLaunchClient(jvmDir, jvmHDir, assetDir, assetHDir, clientDir, clientHDir, profile, pp, accessToken) {
 	processing.resetOverlay();
 	overlay.swap(0, processing.overlay, function(event)
-		launchClient(jvmDir, jvmHDir, clientHDir, profile, new ClientLauncherParams(settings.lastSign, assetDir, clientDir,
-			pp, accessToken, settings.autoEnter, settings.fullScreen, settings.ram, 0, 0), doDebugClient)
+		launchClient(jvmDir, jvmHDir, assetHDir, clientHDir, profile, new ClientLauncherParams(settings.lastSign,
+			assetDir, clientDir, pp, accessToken, settings.autoEnter, settings.fullScreen, settings.ram, 0, 0), doDebugClient)
 	);
 }
 

@@ -77,15 +77,20 @@ public final class ClientLauncher {
 	}
 
 	@LauncherAPI
-	public static Process launch(Path jvmDir, SignedObjectHolder<HashedDir> jvmHDir, SignedObjectHolder<HashedDir> clientHDir, SignedObjectHolder<ClientProfile> profile, Params params, boolean pipeOutput) throws Throwable {
+	public static Process launch(Path jvmDir, SignedObjectHolder<HashedDir> jvmHDir,
+		SignedObjectHolder<HashedDir> assetHDir, SignedObjectHolder<HashedDir> clientHDir,
+		SignedObjectHolder<ClientProfile> profile, Params params, boolean pipeOutput) throws Throwable {
 		// Write params file (instead of CLI; Mustdie32 API can't handle command line > 32767 chars)
 		LogHelper.debug("Writing ClientLauncher params file");
 		Path paramsFile = Files.createTempFile("ClientLauncherParams", ".bin");
 		try (HOutput output = new HOutput(IOHelper.newOutput(paramsFile))) {
 			params.write(output);
-			jvmHDir.write(output);
-			clientHDir.write(output);
 			profile.write(output);
+
+			// Write hdirs
+			jvmHDir.write(output);
+			assetHDir.write(output);
+			clientHDir.write(output);
 		}
 
 		// Resolve java bin and set permissions
@@ -136,17 +141,17 @@ public final class ClientLauncher {
 		// Read and delete params file
 		LogHelper.debug("Reading ClientLauncher params file");
 		Params params;
-		SignedObjectHolder<HashedDir> jvmHDir;
-		SignedObjectHolder<HashedDir> clientHDir;
 		SignedObjectHolder<ClientProfile> profile;
+		SignedObjectHolder<HashedDir> jvmHDir, assetHDir, clientHDir;
 		RSAPublicKey publicKey = Launcher.getConfig().publicKey;
 		try (HInput input = new HInput(IOHelper.newInput(paramsFile))) {
 			params = new Params(input);
-
-			// Read signed params
-			jvmHDir = new SignedObjectHolder<>(input, publicKey, HashedDir::new);
-			clientHDir = new SignedObjectHolder<>(input, publicKey, HashedDir::new);
 			profile = new SignedObjectHolder<>(input, publicKey, ClientProfile.RO_ADAPTER);
+
+			// Read hdirs
+			jvmHDir = new SignedObjectHolder<>(input, publicKey, HashedDir::new);
+			assetHDir = new SignedObjectHolder<>(input, publicKey, HashedDir::new);
+			clientHDir = new SignedObjectHolder<>(input, publicKey, HashedDir::new);
 		} finally {
 			Files.delete(paramsFile);
 		}
@@ -164,21 +169,19 @@ public final class ClientLauncher {
 
 		// Start client with WatchService monitoring
 		LogHelper.debug("Starting JVM and client WatchService");
-		FileNameMatcher profileMatcher = profile.object.getUpdateMatcher();
+		FileNameMatcher assetMatcher = profile.object.getAssetUpdateMatcher();
+		FileNameMatcher clientMatcher = profile.object.getClientUpdateMatcher();
 		try (DirWatcher jvmWatcher = new DirWatcher(IOHelper.JVM_DIR, jvmHDir.object, null); // JVM Watcher
-			 DirWatcher clientWatcher = new DirWatcher(params.clientDir, clientHDir.object, profileMatcher)) {
-			// Verify current state of JVM and client dirs
-			HashedDir currentJVM = new HashedDir(IOHelper.JVM_DIR, null);
-			if (!jvmHDir.object.diff(currentJVM, null).isSame()) {
-				throw new SecurityException("Forbidden JVM modification");
-			}
-			HashedDir currentClient = new HashedDir(params.clientDir, profileMatcher);
-			if (!clientHDir.object.diff(currentClient, profileMatcher).isSame()) {
-				throw new SecurityException("Forbidden client modification");
-			}
+			 DirWatcher assetWatcher = new DirWatcher(params.assetDir, assetHDir.object, assetMatcher);
+			 DirWatcher clientWatcher = new DirWatcher(params.clientDir, clientHDir.object, clientMatcher)) {
+			// Verify current state of all dirs
+			verifyHDir(IOHelper.JVM_DIR, jvmHDir.object, null);
+			verifyHDir(params.assetDir, assetHDir.object, null);
+			verifyHDir(params.clientDir, clientHDir.object, null);
 
 			// Start WatchService, and only then client
 			CommonHelper.newThread("JVM Directory Watcher", true, jvmWatcher).start();
+			CommonHelper.newThread("Asset Directory Watcher", true, assetWatcher).start();
 			CommonHelper.newThread("Client Directory Watcher", true, clientWatcher).start();
 			launch(profile.object, params);
 		}
@@ -187,6 +190,15 @@ public final class ClientLauncher {
 	@LauncherAPI
 	public static String toHash(UUID uuid) {
 		return UUID_PATTERN.matcher(uuid.toString()).replaceAll("");
+	}
+
+	@LauncherAPI
+	public static void verifyHDir(Path dir, HashedDir hdir, FileNameMatcher matcher) throws IOException {
+		// Hash directory and compare (ignore update-only matcher entries, it will break offline-mode)
+		HashedDir currentHDir = new HashedDir(dir, matcher == null ? null : matcher.verifyOnly());
+		if (!hdir.diff(currentHDir, null).isSame()) {
+			throw new SecurityException(String.format("Forbidden modification: '%s'", IOHelper.getFileName(dir)));
+		}
 	}
 
 	private static void addClientArgs(Collection<String> args, ClientProfile profile, Params params) {
@@ -304,7 +316,8 @@ public final class ClientLauncher {
 		@LauncherAPI public final int height;
 
 		@LauncherAPI
-		public Params(byte[] launcherSign, Path assetDir, Path clientDir, PlayerProfile pp, String accessToken, boolean autoEnter, boolean fullScreen, int ram, int width, int height) {
+		public Params(byte[] launcherSign, Path assetDir, Path clientDir, PlayerProfile pp, String accessToken,
+			boolean autoEnter, boolean fullScreen, int ram, int width, int height) {
 			this.launcherSign = Arrays.copyOf(launcherSign, launcherSign.length);
 
 			// Client paths

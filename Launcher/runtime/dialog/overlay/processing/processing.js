@@ -109,9 +109,9 @@ function makeAuthRequest(login, rsaPassword, callback) {
 	startTask(task);
 }
 
-function launchClient(jvmDir, jvmHDir, clientHDir, profile, params, callback) {
-	var task = newTask(function() ClientLauncher.launch(jvmDir, jvmHDir,
-		clientHDir, profile, params, LogHelper.isDebugEnabled()));
+function launchClient(jvmDir, jvmHDir, assetHDir, clientHDir, profile, params, callback) {
+	var task = newTask(function() ClientLauncher.launch(jvmDir, jvmHDir, assetHDir, clientHDir,
+		profile, params, LogHelper.isDebugEnabled()));
 	processing.setTaskProperties(task, callback, null, true);
 	task.updateMessage("Запуск выбранного клиента");
 	startTask(task);

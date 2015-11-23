@@ -196,7 +196,7 @@ public final class ClientLauncher {
 	public static void verifyHDir(Path dir, HashedDir hdir, FileNameMatcher matcher) throws IOException {
 		// Hash directory and compare (ignore update-only matcher entries, it will break offline-mode)
 		HashedDir currentHDir = new HashedDir(dir, matcher == null ? null : matcher.verifyOnly());
-		if (!hdir.diff(currentHDir, null).isSame()) {
+		if (!hdir.diff(currentHDir, matcher).isSame()) {
 			throw new SecurityException(String.format("Forbidden modification: '%s'", IOHelper.getFileName(dir)));
 		}
 	}

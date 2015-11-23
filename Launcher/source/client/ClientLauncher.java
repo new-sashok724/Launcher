@@ -176,8 +176,8 @@ public final class ClientLauncher {
 			 DirWatcher clientWatcher = new DirWatcher(params.clientDir, clientHDir.object, clientMatcher)) {
 			// Verify current state of all dirs
 			verifyHDir(IOHelper.JVM_DIR, jvmHDir.object, null);
-			verifyHDir(params.assetDir, assetHDir.object, null);
-			verifyHDir(params.clientDir, clientHDir.object, null);
+			verifyHDir(params.assetDir, assetHDir.object, assetMatcher);
+			verifyHDir(params.clientDir, clientHDir.object, clientMatcher);
 
 			// Start WatchService, and only then client
 			CommonHelper.newThread("JVM Directory Watcher", true, jvmWatcher).start();

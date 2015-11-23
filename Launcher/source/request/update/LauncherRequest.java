@@ -57,16 +57,18 @@ public final class LauncherRequest extends Request<LauncherRequest.Result> {
 		if (shouldUpdate) {
 			byte[] binary = input.readByteArray(0);
 			SecurityHelper.verifySign(binary, sign, publicKey);
-			IOHelper.write(BINARY_PATH, binary);
 
-			// Start new launcher instance (java -jar works for Launch4J's EXE too)
+			// Prepare process builder to start new instance (java -jar works for Launch4J's EXE too)
 			ProcessBuilder builder = new ProcessBuilder(IOHelper.resolveJavaBin(null).toString(),
 				ClientLauncher.jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())),
 				"-jar", BINARY_PATH.toString());
 			builder.inheritIO();
+
+			// Rewrite and start new instance
+			IOHelper.write(BINARY_PATH, binary);
 			builder.start();
 
-			// Exit current instance
+			// Kill current instance
 			JVMHelper.RUNTIME.exit(255);
 			throw new AssertionError("Why Launcher wasn't restarted?!");
 		}

@@ -46,13 +46,8 @@ public final class FileAuthProvider extends DigestAuthProvider {
 			entry = entries.get(CommonHelper.low(login));
 		}
 
-		// Verify is account exist
-		if (entry == null) {
-			return authError("Incorrect username or password");
-		}
-
 		// Verify digest and return true username
-		verifyDigest(entry.password, password);
+		verifyDigest(entry == null ? null : entry.password, password);
 		return entry.username;
 	}
 

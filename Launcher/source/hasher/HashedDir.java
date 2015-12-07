@@ -27,8 +27,8 @@ public final class HashedDir extends HashedEntry {
 	}
 
 	@LauncherAPI
-	public HashedDir(Path dir, FileNameMatcher matcher) throws IOException {
-		IOHelper.walk(dir, new HashFileVisitor(dir, matcher), true);
+	public HashedDir(Path dir, FileNameMatcher matcher, boolean allowSymlinks) throws IOException {
+		IOHelper.walk(dir, new HashFileVisitor(dir, matcher, allowSymlinks), true);
 	}
 
 	@LauncherAPI
@@ -173,15 +173,17 @@ public final class HashedDir extends HashedEntry {
 	private final class HashFileVisitor extends SimpleFileVisitor<Path> {
 		private final Path dir;
 		private final FileNameMatcher matcher;
-		private final Deque<String> path = new LinkedList<>();
-		private final Deque<HashedDir> stack = new LinkedList<>();
+		private final boolean allowSymlinks;
 
 		// State
 		private HashedDir current = HashedDir.this;
+		private final Deque<String> path = new LinkedList<>();
+		private final Deque<HashedDir> stack = new LinkedList<>();
 
-		private HashFileVisitor(Path dir, FileNameMatcher matcher) {
+		private HashFileVisitor(Path dir, FileNameMatcher matcher, boolean allowSymlinks) {
 			this.dir = dir;
 			this.matcher = matcher;
+			this.allowSymlinks = allowSymlinks;
 		}
 
 		@Override
@@ -207,6 +209,12 @@ public final class HashedDir extends HashedEntry {
 				return result;
 			}
 
+			// Verify is not symlink
+			// Symlinks was disallowed because modification of it's destination are ignored by DirWatcher
+			if (!allowSymlinks && attrs.isSymbolicLink()) {
+				throw new SecurityException("Symlinks are not allowed");
+			}
+
 			// Add child
 			stack.add(current);
 			current = new HashedDir();
@@ -218,9 +226,13 @@ public final class HashedDir extends HashedEntry {
 
 		@Override
 		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			path.add(IOHelper.getFileName(file));
+			// Verify is not symlink
+			if (!allowSymlinks && attrs.isSymbolicLink()) {
+				throw new SecurityException("Symlinks are not allowed");
+			}
 
 			// Add file (may be unhashed, if exclusion)
+			path.add(IOHelper.getFileName(file));
 			boolean hash = matcher == null || matcher.shouldUpdate(path);
 			current.map.put(path.removeLast(), new HashedFile(file, attrs.size(), hash));
 			return super.visitFile(file, attrs);

@@ -281,7 +281,7 @@ public final class LaunchServer implements Runnable {
 
 				// Sync and sign update dir
 				LogHelper.subInfo("Syncing '%s' update dir", name);
-				HashedDir updateHDir = new HashedDir(updateDir, null);
+				HashedDir updateHDir = new HashedDir(updateDir, null, true);
 				newUpdatesDirMap.put(name, new SignedObjectHolder<>(updateHDir, privateKey));
 			}
 		}

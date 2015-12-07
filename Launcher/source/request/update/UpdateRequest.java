@@ -65,7 +65,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 	@Override
 	public SignedObjectHolder<HashedDir> request() throws Exception {
 		Files.createDirectories(dir);
-		localDir = new HashedDir(dir, matcher);
+		localDir = new HashedDir(dir, matcher, false);
 
 		// Start request
 		return super.request();

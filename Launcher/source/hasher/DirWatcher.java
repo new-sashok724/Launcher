@@ -15,6 +15,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Objects;
 
+import com.sun.nio.file.ExtendedWatchEventModifier;
 import com.sun.nio.file.SensitivityWatchEventModifier;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
@@ -22,7 +23,13 @@ import launcher.helper.JVMHelper;
 import launcher.helper.LogHelper;
 
 public final class DirWatcher implements Runnable, AutoCloseable {
+	private static final boolean FILE_TREE_SUPPORTED = JVMHelper.OS_TYPE == JVMHelper.OS.MUSTDIE;
+
+	// Constants
 	private static final WatchEvent.Modifier[] MODIFIERS = { SensitivityWatchEventModifier.HIGH };
+	private static final WatchEvent.Modifier[] FILE_TREE_MODIFIERS = {
+		ExtendedWatchEventModifier.FILE_TREE, SensitivityWatchEventModifier.HIGH
+	};
 	private static final WatchEvent.Kind<?>[] KINDS = {
 		StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE
 	};
@@ -38,9 +45,15 @@ public final class DirWatcher implements Runnable, AutoCloseable {
 		this.dir = Objects.requireNonNull(dir, "dir");
 		this.hdir = Objects.requireNonNull(hdir, "hdir");
 		this.matcher = matcher;
+		service = dir.getFileSystem().newWatchService();
+
+		// Use FILE_TREE if supported
+		if (FILE_TREE_SUPPORTED) {
+			dir.register(service, KINDS, FILE_TREE_MODIFIERS);
+			return;
+		}
 
 		// Register dirs recursively
-		service = dir.getFileSystem().newWatchService();
 		IOHelper.walk(dir, new RegisterFileVisitor(), true);
 	}
 

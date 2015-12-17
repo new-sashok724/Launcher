@@ -80,7 +80,7 @@ function offlineUpdateRequest(dirName, dir, matcher) {
 		}
 		
 		// Verify dir with matcher using ClientLauncher's API
-		ClientLauncher.verifyHDir(dir, hdir, matcher);
+		ClientLauncher.verifyHDir(dir, hdir.object, matcher);
 		return hdir;
 	};
 }

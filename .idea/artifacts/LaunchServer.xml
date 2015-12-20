@@ -14,7 +14,6 @@
           </element>
         </element>
       </element>
-      <element id="file-copy" path="$PROJECT_DIR$/buildnumber" />
       <element id="extracted-dir" path="$PROJECT_DIR$/build/libraries/minimal-json-0.9.4.jar" path-in-jar="/" />
     </root>
   </artifact>

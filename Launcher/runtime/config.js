@@ -5,7 +5,7 @@ var config = {
 	icons: [ "favicon.png" ], // Window icon paths
 
 	// Auth config
-	newsURL: "http://launcher.sashok724.net/", // News WebView URL
+	newsURL: "https://launcher.sashok724.net/", // News WebView URL
 	linkText: "Бесплатные окна", // Text for link under "Auth" button
 	linkURL: new java.net.URL("http://bit.ly/1SP0Rl8"), // URL for link under "Auth" button
 

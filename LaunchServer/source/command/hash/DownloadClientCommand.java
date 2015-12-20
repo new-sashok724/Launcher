@@ -19,7 +19,7 @@ import launchserver.command.Command;
 import launchserver.command.CommandException;
 
 public final class DownloadClientCommand extends Command {
-	private static final String CLIENT_URL_MASK = "http://launcher.sashok724.net/download/clients/%s.zip";
+	private static final String CLIENT_URL_MASK = "https://launcher.sashok724.net/download/clients/%s.zip";
 
 	public DownloadClientCommand(LaunchServer server) {
 		super(server);

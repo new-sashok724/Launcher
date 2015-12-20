@@ -1,15 +1,10 @@
 package launchserver;
 
-import javax.script.Bindings;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.URL;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -32,7 +27,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.CRC32;
 
-import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.client.ClientProfile;
 import launcher.hasher.HashedDir;
@@ -50,22 +44,15 @@ import launcher.serialize.config.entry.BooleanConfigEntry;
 import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 import launcher.serialize.signed.SignedObjectHolder;
-import launchserver.auth.AuthException;
-import launchserver.auth.MySQLSourceConfig;
 import launchserver.auth.handler.AuthHandler;
-import launchserver.auth.handler.CachedAuthHandler;
-import launchserver.auth.handler.FileAuthHandler;
 import launchserver.auth.provider.AuthProvider;
 import launchserver.binary.EXEL4JLauncherBinary;
 import launchserver.binary.EXELauncherBinary;
 import launchserver.binary.JARLauncherBinary;
 import launchserver.binary.LauncherBinary;
-import launchserver.command.Command;
-import launchserver.command.CommandException;
 import launchserver.command.handler.CommandHandler;
 import launchserver.command.handler.JLineCommandHandler;
 import launchserver.command.handler.StdCommandHandler;
-import launchserver.response.Response;
 import launchserver.response.ServerSocketHandler;
 import launchserver.texture.TextureProvider;
 
@@ -90,15 +77,12 @@ public final class LaunchServer implements Runnable {
 	@LauncherAPI public final CommandHandler commandHandler;
 	@LauncherAPI public final ServerSocketHandler serverSocketHandler;
 	private final AtomicBoolean started = new AtomicBoolean(false);
-	private final ScriptEngine engine = CommonHelper.newScriptEngine();
 
 	// Updates and profiles
 	private volatile List<SignedObjectHolder<ClientProfile>> profilesList;
 	private volatile Map<String, SignedObjectHolder<HashedDir>> updatesDirMap;
 
 	private LaunchServer() throws IOException, InvalidKeySpecException {
-		setScriptBindings();
-
 		// Set command handler
 		CommandHandler localCommandHandler;
 		try {
@@ -172,17 +156,6 @@ public final class LaunchServer implements Runnable {
 			throw new IllegalStateException("LaunchServer has been already started");
 		}
 
-		// Load plugin script if exist
-		Path scriptFile = IOHelper.WORKING_DIR.resolve("plugin.js");
-		if (IOHelper.isFile(scriptFile)) {
-			LogHelper.info("Loading plugin.js script");
-			try {
-				loadScript(IOHelper.toURL(scriptFile));
-			} catch (Exception e) {
-				throw new RuntimeException("Error while loading plugin.js", e);
-			}
-		}
-
 		// Add shutdown hook, then start LaunchServer
 		JVMHelper.RUNTIME.addShutdownHook(CommonHelper.newThread(null, false, this::shutdownHook));
 		CommonHelper.newThread("Command Thread", true, commandHandler).start();
@@ -209,14 +182,6 @@ public final class LaunchServer implements Runnable {
 	@LauncherAPI
 	public Set<Map.Entry<String, SignedObjectHolder<HashedDir>>> getUpdateDirs() {
 		return updatesDirMap.entrySet();
-	}
-
-	@LauncherAPI
-	public Object loadScript(URL url) throws IOException, ScriptException {
-		LogHelper.debug("Loading server script: '%s'", url);
-		try (BufferedReader reader = IOHelper.newReader(url)) {
-			return engine.eval(reader);
-		}
 	}
 
 	@LauncherAPI
@@ -311,16 +276,6 @@ public final class LaunchServer implements Runnable {
 		}
 	}
 
-	private void setScriptBindings() {
-		LogHelper.info("Setting up server script engine bindings");
-		Bindings bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-		bindings.put("server", this);
-
-		// Add launcher and launchserver class bindings
-		Launcher.addLauncherClassBindings(bindings);
-		addLaunchServerClassBindings(bindings);
-	}
-
 	private void shutdownHook() {
 		serverSocketHandler.close();
 
@@ -345,7 +300,7 @@ public final class LaunchServer implements Runnable {
 		LogHelper.info("LaunchServer stopped");
 	}
 
-	public static void main(String... args) throws Throwable {
+	public static void main(String... args) throws Exception {
 		JVMHelper.verifySystemProperties(LaunchServer.class);
 		SecurityHelper.verifyCertificates(LaunchServer.class);
 		LogHelper.addOutput(IOHelper.WORKING_DIR.resolve("LaunchServer.log"));
@@ -361,30 +316,6 @@ public final class LaunchServer implements Runnable {
 		}
 		Instant end = Instant.now();
 		LogHelper.debug("LaunchServer started in %dms", Duration.between(start, end).toMillis());
-	}
-
-	private static void addLaunchServerClassBindings(Map<String, Object> bindings) {
-		bindings.put("LaunchServerClass", LaunchServer.class);
-
-		// Set auth class bindings
-		bindings.put("AuthHandlerClass", AuthHandler.class);
-		bindings.put("FileAuthHandlerClass", FileAuthHandler.class);
-		bindings.put("CachedAuthHandlerClass", CachedAuthHandler.class);
-		bindings.put("AuthProviderClass", AuthProvider.class);
-		bindings.put("DigestAuthProviderClass", AuthProvider.class);
-		bindings.put("MySQLSourceConfigClass", MySQLSourceConfig.class);
-		bindings.put("AuthExceptionClass", AuthException.class);
-		bindings.put("TextureProviderClass", TextureProvider.class);
-
-		// Set command class bindings
-		bindings.put("CommandClass", Command.class);
-		bindings.put("CommandHandlerClass", CommandHandler.class);
-		bindings.put("CommandExceptionClass", CommandException.class);
-
-		// Set response class bindings
-		bindings.put("ResponseClass", Response.class);
-		bindings.put("ResponseFactoryClass", Response.Factory.class);
-		bindings.put("ServerSocketHandlerListenerClass", ServerSocketHandler.Listener.class);
 	}
 
 	private final class ProfilesFileVisitor extends SimpleFileVisitor<Path> {

@@ -144,7 +144,7 @@ public final class ServerPinger {
 		output.flush();
 
 		// Read outer status response packet ID
-		// ab is a dirty fix for some servers (noticed KCauldron 1.7.10)
+		// ab - dirty fix for some servers (e.g. KCauldron 1.7.10)
 		String response;
 		int ab = IOHelper.verifyLength(input.readVarInt(), IOHelper.BUFFER_SIZE);
 		byte[] statusPacket = ab == 0x0 ? input.readByteArray(IOHelper.BUFFER_SIZE) : input.readByteArray(-ab);

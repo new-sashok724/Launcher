@@ -5,12 +5,16 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 import com.sun.management.OperatingSystemMXBean;
 import launcher.LauncherAPI;
+import launcher.request.update.LauncherRequest;
 import sun.misc.URLClassPath;
 
 public final class JVMHelper {
@@ -78,13 +82,23 @@ public final class JVMHelper {
 	}
 
 	@LauncherAPI
-	public static void verifySystemProperties(Class<?> mainClass) {
+	public static void verifySystemProperties(Class<?> mainClass) throws URISyntaxException {
 		Locale.setDefault(Locale.US);
 
 		// Verify class loader
 		LogHelper.debug("Verifying class loader");
 		if (!mainClass.getClassLoader().equals(LOADER)) {
 			throw new SecurityException("ClassLoader should be system");
+		}
+
+		// Verify classpath
+		LogHelper.subDebug("Verifying classpath");
+		URL[] classpath = LOADER.getURLs();
+		for (URL classpathURL : classpath) {
+			Path file = Paths.get(classpathURL.toURI());
+			if (!file.startsWith(IOHelper.JVM_DIR) && !file.equals(LauncherRequest.BINARY_PATH)) {
+				throw new SecurityException(String.format("Forbidden classpath entry: '%s'", file));
+			}
 		}
 
 		// Verify system and java architecture

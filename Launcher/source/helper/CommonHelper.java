@@ -1,26 +1,16 @@
 package launcher.helper;
 
-import javax.script.ScriptEngine;
 import java.util.Locale;
 
-import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import launcher.LauncherAPI;
 
 public final class CommonHelper {
-	private static final String[] SCRIPT_ENGINE_ARGS = { "-strict" };
-	private static final NashornScriptEngineFactory SCRIPT_ENGINE_FACTORY = new NashornScriptEngineFactory();
-
 	private CommonHelper() {
 	}
 
 	@LauncherAPI
 	public static String low(String s) {
 		return s.toLowerCase(Locale.US);
-	}
-
-	@LauncherAPI
-	public static ScriptEngine newScriptEngine() {
-		return SCRIPT_ENGINE_FACTORY.getScriptEngine(SCRIPT_ENGINE_ARGS);
 	}
 
 	@LauncherAPI

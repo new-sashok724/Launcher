@@ -7,7 +7,6 @@ import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
@@ -79,7 +78,7 @@ public final class ClientLauncher {
 	@LauncherAPI
 	public static Process launch(Path jvmDir, SignedObjectHolder<HashedDir> jvmHDir,
 		SignedObjectHolder<HashedDir> assetHDir, SignedObjectHolder<HashedDir> clientHDir,
-		SignedObjectHolder<ClientProfile> profile, Params params, boolean pipeOutput) throws Throwable {
+		SignedObjectHolder<ClientProfile> profile, Params params, boolean pipeOutput) throws Exception {
 		// Write params file (instead of CLI; Mustdie32 API can't handle command line > 32767 chars)
 		LogHelper.debug("Writing ClientLauncher params file");
 		Path paramsFile = Files.createTempFile("ClientLauncherParams", ".bin");
@@ -143,7 +142,7 @@ public final class ClientLauncher {
 		Params params;
 		SignedObjectHolder<ClientProfile> profile;
 		SignedObjectHolder<HashedDir> jvmHDir, assetHDir, clientHDir;
-		RSAPublicKey publicKey = Launcher.getConfig().publicKey;
+		RSAPublicKey publicKey = Launcher.Config.getDefault().publicKey;
 		try (HInput input = new HInput(IOHelper.newInput(paramsFile))) {
 			params = new Params(input);
 			profile = new SignedObjectHolder<>(input, publicKey, ClientProfile.RO_ADAPTER);
@@ -156,16 +155,9 @@ public final class ClientLauncher {
 			Files.delete(paramsFile);
 		}
 
-		// Verify ClientLauncher sign and classpath
+		// Verify ClientLauncher sign
 		LogHelper.debug("Verifying ClientLauncher sign and classpath");
 		SecurityHelper.verifySign(LauncherRequest.BINARY_PATH, params.launcherSign, publicKey);
-		URL[] classpath = JVMHelper.LOADER.getURLs();
-		for (URL classpathURL : classpath) {
-			Path file = Paths.get(classpathURL.toURI());
-			if (!file.startsWith(IOHelper.JVM_DIR) && !file.equals(LauncherRequest.BINARY_PATH)) {
-				throw new SecurityException(String.format("Forbidden classpath entry: '%s'", file));
-			}
-		}
 
 		// Start client with WatchService monitoring
 		LogHelper.debug("Starting JVM and client WatchService");

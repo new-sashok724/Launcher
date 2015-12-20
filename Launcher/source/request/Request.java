@@ -18,7 +18,7 @@ public abstract class Request<R> {
 
 	@LauncherAPI
 	protected Request(Launcher.Config config) {
-		this.config = config == null ? Launcher.getConfig() : config;
+		this.config = config == null ? Launcher.Config.getDefault() : config;
 	}
 
 	@LauncherAPI

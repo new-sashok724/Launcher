@@ -5,6 +5,7 @@ import java.io.IOException;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
+import launcher.request.RequestException;
 import launcher.request.auth.JoinServerRequest;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
@@ -29,12 +30,10 @@ public final class JoinServerResponse extends Response {
 		try {
 			success = server.config.authHandler.joinServer(username, accessToken, serverID);
 		} catch (AuthException e) {
-			requestError(e.getMessage());
-			return;
+			throw new RequestException(e.getMessage());
 		} catch (Exception e) {
 			LogHelper.error(e);
-			requestError("Internal auth handler error");
-			return;
+			throw new RequestException("Internal auth handler error");
 		}
 		writeNoError(output);
 

@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import launcher.LauncherAPI;
 import launcher.helper.LogHelper;
-import launcher.request.RequestException;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
@@ -39,11 +38,6 @@ public abstract class Response {
 	@LauncherAPI
 	protected final void writeNoError(HOutput output) throws IOException {
 		output.writeString("", 0);
-	}
-
-	@LauncherAPI
-	public static void requestError(String message) throws RequestException {
-		throw new RequestException(message);
 	}
 
 	@FunctionalInterface

@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Locale;
 
 import com.sun.management.OperatingSystemMXBean;
 import launcher.LauncherAPI;
@@ -83,8 +82,6 @@ public final class JVMHelper {
 
 	@LauncherAPI
 	public static void verifySystemProperties(Class<?> mainClass) throws URISyntaxException {
-		Locale.setDefault(Locale.US);
-
 		// Verify class loader
 		LogHelper.debug("Verifying class loader");
 		if (!mainClass.getClassLoader().equals(LOADER)) {

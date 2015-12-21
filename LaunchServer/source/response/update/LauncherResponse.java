@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import launcher.client.ClientProfile;
 import launcher.helper.SecurityHelper;
+import launcher.request.RequestException;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.signed.SignedBytesHolder;
@@ -22,8 +23,7 @@ public final class LauncherResponse extends Response {
 		// Resolve launcher binary
 		SignedBytesHolder bytes = (input.readBoolean() ? server.launcherEXEBinary : server.launcherBinary).getBytes();
 		if (bytes == null) {
-			requestError("Missing launcher binary");
-			return;
+			throw new RequestException("Missing launcher binary");
 		}
 		writeNoError(output);
 

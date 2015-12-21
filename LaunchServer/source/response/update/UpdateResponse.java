@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import launcher.hasher.HashedDir;
 import launcher.hasher.HashedEntry;
 import launcher.helper.IOHelper;
+import launcher.request.RequestException;
 import launcher.request.update.UpdateRequest;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
@@ -27,8 +28,7 @@ public final class UpdateResponse extends Response {
 		String updateDirName = IOHelper.verifyFileName(input.readString(255));
 		SignedObjectHolder<HashedDir> hdir = server.getUpdateDir(updateDirName);
 		if (hdir == null) {
-			requestError(String.format("Unknown update dir: %s", updateDirName));
-			return;
+			throw new RequestException(String.format("Unknown update dir: %s", updateDirName));
 		}
 		writeNoError(output);
 

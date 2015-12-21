@@ -9,11 +9,11 @@ import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
+import launcher.request.RequestException;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
 import launchserver.auth.AuthException;
-import launchserver.auth.provider.AuthProvider;
 import launchserver.response.Response;
 import launchserver.response.profile.ProfileByUUIDResponse;
 
@@ -33,8 +33,7 @@ public final class AuthResponse extends Response {
 			password = IOHelper.decode(SecurityHelper.newRSADecryptCipher(server.privateKey).
 				doFinal(encryptedPassword));
 		} catch (IllegalBlockSizeException | BadPaddingException ignored) {
-			requestError("Password decryption error");
-			return;
+			throw new RequestException("Password decryption error");
 		}
 
 		// Authenticate
@@ -43,16 +42,13 @@ public final class AuthResponse extends Response {
 		try {
 			username = server.config.authProvider.auth(login, password);
 			if (!VerifyHelper.isValidUsername(username)) {
-				AuthProvider.authError(String.format("Illegal username: '%s'", username));
-				return;
+				throw new AuthException(String.format("Illegal username: '%s'", username));
 			}
 		} catch (AuthException e) {
-			requestError(e.getMessage());
-			return;
+			throw new RequestException(e.getMessage());
 		} catch (Exception e) {
 			LogHelper.error(e);
-			requestError("Internal auth provider error");
-			return;
+			throw new RequestException("Internal auth provider error");
 		}
 		debug("Auth: '%s' -> '%s'", login, username);
 
@@ -62,12 +58,10 @@ public final class AuthResponse extends Response {
 		try {
 			uuid = server.config.authHandler.auth(username, accessToken);
 		} catch (AuthException e) {
-			requestError(e.getMessage());
-			return;
+			throw new RequestException(e.getMessage());
 		} catch (Exception e) {
 			LogHelper.error(e);
-			requestError("Internal auth handler error");
-			return;
+			throw new RequestException("Internal auth handler error");
 		}
 		writeNoError(output);
 

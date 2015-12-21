@@ -9,6 +9,7 @@ import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
+import launchserver.auth.AuthException;
 
 public final class RequestAuthProvider extends AuthProvider {
 	private final String url;
@@ -29,8 +30,10 @@ public final class RequestAuthProvider extends AuthProvider {
 
 		// Match username
 		Matcher matcher = response.matcher(currentResponse);
-		return matcher.matches() && matcher.groupCount() >= 1 ?
-			matcher.group("username") : authError(currentResponse);
+		if (!matcher.matches() || matcher.groupCount() < 1) {
+			throw new AuthException(currentResponse);
+		}
+		return matcher.group("username");
 	}
 
 	@Override

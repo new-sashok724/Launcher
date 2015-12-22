@@ -33,7 +33,7 @@ public final class CheckServerResponse extends Response {
 			throw new RequestException(e.getMessage());
 		} catch (Exception e) {
 			LogHelper.error(e);
-			throw new RequestException("Internal auth handler error");
+			throw new RequestException("error.auth.internalError");
 		}
 		writeNoError(output);
 

@@ -29,7 +29,7 @@ public abstract class DigestAuthProvider extends AuthProvider {
 
 		// Verify is valid
 		if (!valid) {
-			throw new AuthException("Incorrect username or password");
+			throw new AuthException("error.auth.incorrectCredentials");
 		}
 	}
 }

@@ -33,7 +33,7 @@ public final class AuthResponse extends Response {
 			password = IOHelper.decode(SecurityHelper.newRSADecryptCipher(server.privateKey).
 				doFinal(encryptedPassword));
 		} catch (IllegalBlockSizeException | BadPaddingException ignored) {
-			throw new RequestException("Password decryption error");
+			throw new RequestException("error.auth.passwordDecryptionError");
 		}
 
 		// Authenticate
@@ -42,13 +42,13 @@ public final class AuthResponse extends Response {
 		try {
 			username = server.config.authProvider.auth(login, password);
 			if (!VerifyHelper.isValidUsername(username)) {
-				throw new AuthException(String.format("Illegal username: '%s'", username));
+				throw new IllegalArgumentException(String.format("Illegal username: '%s'", username));
 			}
 		} catch (AuthException e) {
 			throw new RequestException(e.getMessage());
 		} catch (Exception e) {
 			LogHelper.error(e);
-			throw new RequestException("Internal auth provider error");
+			throw new RequestException("error.auth.internalError");
 		}
 		debug("Auth: '%s' -> '%s'", login, username);
 
@@ -61,7 +61,7 @@ public final class AuthResponse extends Response {
 			throw new RequestException(e.getMessage());
 		} catch (Exception e) {
 			LogHelper.error(e);
-			throw new RequestException("Internal auth handler error");
+			throw new RequestException("error.auth.internalError");
 		}
 		writeNoError(output);
 

@@ -19,6 +19,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import launcher.client.ClientProfile;
 import launcher.helper.IOHelper;
+import launcher.helper.LogHelper;
 import launcher.runtime.Mainclass;
 import launcher.serialize.signed.SignedObjectHolder;
 
@@ -55,15 +56,37 @@ public final class DialogController {
 		engine.setUserDataDirectory(Mainclass.DIR.resolve("webserver").toFile());
 		engine.load("https://launcher.sashok724.net/");
 
-		// Initialize login field TODO
+		// Initialize login field
 		login.setOnAction(this::play);
+		String loginValue = Mainclass.SETTINGS.getLogin();
+		if (loginValue != null) {
+			login.setText(loginValue);
+		}
+
+		// Initialize password field
+		password.setOnAction(this::play);
+		if (Mainclass.SETTINGS.getPassword() != null) {
+			password.getStyleClass().add("hasSaved");
+			password.setPromptText(LOCALE.getString("dialog.savedPassword"));
+		}
+
+		// Initialize save password checkbox
+		savePassword.setSelected(Mainclass.SETTINGS.isPasswordSaved());
+
+		// Initialize action buttons
+		play.setOnAction(this::play);
+		settings.setOnAction(this::settings);
 
 		// Return initialized root
 		return root;
 	}
 
 	private void play(ActionEvent actionEvent) {
+		LogHelper.debug("Play");
+	}
 
+	private void settings(ActionEvent actionEvent) {
+		LogHelper.debug("Settings");
 	}
 
 	public static Node loadFXML(URL url, Object controller) throws IOException {

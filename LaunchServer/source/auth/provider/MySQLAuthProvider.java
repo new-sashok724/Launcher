@@ -41,7 +41,7 @@ public final class MySQLAuthProvider extends AuthProvider {
 			s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
 			try (ResultSet set = s.executeQuery()) {
 				if (!set.next()) {
-					throw new AuthException("Incorrect username or password");
+					throw new AuthException("error.auth.incorrectCredentials");
 				}
 				return set.getString(1);
 			}

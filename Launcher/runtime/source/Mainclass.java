@@ -3,6 +3,7 @@ package launcher.runtime;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.security.SignatureException;
 import java.util.Properties;
 
 import javafx.application.Application;
@@ -12,11 +13,14 @@ import javafx.stage.Stage;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.runtime.dialog.DialogController;
+import launcher.runtime.storage.Settings;
+import launcher.serialize.HInput;
 
 public final class Mainclass extends Application {
 	public static final Properties PROPERTIES = new Properties();
-	public static final Path DIR = IOHelper.HOME_DIR.resolve(IOHelper.toPath(
-		PROPERTIES.getProperty("dir", "launcher")));
+	public static final Path DIR = IOHelper.HOME_DIR.resolve(
+		IOHelper.toPath(PROPERTIES.getProperty("dir", "launcher")));
+	public static final Settings SETTINGS;
 
 	public Mainclass() {
 	}
@@ -58,5 +62,14 @@ public final class Mainclass extends Application {
 		} catch (IOException e) {
 			throw new RuntimeException("Can't load config.properties", e);
 		}
+
+		// Load settings
+		Settings settings;
+		try (HInput input = new HInput(IOHelper.newInput(DIR.resolve("settings.bin")))) {
+			settings = new Settings(input);
+		} catch (IOException | SignatureException e) {
+			settings = new Settings();
+		}
+		SETTINGS = settings;
 	}
 }

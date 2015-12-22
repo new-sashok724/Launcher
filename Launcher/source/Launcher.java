@@ -20,7 +20,7 @@ import launcher.serialize.stream.StreamObject;
 public final class Launcher {
 	@LauncherAPI public static final String VERSION = "15.1";
 	@LauncherAPI public static final String BUILD = readBuildNumber();
-	@LauncherAPI public static final int PROTOCOL_MAGIC = 0x724724_16;
+	@LauncherAPI public static final int PROTOCOL_MAGIC = 0x724724_E4;
 
 	private Launcher() {
 	}

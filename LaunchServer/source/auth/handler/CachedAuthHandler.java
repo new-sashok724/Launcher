@@ -12,7 +12,6 @@ import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.auth.JoinServerRequest;
 import launcher.serialize.config.entry.BlockConfigEntry;
-import launchserver.auth.AuthException;
 
 public abstract class CachedAuthHandler extends AuthHandler {
 	private final Map<UUID, Entry> entryCache = new HashMap<>(IOHelper.BUFFER_SIZE);
@@ -27,7 +26,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
 	public final synchronized UUID auth(String username, String accessToken) throws IOException {
 		Entry entry = getEntry(username);
 		if (entry == null || !updateAuth(entry.uuid, entry.username, accessToken)) {
-			throw new AuthException(String.format("UUID is null for username '%s'", username));
+			throw new IllegalArgumentException(String.format("UUID is null for username '%s'", username));
 		}
 
 		// Update cached access token (and username case)

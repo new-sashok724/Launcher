@@ -27,12 +27,12 @@
 }
 
 /* Overlay styles */
-#layout > #overlayDim {
+#overlayDim {
 	-fx-opacity: 0.0;
 	-fx-background-color: rgba(0, 0, 0, .5);
 }
 
-#layout > #overlayDim > #overlay {
+#overlayDim > #overlay {
 	-fx-opacity: 0.0;
 	-fx-background-color: white;
 	-fx-background-radius: 5px;

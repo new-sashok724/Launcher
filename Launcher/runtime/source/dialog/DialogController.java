@@ -28,6 +28,7 @@ import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.runtime.Mainclass;
+import launcher.runtime.dialog.overlay.SpinnerController;
 import launcher.serialize.signed.SignedObjectHolder;
 
 public final class DialogController {
@@ -90,7 +91,7 @@ public final class DialogController {
 		password.setText("");
 
 		// Switch news view to offline page
-		URL offlineURL = IOHelper.getResourceURL("launcher/runtime/dialog/offline/offline.html");
+		URL offlineURL = IOHelper.getResourceURL("launcher/runtime/dialog/overlay/offline/index.html");
 		news.getEngine().load(offlineURL.toString());
 	}
 
@@ -182,7 +183,12 @@ public final class DialogController {
 	}
 
 	private void play(ActionEvent e) {
-		LogHelper.debug("Play");
+		try {
+			SpinnerController controller = new SpinnerController();
+			showOverlay(controller.getOverlay(), null);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 	}
 
 	private void settings(ActionEvent e) {

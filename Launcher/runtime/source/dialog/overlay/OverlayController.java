@@ -5,19 +5,19 @@ import java.net.URL;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.Parent;
+import javafx.scene.layout.Pane;
 import launcher.helper.CommonHelper;
 import launcher.request.Request;
 import launcher.runtime.dialog.DialogController;
 
 public abstract class OverlayController {
-	@FXML private Parent overlay;
+	@FXML private Pane overlay;
 
 	public OverlayController(URL fxmlURL) throws IOException {
 		DialogController.loadFXML(fxmlURL, this);
 	}
 
-	public final Parent getOverlay() {
+	public final Pane getOverlay() {
 		return overlay;
 	}
 

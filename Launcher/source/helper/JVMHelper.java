@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 
 import com.sun.management.OperatingSystemMXBean;
 import launcher.LauncherAPI;
-import launcher.request.update.LauncherRequest;
+import launcher.request.update.LauncherUpdateRequest;
 import sun.misc.URLClassPath;
 
 public final class JVMHelper {
@@ -93,7 +93,7 @@ public final class JVMHelper {
 		URL[] classpath = LOADER.getURLs();
 		for (URL classpathURL : classpath) {
 			Path file = Paths.get(classpathURL.toURI());
-			if (!file.startsWith(IOHelper.JVM_DIR) && !file.equals(LauncherRequest.BINARY_PATH)) {
+			if (!file.startsWith(IOHelper.JVM_DIR) && !file.equals(LauncherUpdateRequest.BINARY_PATH)) {
 				throw new SecurityException(String.format("Forbidden classpath entry: '%s'", file));
 			}
 		}

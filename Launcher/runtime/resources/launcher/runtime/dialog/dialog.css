@@ -1,0 +1,39 @@
+@import url(common.css);
+
+#layout {
+	-fx-background-color: white;
+}
+
+/* Auth pane styles */
+#layout > #authPane > #password.hasSaved {
+	-fx-prompt-text-fill: black;
+}
+
+#layout > #authPane > #profiles > .arrow-button {
+	-fx-padding: 0;
+}
+
+#layout > #authPane > #profiles > .arrow-button > .arrow {
+	-fx-padding: 0;
+}
+
+#layout > #authPane > #profiles > .list-cell {
+	-fx-padding: 5px 5px 5px 8px;
+}
+
+#layout > #authPane > #settings {
+	-fx-padding: 0;
+	-fx-graphic: url(images/settings.png);
+}
+
+/* Overlay styles */
+#layout > #overlayDim {
+	-fx-opacity: 0.0;
+	-fx-background-color: rgba(0, 0, 0, .5);
+}
+
+#layout > #overlayDim > #overlay {
+	-fx-opacity: 0.0;
+	-fx-background-color: white;
+	-fx-background-radius: 5px;
+}

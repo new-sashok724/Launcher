@@ -29,7 +29,7 @@ import launcher.serialize.signed.SignedObjectHolder;
 import launcher.serialize.stream.EnumSerializer;
 import launcher.serialize.stream.StreamObject;
 
-public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> {
+public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> { // TODO Controllable through API
 	@LauncherAPI public static final int MAX_QUEUE_SIZE = 128;
 
 	// Instance

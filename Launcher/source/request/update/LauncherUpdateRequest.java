@@ -23,17 +23,17 @@ import launcher.serialize.HOutput;
 import launcher.serialize.signed.SignedObjectHolder;
 import launcher.serialize.stream.StreamObject;
 
-public final class LauncherRequest extends Request<LauncherRequest.Result> {
+public final class LauncherUpdateRequest extends Request<LauncherUpdateRequest.Result> {
 	@LauncherAPI public static final Path BINARY_PATH = IOHelper.getCodeSource(Launcher.class);
 	@LauncherAPI public static final boolean EXE_BINARY = IOHelper.hasExtension(BINARY_PATH, "exe");
 
 	@LauncherAPI
-	public LauncherRequest(Launcher.Config config) {
+	public LauncherUpdateRequest(Launcher.Config config) {
 		super(config);
 	}
 
 	@LauncherAPI
-	public LauncherRequest() {
+	public LauncherUpdateRequest() {
 		this(null);
 	}
 

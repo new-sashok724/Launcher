@@ -6,12 +6,13 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import launcher.Launcher;
 import launcher.hasher.HashedDir;
 import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
-import launcher.request.update.LauncherRequest;
+import launcher.request.update.LauncherUpdateRequest;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.signed.SignedObjectHolder;
@@ -20,14 +21,17 @@ import launcher.serialize.stream.StreamObject;
 public final class Settings extends StreamObject {
 	private static final int SETTINGS_MAGIC = 0x724724_E4;
 
+	// Lock
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
 	// Dialog data
 	private String login = null;
 	private byte[] password = null;
 	private int profileIndex = 0;
 
 	// Offline cache
-	public LauncherRequest.Result launcherResult = null;
-	private Map<String, SignedObjectHolder<HashedDir>> offlineHDirs;
+	private LauncherUpdateRequest.Result launcherUpdateRequest = null;
+	private final Map<String, SignedObjectHolder<HashedDir>> offlineHDirs;
 
 	public Settings() {
 		offlineHDirs = new HashMap<>(4);
@@ -46,7 +50,7 @@ public final class Settings extends StreamObject {
 
 		// Read offline cache
 		RSAPublicKey publicKey = Launcher.Config.getDefault().publicKey;
-		launcherResult = input.readBoolean() ? new LauncherRequest.Result(input, publicKey) : null;
+		launcherUpdateRequest = input.readBoolean() ? new LauncherUpdateRequest.Result(input, publicKey) : null;
 		int offlineHDirsCount = input.readLength(0);
 		offlineHDirs = new HashMap<>(offlineHDirsCount);
 		for (int i = 0; i < offlineHDirsCount; i++) {
@@ -57,72 +61,141 @@ public final class Settings extends StreamObject {
 
 	@Override
 	public void write(HOutput output) throws IOException {
-		output.writeInt(SETTINGS_MAGIC);
+		lock.readLock().lock();
+		try {
+			output.writeInt(SETTINGS_MAGIC);
 
-		// Write dialog data
-		output.writeBoolean(login != null);
-		if (login != null) {
-			output.writeString(login, 255);
-		}
-		output.writeBoolean(password != null);
-		if (password != null) {
-			output.writeByteArray(password, SecurityHelper.CRYPTO_MAX_LENGTH);
-		}
-		output.writeLength(profileIndex, 0);
+			// Write dialog data
+			output.writeBoolean(login != null);
+			if (login != null) {
+				output.writeString(login, 255);
+			}
+			output.writeBoolean(password != null);
+			if (password != null) {
+				output.writeByteArray(password, SecurityHelper.CRYPTO_MAX_LENGTH);
+			}
+			output.writeLength(profileIndex, 0);
 
-		// Write offline cache
-		output.writeBoolean(launcherResult != null);
-		if (launcherResult != null) {
-			launcherResult.write(output);
-		}
-		output.writeLength(offlineHDirs.size(), 0);
-		for (Map.Entry<String, SignedObjectHolder<HashedDir>> entry : offlineHDirs.entrySet()) {
-			output.writeString(entry.getKey(), 255);
-			entry.getValue().write(output);
+			// Write offline cache
+			output.writeBoolean(launcherUpdateRequest != null);
+			if (launcherUpdateRequest != null) {
+				launcherUpdateRequest.write(output);
+			}
+			output.writeLength(offlineHDirs.size(), 0);
+			for (Map.Entry<String, SignedObjectHolder<HashedDir>> entry : offlineHDirs.entrySet()) {
+				output.writeString(entry.getKey(), 255);
+				entry.getValue().write(output);
+			}
+		} finally {
+			lock.readLock().unlock();
 		}
 	}
 
 	public SignedObjectHolder<HashedDir> getHDir(String name) {
-		return offlineHDirs.get(name);
+		lock.readLock().lock();
+		try {
+			return offlineHDirs.get(name);
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	public LauncherUpdateRequest.Result getLauncherUpdateRequest() {
+		lock.readLock().lock();
+		try {
+			return launcherUpdateRequest;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public String getLogin() {
-		return login;
+		lock.readLock().lock();
+		try {
+			return login;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public byte[] getPassword() {
-		return password == null ? null : Arrays.copyOf(password, password.length);
+		lock.readLock().lock();
+		try {
+			return password == null ? null : Arrays.copyOf(password, password.length);
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public int getProfileIndex() {
-		return profileIndex;
+		lock.readLock().lock();
+		try {
+			return profileIndex;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public boolean isPasswordSaved() {
-		return login == null || password != null;
+		lock.readLock().lock();
+		try {
+			return login == null || password != null;
+		} finally {
+			lock.readLock().unlock();
+		}
 	}
 
 	public boolean rememberHDir(String name, SignedObjectHolder<HashedDir> dir) {
 		if (!IOHelper.isValidFileName(name) || dir == null) {
 			return false;
 		}
-		offlineHDirs.put(name, dir);
+
+		// Apply changes
+		lock.writeLock().lock();
+		try {
+			offlineHDirs.put(name, dir);
+		} finally {
+			lock.writeLock().unlock();
+		}
 		return true;
 	}
 
+	public void setLauncherUpdateRequest(LauncherUpdateRequest.Result result) {
+		lock.writeLock().lock();
+		try {
+			launcherUpdateRequest = result;
+		} finally {
+			lock.writeLock().unlock();
+		}
+	}
+
 	public boolean setLogin(String login) {
-		if (login.length() > 255) {
+		if (login != null && login.length() > 255) {
 			return false;
 		}
-		this.login = login;
+
+		// Apply changes
+		lock.writeLock().lock();
+		try {
+			this.login = login;
+		} finally {
+			lock.writeLock().unlock();
+		}
 		return true;
 	}
 
 	public boolean setPassword(byte[] password) {
-		if (password.length > SecurityHelper.CRYPTO_MAX_LENGTH) {
+		if (password != null && password.length > SecurityHelper.CRYPTO_MAX_LENGTH) {
 			return false;
 		}
-		this.password = Arrays.copyOf(password, password.length);
+
+		// Apply changes
+		lock.writeLock().lock();
+		try {
+			this.password = password == null ? null : Arrays.copyOf(password, password.length);
+		} finally {
+			lock.writeLock().unlock();
+		}
 		return true;
 	}
 
@@ -130,7 +203,14 @@ public final class Settings extends StreamObject {
 		if (profileIndex < 0) {
 			return false;
 		}
-		this.profileIndex = profileIndex;
+
+		// Apply changes
+		lock.writeLock().lock();
+		try {
+			this.profileIndex = profileIndex;
+		} finally {
+			lock.writeLock().unlock();
+		}
 		return true;
 	}
 }

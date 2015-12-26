@@ -2,6 +2,7 @@ package launcher.runtime;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SignatureException;
 import java.util.Properties;
@@ -17,9 +18,8 @@ import launcher.runtime.storage.Settings;
 import launcher.serialize.HInput;
 
 public final class Mainclass extends Application {
-	public static final Properties PROPERTIES = new Properties();
-	public static final Path DIR = IOHelper.HOME_DIR.resolve(
-		IOHelper.toPath(PROPERTIES.getProperty("dir", "launcher")));
+	public static final Properties CONFIG = new Properties();
+	public static final Path DIR;
 	public static final Settings SETTINGS;
 
 	public Mainclass() {
@@ -28,11 +28,11 @@ public final class Mainclass extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		primaryStage.setResizable(false);
-		primaryStage.setTitle(PROPERTIES.getProperty("window.title", "* Missing title *"));
-		primaryStage.setAlwaysOnTop(Boolean.parseBoolean(PROPERTIES.getProperty("window.alwaysOnTop")));
+		primaryStage.setTitle(CONFIG.getProperty("window.title", "sashok724's Launcher"));
+		primaryStage.setAlwaysOnTop(Boolean.parseBoolean(CONFIG.getProperty("window.alwaysOnTop")));
 
 		// Set icon if specified
-		String icon = PROPERTIES.getProperty("window.icon", "");
+		String icon = CONFIG.getProperty("window.icon", "");
 		if (!icon.isEmpty()) {
 			primaryStage.getIcons().add(new Image(IOHelper.getResourceURL(icon).toString()));
 		}
@@ -57,10 +57,21 @@ public final class Mainclass extends Application {
 	}
 
 	static {
+		// Load launcher config
 		try (BufferedReader reader = IOHelper.newReader(IOHelper.getResourceURL("launcher/runtime/config.properties"))) {
-			PROPERTIES.load(reader);
+			CONFIG.load(reader);
 		} catch (IOException e) {
 			throw new RuntimeException("Can't load config.properties", e);
+		}
+
+		// Resolve and create dir
+		DIR = IOHelper.HOME_DIR.resolve(CONFIG.getProperty("dir", "launcher"));
+		if (!IOHelper.isDir(DIR)) {
+			try {
+				Files.createDirectory(DIR);
+			} catch (IOException e) {
+				LogHelper.error(e);
+			}
 		}
 
 		// Load settings

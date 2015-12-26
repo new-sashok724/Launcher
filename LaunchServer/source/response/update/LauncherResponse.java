@@ -3,7 +3,7 @@ package launchserver.response.update;
 import java.io.IOException;
 
 import launcher.request.RequestException;
-import launcher.request.update.LauncherRequest;
+import launcher.request.update.LauncherUpdateRequest;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.signed.SignedBytesHolder;
@@ -25,7 +25,7 @@ public final class LauncherResponse extends Response {
 		writeNoError(output);
 
 		// Write request result
-		LauncherRequest.Result result = new LauncherRequest.Result(bytes.getSign(), server.getProfiles());
+		LauncherUpdateRequest.Result result = new LauncherUpdateRequest.Result(bytes.getSign(), server.getProfiles());
 		result.write(output);
 		output.flush();
 

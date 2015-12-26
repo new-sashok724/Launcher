@@ -12,21 +12,22 @@ import launcher.helper.VerifyHelper;
 import launcher.request.Request;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
+import launcher.serialize.stream.StreamObject;
 
 public final class AuthRequest extends Request<AuthRequest.Result> {
 	private final String login;
-	private final byte[] encryptedPassword;
+	private final byte[] password;
 
 	@LauncherAPI
-	public AuthRequest(Launcher.Config config, String login, byte[] encryptedPassword) {
+	public AuthRequest(Launcher.Config config, String login, byte[] password) {
 		super(config);
 		this.login = VerifyHelper.verify(login, VerifyHelper.NOT_EMPTY, "Login can't be empty");
-		this.encryptedPassword = Arrays.copyOf(encryptedPassword, encryptedPassword.length);
+		this.password = Arrays.copyOf(password, password.length);
 	}
 
 	@LauncherAPI
-	public AuthRequest(String login, byte[] encryptedPassword) {
-		this(null, login, encryptedPassword);
+	public AuthRequest(String login, byte[] password) {
+		this(null, login, password);
 	}
 
 	@Override
@@ -37,23 +38,34 @@ public final class AuthRequest extends Request<AuthRequest.Result> {
 	@Override
 	protected Result requestDo(HInput input, HOutput output) throws IOException {
 		output.writeString(login, 255);
-		output.writeByteArray(encryptedPassword, IOHelper.BUFFER_SIZE);
+		output.writeByteArray(password, IOHelper.BUFFER_SIZE);
 		output.flush();
 
 		// Read UUID and access token
 		readError(input);
-		PlayerProfile pp = new PlayerProfile(input);
-		String accessToken = input.readASCII(-SecurityHelper.TOKEN_STRING_LENGTH);
-		return new Result(pp, accessToken);
+		return new Result(input);
 	}
 
-	public static final class Result {
+	public static final class Result extends StreamObject {
 		@LauncherAPI public final PlayerProfile pp;
 		@LauncherAPI public final String accessToken;
 
-		private Result(PlayerProfile pp, String accessToken) {
+		@LauncherAPI
+		public Result(HInput input) throws IOException {
+			pp = new PlayerProfile(input);
+			accessToken = input.readASCII(-SecurityHelper.TOKEN_STRING_LENGTH);
+		}
+
+		@LauncherAPI
+		public Result(PlayerProfile pp, String accessToken) {
 			this.pp = pp;
 			this.accessToken = accessToken;
+		}
+
+		@Override
+		public void write(HOutput output) throws IOException {
+			pp.write(output);
+			output.writeASCII(accessToken, -SecurityHelper.TOKEN_STRING_LENGTH);
 		}
 	}
 }

@@ -5,11 +5,13 @@ import javax.crypto.IllegalBlockSizeException;
 import java.util.Arrays;
 import java.util.UUID;
 
+import launcher.client.PlayerProfile;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.RequestException;
+import launcher.request.auth.AuthRequest;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
@@ -66,8 +68,9 @@ public final class AuthResponse extends Response {
 		writeNoError(output);
 
 		// Write profile and UUID
-		ProfileByUUIDResponse.getProfile(server, uuid, username).write(output);
-		output.writeASCII(accessToken, -SecurityHelper.TOKEN_STRING_LENGTH);
+		PlayerProfile profile = ProfileByUUIDResponse.getProfile(server, uuid, username);
+		AuthRequest.Result result = new AuthRequest.Result(profile, accessToken);
+		result.write(output);
 	}
 
 	private static String echo(int length) {

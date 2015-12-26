@@ -36,7 +36,7 @@ import launcher.helper.JVMHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
-import launcher.request.update.LauncherRequest;
+import launcher.request.update.LauncherUpdateRequest;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.signed.SignedObjectHolder;
@@ -157,7 +157,7 @@ public final class ClientLauncher {
 
 		// Verify ClientLauncher sign
 		LogHelper.debug("Verifying ClientLauncher sign and classpath");
-		SecurityHelper.verifySign(LauncherRequest.BINARY_PATH, params.launcherSign, publicKey);
+		SecurityHelper.verifySign(LauncherUpdateRequest.BINARY_PATH, params.launcherSign, publicKey);
 
 		// Start client with WatchService monitoring
 		LogHelper.debug("Starting JVM and client WatchService");

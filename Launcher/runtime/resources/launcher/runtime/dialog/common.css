@@ -1,0 +1,67 @@
+* {
+	-fx-font-family: "Open Sans", sans-serif;
+}
+
+Button, CheckBox, ComboBox {
+	-fx-cursor: hand;
+}
+
+/* Button */
+.button {
+	-fx-background-color: #e0e1e2;
+	-fx-background-radius: 3px;
+	-fx-background-insets: none;
+
+	-fx-text-fill: rgba(0, 0, 0, .8);
+	-fx-font-size: 9pt;
+	-fx-font-weight: bold;
+}
+
+.button:hover,
+.button:focused {
+	-fx-background-color: #cacbcd;
+}
+
+.button:pressed {
+	-fx-background-color: #babbbc;
+}
+
+/* Default button */
+.button:default {
+	-fx-background-color: #2185d0;
+	-fx-text-fill: white;
+}
+
+.button:default:hover,
+.button:default:focused {
+	-fx-background-color: #1678c2;
+}
+
+.button:default:pressed {
+	-fx-background-color: #1a69a4;
+}
+
+/* Input */
+.text-input,
+.check-box > .box,
+.combo-box-base, .combo-box-popup > .list-view {
+	-fx-background-color: rgba(34, 36, 38, .15), white;
+	-fx-background-insets: 0, 1;
+	-fx-background-radius: 3px;
+}
+
+.text-input:focused,
+.check-box:hover > .box, .check-box:focused > .box,
+.combo-box-base:hover, .combo-box-base:focused, .combo-box-base:showing {
+	-fx-background-color: rgba(34, 36, 38, .35), white;
+}
+
+/* Combobox-specific */
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
+	-fx-background-color: white;
+	-fx-text-fill: black;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
+	-fx-background-color: #efefef;
+}

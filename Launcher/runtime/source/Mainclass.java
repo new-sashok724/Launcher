@@ -45,6 +45,9 @@ public final class Mainclass extends Application {
 		primaryStage.sizeToScene();
 		primaryStage.centerOnScreen();
 		primaryStage.show();
+
+		// Initialize launcher
+		controller.initLauncher();
 	}
 
 	public static void main(String... args) throws Exception {

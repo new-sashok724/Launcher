@@ -5,7 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
-<BorderPane xmlns:fx="http://javafx.com/fxml/1" fx:id="overlay" maxWidth="400.0" maxHeight="100.0">
+<BorderPane fx:id="overlay" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" maxWidth="400.0" maxHeight="100.0">
 	<stylesheets>
 		<URL value="@spinner.css" />
 	</stylesheets>
@@ -21,6 +21,10 @@
 
 	<!-- Description -->
 	<center>
-		<Label fx:id="description" BorderPane.alignment="CENTER_LEFT" />
+		<Label fx:id="description" BorderPane.alignment="CENTER_LEFT">
+			<BorderPane.margin>
+				<Insets top="10.0" bottom="10.0" right="26.0" />
+			</BorderPane.margin>
+		</Label>
 	</center>
 </BorderPane>

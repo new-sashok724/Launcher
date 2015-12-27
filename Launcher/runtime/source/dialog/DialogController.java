@@ -3,10 +3,14 @@ package launcher.runtime.dialog;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.NoSuchFileException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -15,15 +19,22 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBoxBase;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import launcher.client.ClientProfile;
+import launcher.client.ServerPinger;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
@@ -35,25 +46,32 @@ public final class DialogController {
 	private static final ResourceBundle LOCALE = ResourceBundle.getBundle("launcher.runtime.dialog.locale");
 
 	// Instance
+	private final Map<ClientProfile, ServerPinger> pingers = new HashMap<>(16);
 	private final Application app;
 	private final Stage stage;
 
+	// Overlay
+	private final SpinnerController spinnerOverlay;
+
 	// Layout
 	@FXML private Pane root, layout, overlayDim, overlay;
-	@FXML private WebView news;
 
-	// Input controls
-	@FXML private CheckBox savePassword;
+	// Controls
+	@FXML private WebView news;
 	@FXML private TextField login, password;
-	@FXML private ComboBoxBase<SignedObjectHolder<ClientProfile>> profiles;
+	@FXML private CheckBox savePassword;
+	@FXML private ComboBox<SignedObjectHolder<ClientProfile>> profiles;
 	@FXML private Hyperlink link;
 
 	// Action controls
 	@FXML private ButtonBase play, settings;
 
-	public DialogController(Application app, Stage stage) {
+	public DialogController(Application app, Stage stage) throws IOException {
 		this.app = app;
 		this.stage = stage;
+
+		// Spinner
+		spinnerOverlay = new SpinnerController(this);
 	}
 
 	public void hideOverlay(double delay, EventHandler<ActionEvent> handler) {
@@ -76,7 +94,22 @@ public final class DialogController {
 		});
 	}
 
-	public void initOfflineMode() throws NoSuchFileException {
+	public void initLauncher() {
+		spinnerOverlay.reset();
+		showOverlay(spinnerOverlay.getOverlay(), e -> spinnerOverlay.makeLauncherUpdateRequest(result -> {
+			Mainclass.SETTINGS.setLauncherUpdateRequest(result);
+			if (spinnerOverlay.isOfflineMode()) {
+				initOfflineMode();
+			}
+
+			// Init profiles list and hide overlay
+			setProfilesList(result.profiles);
+			hideOverlay(0.0D, null);
+			return null;
+		}));
+	}
+
+	public void initOfflineMode() {
 		stage.setTitle(stage.getTitle() + " [Offline]");
 
 		// Set login field as username field
@@ -91,7 +124,12 @@ public final class DialogController {
 		password.setText("");
 
 		// Switch news view to offline page
-		URL offlineURL = IOHelper.getResourceURL("launcher/runtime/dialog/overlay/offline/index.html");
+		URL offlineURL;
+		try {
+			offlineURL = IOHelper.getResourceURL("launcher/runtime/dialog/overlay/offline/index.html");
+		} catch (NoSuchFileException e) {
+			throw new RuntimeException(e);
+		}
 		news.getEngine().load(offlineURL.toString());
 	}
 
@@ -121,6 +159,10 @@ public final class DialogController {
 		// Initialize save password checkbox
 		savePassword.setSelected(Mainclass.SETTINGS.isPasswordSaved());
 
+		// Initialize profiles combobox
+		profiles.setCellFactory(ProfileListCell::new);
+		profiles.setButtonCell(new ProfileListCell(null));
+
 		// Initialize hyperlink
 		link.setText(Mainclass.CONFIG.getProperty("dialog.link.text", "Missing text"));
 		link.setOnAction(e -> app.getHostServices().showDocument(
@@ -129,8 +171,6 @@ public final class DialogController {
 		// Initialize action buttons
 		play.setOnAction(this::play);
 		settings.setOnAction(this::settings);
-
-		// Return initialized root
 		return root;
 	}
 
@@ -183,12 +223,60 @@ public final class DialogController {
 	}
 
 	private void play(ActionEvent e) {
-		try {
-			SpinnerController controller = new SpinnerController();
-			showOverlay(controller.getOverlay(), null);
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		if (overlay != null) {
+			return;
 		}
+
+		// Get profile
+		SelectionModel<SignedObjectHolder<ClientProfile>> sm = profiles.getSelectionModel();
+		SignedObjectHolder<ClientProfile> profile = sm.getSelectedItem();
+		if (profile == null) { // Verify is profile selected
+			return;
+		}
+
+		// Get login
+		String loginValue = login.getText();
+		if (loginValue.isEmpty()) { // Verify is login specified
+			return;
+		}
+
+		// Get password
+		byte[] passwordValue = null;
+		if (!spinnerOverlay.isOfflineMode()) {
+			String passwordPlain = password.getText();
+			if (!passwordPlain.isEmpty()) {
+				passwordValue = Mainclass.SETTINGS.encryptPassword(passwordPlain);
+			} else if (Mainclass.SETTINGS.getPassword() != null) {
+				passwordValue = Mainclass.SETTINGS.getPassword();
+			} else { // No password specified
+				return;
+			}
+
+			// Remember or reset password
+			Mainclass.SETTINGS.setPassword(savePassword.isSelected() ? passwordValue : null);
+		}
+		Mainclass.SETTINGS.setLogin(loginValue);
+
+		// Show auth overlay
+		spinnerOverlay.reset();
+		byte[] fPassword = passwordValue;
+		showOverlay(spinnerOverlay.getOverlay(), e2 -> spinnerOverlay.makeAuthRequest(loginValue, fPassword, result -> {
+			System.out.println("KeK");
+			return null;
+		}));
+	}
+
+	private void setProfilesList(Collection<SignedObjectHolder<ClientProfile>> profilesList) {
+		profiles.setItems(FXCollections.observableArrayList(profilesList));
+		for (SignedObjectHolder<ClientProfile> profile : profilesList) {
+			pingers.put(profile.object, new ServerPinger(
+				profile.object.getServerSocketAddress(), profile.object.getVersion()));
+		}
+
+		// Set profiles seleciton model
+		SelectionModel<SignedObjectHolder<ClientProfile>> sm = profiles.getSelectionModel();
+		sm.selectedIndexProperty().addListener((o, ov, nv) -> Mainclass.SETTINGS.setProfileIndex(nv.intValue()));
+		sm.select(Mainclass.SETTINGS.getProfileIndex(profilesList.size()));
 	}
 
 	private void settings(ActionEvent e) {
@@ -200,5 +288,49 @@ public final class DialogController {
 		loader.setCharset(IOHelper.UNICODE_CHARSET);
 		loader.setController(controller);
 		return loader.load();
+	}
+
+	private final class ProfileListCell extends ListCell<SignedObjectHolder<ClientProfile>> {
+		@FXML private Pane cell;
+		@FXML private Label title, status;
+		@FXML private Circle statusCirc;
+
+		private ProfileListCell(ListView<SignedObjectHolder<ClientProfile>> view) {
+			setText(null);
+			try {
+				URL resourceURL = IOHelper.getResourceURL("launcher/runtime/dialog/profileCell.fxml");
+				loadFXML(resourceURL, this);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		@Override
+		protected void updateItem(SignedObjectHolder<ClientProfile> item, boolean empty) {
+			super.updateItem(item, empty);
+			setGraphic(empty ? null : cell);
+			if (empty) { // No need to update controls
+				return;
+			}
+
+			// Update title
+			title.setText(item.object.getTitle());
+
+			// Update server status
+			setServerStatus("...", Color.GREY);
+			DialogTask<ServerPinger.Result> task = new DialogTask<>(() -> pingers.get(item.object).ping());
+			task.setOnSucceeded(e -> {
+				ServerPinger.Result result = task.getValue();
+				Color color = result.isOverfilled() ? Color.YELLOW : Color.GREEN;
+				setServerStatus(String.format("%d из %d", result.onlinePlayers, result.maxPlayers), color);
+			});
+			task.setOnFailed(e -> setServerStatus("Недоступен", Color.RED));
+			task.start();
+		}
+
+		private void setServerStatus(String s, Color color) {
+			status.setText(s);
+			statusCirc.setFill(color);
+		}
 	}
 }

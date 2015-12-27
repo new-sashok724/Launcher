@@ -23,18 +23,24 @@ import launcher.request.RequestException;
 import launcher.request.auth.AuthRequest;
 import launcher.request.update.LauncherUpdateRequest;
 import launcher.runtime.Mainclass;
+import launcher.runtime.dialog.DialogController;
+import launcher.runtime.dialog.DialogTask;
 import launcher.serialize.signed.SignedObjectHolder;
 
 public final class SpinnerController extends OverlayController {
 	private static final Image SPINNER_IMAGE, ERROR_IMAGE;
 
 	// Instance
-	@FXML private ImageView spinner;
-	@FXML private Labeled description;
+	private final DialogController dialog;
 	private boolean offlineMode;
 
-	public SpinnerController() throws IOException {
+	// Controls
+	@FXML private ImageView spinner;
+	@FXML private Labeled description;
+
+	public SpinnerController(DialogController dialog) throws IOException {
 		super(IOHelper.getResourceURL("launcher/runtime/dialog/overlay/spinner/spinner.fxml"));
+		this.dialog = dialog;
 	}
 
 	@Override
@@ -52,7 +58,7 @@ public final class SpinnerController extends OverlayController {
 		SignedObjectHolder<HashedDir> assetHDir, SignedObjectHolder<HashedDir> clientHDir,
 		SignedObjectHolder<ClientProfile> profile, ClientLauncher.Params params, boolean pipeOutput,
 		Callback<Process, Void> callback) {
-		OverlayTask<Process> task = new OverlayTask<>(() ->
+		DialogTask<Process> task = new DialogTask<>(() ->
 			ClientLauncher.launch(jvmDir, jvmHDir, assetHDir, clientHDir, profile, params, pipeOutput));
 		setTaskProperties(task, callback, null);
 
@@ -62,8 +68,8 @@ public final class SpinnerController extends OverlayController {
 	}
 
 	public void makeAuthRequest(String login, byte[] password, Callback<AuthRequest.Result, Void> callback) {
-		OverlayTask<AuthRequest.Result> task = offlineMode ?
-			new OverlayTask<>(() -> SpinnerController.offlineAuthRequest(login)) :
+		DialogTask<AuthRequest.Result> task = offlineMode ?
+			new DialogTask<>(() -> SpinnerController.offlineAuthRequest(login)) :
 			newRequestTask(new AuthRequest(login, password));
 		setTaskProperties(task, callback, null);
 
@@ -73,17 +79,17 @@ public final class SpinnerController extends OverlayController {
 	}
 
 	public void makeLauncherUpdateRequest(Callback<LauncherUpdateRequest.Result, Void> callback) {
-		OverlayTask<LauncherUpdateRequest.Result> task = offlineMode ?
-			new OverlayTask<>(SpinnerController::offlineLauncherUpdateRequest) :
+		DialogTask<LauncherUpdateRequest.Result> task = offlineMode ?
+			new DialogTask<>(SpinnerController::offlineLauncherUpdateRequest) :
 			newRequestTask(new LauncherUpdateRequest());
-		setTaskProperties(task, callback, error -> {
+		setTaskProperties(task, callback, exc -> {
 			if (offlineMode) { // We're already in offline
 				return null;
 			}
 
 			// Repeat request, but in offline mode
 			offlineMode = true;
-			// TODO Swap overlay
+			dialog.swapOverlay(2500.0D, getOverlay(), e -> makeLauncherUpdateRequest(callback));
 			return null;
 		});
 
@@ -105,11 +111,13 @@ public final class SpinnerController extends OverlayController {
 
 			// Set error message
 			Throwable exc = task.getException();
-			LogHelper.error(exc);
 			setError(exc.toString());
 			if (eCallback != null) {
 				eCallback.call(exc);
 			}
+
+			// Log error
+			LogHelper.error(exc);
 		});
 		task.setOnSucceeded(e -> {
 			description.textProperty().unbind();

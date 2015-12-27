@@ -15,14 +15,14 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
+import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
 
 public final class JARLauncherBinary extends LauncherBinary {
-	//	@LauncherAPI public static final Path RUNTIME_DIR = IOHelper.WORKING_DIR.resolve(Launcher.RUNTIME_DIR);
-//	@LauncherAPI public static final Path INIT_SCRIPT_FILE = RUNTIME_DIR.resolve(Launcher.INIT_SCRIPT_FILE);
 	@LauncherAPI public static final Path JAR_BINARY_FILE = IOHelper.WORKING_DIR.resolve("Launcher.jar");
 
 	@LauncherAPI
@@ -53,15 +53,15 @@ public final class JARLauncherBinary extends LauncherBinary {
 			// Create launcher config file
 			byte[] launcherConfigBytes;
 			try (ByteArrayOutputStream configArray = IOHelper.newByteArrayOutput()) {
-//				try (HOutput configOutput = new HOutput(configArray)) {
-//					new Launcher.Config(server.config.getAddress(), server.config.port,
-//						server.publicKey, runtime).write(configOutput);
-//				}
+				try (HOutput configOutput = new HOutput(configArray)) {
+					new Launcher.Config(server.config.getAddress(), server.config.port,
+						server.publicKey).write(configOutput);
+				}
 				launcherConfigBytes = configArray.toByteArray();
 			}
 
 			// Write launcher config file
-//			output.putNextEntry(IOHelper.newZipEntry(Launcher.DEFAULT_FILE));
+			output.putNextEntry(IOHelper.newZipEntry("config.bin"));
 			output.write(launcherConfigBytes);
 		}
 	}

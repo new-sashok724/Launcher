@@ -1,5 +1,7 @@
 package launcher.runtime.storage;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
 import java.io.IOException;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPublicKey;
@@ -91,6 +93,18 @@ public final class Settings extends StreamObject {
 		}
 	}
 
+	public byte[] encryptPassword(String password) {
+		byte[] passwordEncrypted;
+		try {
+			RSAPublicKey publicKey = Launcher.Config.getDefault().publicKey;
+			passwordEncrypted = SecurityHelper.newRSAEncryptCipher(publicKey).
+				doFinal(password.getBytes(IOHelper.UNICODE_CHARSET));
+		} catch (IllegalBlockSizeException | BadPaddingException e) {
+			throw new AssertionError(e);
+		}
+		return passwordEncrypted;
+	}
+
 	public SignedObjectHolder<HashedDir> getHDir(String name) {
 		lock.readLock().lock();
 		try {
@@ -127,10 +141,10 @@ public final class Settings extends StreamObject {
 		}
 	}
 
-	public int getProfileIndex() {
+	public int getProfileIndex(int size) {
 		lock.readLock().lock();
 		try {
-			return profileIndex;
+			return Math.min(profileIndex, size - 1);
 		} finally {
 			lock.readLock().unlock();
 		}

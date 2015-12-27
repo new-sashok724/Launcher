@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -55,14 +54,12 @@ public final class Launcher {
 		// Instance
 		@LauncherAPI public final InetSocketAddress address;
 		@LauncherAPI public final RSAPublicKey publicKey;
-		@LauncherAPI public final byte[] runtimeSign;
 
 		@LauncherAPI
 		@SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
-		public Config(String address, int port, RSAPublicKey publicKey, byte[] runtimeSign) {
+		public Config(String address, int port, RSAPublicKey publicKey) {
 			this.address = InetSocketAddress.createUnresolved(address, port);
 			this.publicKey = Objects.requireNonNull(publicKey, "publicKey");
-			this.runtimeSign = Arrays.copyOf(runtimeSign, runtimeSign.length);
 		}
 
 		@LauncherAPI
@@ -71,7 +68,6 @@ public final class Launcher {
 			address = InetSocketAddress.createUnresolved(
 				ADDRESS_OVERRIDE == null ? localAddress : ADDRESS_OVERRIDE, input.readLength(65535));
 			publicKey = SecurityHelper.toPublicRSAKey(input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH));
-			runtimeSign = input.readByteArray(-SecurityHelper.RSA_KEY_LENGTH);
 
 			// Print warning if address override has been enabled
 			if (ADDRESS_OVERRIDE != null) {
@@ -84,7 +80,6 @@ public final class Launcher {
 			output.writeASCII(address.getHostString(), 255);
 			output.writeLength(address.getPort(), 65535);
 			output.writeByteArray(publicKey.getEncoded(), SecurityHelper.CRYPTO_MAX_LENGTH);
-			output.writeByteArray(runtimeSign, -SecurityHelper.RSA_KEY_LENGTH);
 		}
 
 		@LauncherAPI

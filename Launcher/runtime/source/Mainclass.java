@@ -11,11 +11,14 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
+import launcher.helper.JVMHelper;
 import launcher.helper.LogHelper;
 import launcher.runtime.dialog.DialogController;
 import launcher.runtime.storage.Settings;
 import launcher.serialize.HInput;
+import launcher.serialize.HOutput;
 
 public final class Mainclass extends Application {
 	public static final Properties CONFIG = new Properties();
@@ -39,7 +42,7 @@ public final class Mainclass extends Application {
 
 		// Set dialog controller and scene
 		DialogController controller = new DialogController(this, primaryStage);
-		primaryStage.setScene(new Scene(controller.loadDialog()));
+		primaryStage.setScene(new Scene(controller.getRoot()));
 
 		// Fix and show stage
 		primaryStage.sizeToScene();
@@ -61,6 +64,7 @@ public final class Mainclass extends Application {
 
 	static {
 		// Load launcher config
+		LogHelper.debug("Loading runtime config file");
 		try (BufferedReader reader = IOHelper.newReader(IOHelper.getResourceURL("launcher/runtime/config.properties"))) {
 			CONFIG.load(reader);
 		} catch (IOException e) {
@@ -68,8 +72,10 @@ public final class Mainclass extends Application {
 		}
 
 		// Resolve and create dir
+		LogHelper.debug("Resolving runtime directory");
 		DIR = IOHelper.HOME_DIR.resolve(CONFIG.getProperty("dir", "launcher"));
 		if (!IOHelper.isDir(DIR)) {
+			LogHelper.subDebug("Creating runtime directory");
 			try {
 				Files.createDirectory(DIR);
 			} catch (IOException e) {
@@ -78,12 +84,26 @@ public final class Mainclass extends Application {
 		}
 
 		// Load settings
+		LogHelper.debug("Loading settings file");
 		Settings settings;
-		try (HInput input = new HInput(IOHelper.newInput(DIR.resolve("settings.bin")))) {
+		Path settingsFile = DIR.resolve("settings.bin");
+		try (HInput input = new HInput(IOHelper.newInput(settingsFile))) {
 			settings = new Settings(input);
 		} catch (IOException | SignatureException e) {
+			LogHelper.error(e);
 			settings = new Settings();
 		}
 		SETTINGS = settings;
+
+		// Set settings shutdown hook
+		Settings finalSettings = settings;
+		JVMHelper.RUNTIME.addShutdownHook(CommonHelper.newThread("Settings Save Thread", false, () -> {
+			LogHelper.debug("Saving settings file");
+			try (HOutput output = new HOutput(IOHelper.newOutput(settingsFile))) {
+				finalSettings.write(output);
+			} catch (IOException e) {
+				LogHelper.error(e);
+			}
+		}));
 	}
 }

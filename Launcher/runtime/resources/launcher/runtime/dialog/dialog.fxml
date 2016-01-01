@@ -38,7 +38,11 @@
 
 				<!-- Second row -->
 				<ComboBox fx:id="profiles" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200.0" prefHeight="30.0" />
-				<CheckBox fx:id="savePassword" GridPane.rowIndex="2" GridPane.columnIndex="2" prefWidth="200.0" prefHeight="30.0" text="%dialog.savePassword" />
+				<CheckBox fx:id="savePassword" GridPane.rowIndex="2" GridPane.columnIndex="2" prefWidth="200.0" prefHeight="30.0" text="%dialog.savePassword">
+					<GridPane.margin>
+						<Insets left="5.0" />
+					</GridPane.margin>
+				</CheckBox>
 				<Hyperlink fx:id="link" GridPane.rowIndex="2" GridPane.columnIndex="3" GridPane.columnSpan="2" prefWidth="170.0" prefHeight="30.0" />
 			</GridPane>
 		</bottom>

@@ -16,6 +16,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
@@ -36,14 +37,14 @@ import javafx.util.Duration;
 import launcher.client.ClientProfile;
 import launcher.client.ServerPinger;
 import launcher.helper.IOHelper;
-import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.runtime.Mainclass;
+import launcher.runtime.dialog.overlay.SettingsController;
 import launcher.runtime.dialog.overlay.SpinnerController;
 import launcher.serialize.signed.SignedObjectHolder;
 
-public final class DialogController {
-	private static final ResourceBundle LOCALE = ResourceBundle.getBundle("launcher.runtime.dialog.locale");
+public final class DialogController implements Initializable {
+	public static final ResourceBundle LOCALE = ResourceBundle.getBundle("launcher.runtime.dialog.locale");
 
 	// Instance
 	private final Map<ClientProfile, ServerPinger> pingers = new HashMap<>(16);
@@ -52,6 +53,7 @@ public final class DialogController {
 
 	// Overlay
 	private final SpinnerController spinnerOverlay;
+	private final SettingsController settingsOverlay;
 
 	// Layout
 	@FXML private Pane root, layout, overlayDim, overlay;
@@ -69,9 +71,54 @@ public final class DialogController {
 	public DialogController(Application app, Stage stage) throws IOException {
 		this.app = app;
 		this.stage = stage;
+		loadFXML(IOHelper.getResourceURL("launcher/runtime/dialog/dialog.fxml"), this);
 
-		// Spinner
+		// Init overlays
 		spinnerOverlay = new SpinnerController(this);
+		settingsOverlay = new SettingsController(this);
+	}
+
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		// Initialize webview
+		news.setContextMenuEnabled(false);
+		WebEngine engine = news.getEngine();
+		engine.setUserDataDirectory(Mainclass.DIR.resolve("webserver").toFile());
+		engine.load(Mainclass.CONFIG.getProperty("dialog.newsURL", "https://launcher.sashok724.net/"));
+
+		// Initialize login field
+		login.setOnAction(this::play);
+		String loginValue = Mainclass.SETTINGS.getLogin();
+		if (loginValue != null) {
+			login.setText(loginValue);
+		}
+
+		// Initialize password field
+		password.setOnAction(this::play);
+		if (Mainclass.SETTINGS.getPassword() != null) {
+			password.getStyleClass().add("hasSaved");
+			password.setPromptText(LOCALE.getString("dialog.savedPassword"));
+		}
+
+		// Initialize save password checkbox
+		savePassword.setSelected(Mainclass.SETTINGS.isPasswordSaved());
+
+		// Initialize profiles combobox
+		profiles.setCellFactory(ProfileListCell::new);
+		profiles.setButtonCell(new ProfileListCell(null));
+
+		// Initialize hyperlink
+		link.setText(Mainclass.CONFIG.getProperty("dialog.link.text", "My site"));
+		link.setOnAction(e -> app.getHostServices().showDocument(
+			Mainclass.CONFIG.getProperty("dialog.link.url", "https://mysite.tld/")));
+
+		// Initialize action buttons
+		play.setOnAction(this::play);
+		settings.setOnAction(this::settings);
+	}
+
+	public Pane getRoot() {
+		return root;
 	}
 
 	public void hideOverlay(double delay, EventHandler<ActionEvent> handler) {
@@ -131,47 +178,6 @@ public final class DialogController {
 			throw new RuntimeException(e);
 		}
 		news.getEngine().load(offlineURL.toString());
-	}
-
-	public Pane loadDialog() throws IOException {
-		loadFXML(IOHelper.getResourceURL("launcher/runtime/dialog/dialog.fxml"), this);
-
-		// Initialize webview
-		news.setContextMenuEnabled(false);
-		WebEngine engine = news.getEngine();
-		engine.setUserDataDirectory(Mainclass.DIR.resolve("webserver").toFile());
-		engine.load("https://launcher.sashok724.net/");
-
-		// Initialize login field
-		login.setOnAction(this::play);
-		String loginValue = Mainclass.SETTINGS.getLogin();
-		if (loginValue != null) {
-			login.setText(loginValue);
-		}
-
-		// Initialize password field
-		password.setOnAction(this::play);
-		if (Mainclass.SETTINGS.getPassword() != null) {
-			password.getStyleClass().add("hasSaved");
-			password.setPromptText(LOCALE.getString("dialog.savedPassword"));
-		}
-
-		// Initialize save password checkbox
-		savePassword.setSelected(Mainclass.SETTINGS.isPasswordSaved());
-
-		// Initialize profiles combobox
-		profiles.setCellFactory(ProfileListCell::new);
-		profiles.setButtonCell(new ProfileListCell(null));
-
-		// Initialize hyperlink
-		link.setText(Mainclass.CONFIG.getProperty("dialog.link.text", "Missing text"));
-		link.setOnAction(e -> app.getHostServices().showDocument(
-			Mainclass.CONFIG.getProperty("dialog.link.url", "https://mysite.tld/")));
-
-		// Initialize action buttons
-		play.setOnAction(this::play);
-		settings.setOnAction(this::settings);
-		return root;
 	}
 
 	public void showOverlay(Pane newOverlay, EventHandler<ActionEvent> handler) {
@@ -280,7 +286,12 @@ public final class DialogController {
 	}
 
 	private void settings(ActionEvent e) {
-		LogHelper.debug("Settings");
+		if (overlay != null) {
+			return;
+		}
+
+		// Show settings overlay
+		showOverlay(settingsOverlay.getOverlay(), null);
 	}
 
 	public static Node loadFXML(URL url, Object controller) throws IOException {
@@ -306,7 +317,7 @@ public final class DialogController {
 		}
 
 		@Override
-		protected void updateItem(SignedObjectHolder<ClientProfile> item, boolean empty) {
+		public void updateItem(SignedObjectHolder<ClientProfile> item, boolean empty) {
 			super.updateItem(item, empty);
 			setGraphic(empty ? null : cell);
 			if (empty) { // No need to update controls
@@ -322,9 +333,9 @@ public final class DialogController {
 			task.setOnSucceeded(e -> {
 				ServerPinger.Result result = task.getValue();
 				Color color = result.isOverfilled() ? Color.YELLOW : Color.GREEN;
-				setServerStatus(String.format("%d из %d", result.onlinePlayers, result.maxPlayers), color);
+				setServerStatus(String.format("%d / %d", result.onlinePlayers, result.maxPlayers), color);
 			});
-			task.setOnFailed(e -> setServerStatus("Недоступен", Color.RED));
+			task.setOnFailed(e -> setServerStatus(LOCALE.getString("dialog.unavailable"), Color.RED));
 			task.start();
 		}
 

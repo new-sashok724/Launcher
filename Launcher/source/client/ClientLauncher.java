@@ -102,8 +102,9 @@ public final class ClientLauncher {
 		// Fill CLI arguments
 		List<String> args = new LinkedList<>();
 		args.add(javaBin.toString());
-		if (params.ram > 0 && params.ram <= JVMHelper.RAM) {
-			args.add("-Xmx" + params.ram + 'M');
+		if (params.heapMiB > 0 && params.heapMiB <= JVMHelper.RAM) {
+			args.add("-Xms" + (params.heapMiB >> 1) + 'M');
+			args.add("-Xmx" + params.heapMiB + 'M');
 		}
 		args.add(jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())));
 
@@ -307,13 +308,13 @@ public final class ClientLauncher {
 		@LauncherAPI public final String accessToken;
 		@LauncherAPI public final boolean autoEnter;
 		@LauncherAPI public final boolean fullScreen;
-		@LauncherAPI public final int ram;
+		@LauncherAPI public final int heapMiB;
 		@LauncherAPI public final int width;
 		@LauncherAPI public final int height;
 
 		@LauncherAPI
 		public Params(byte[] launcherSign, Path assetDir, Path clientDir, PlayerProfile pp, String accessToken,
-			boolean autoEnter, boolean fullScreen, int ram, int width, int height) {
+			boolean autoEnter, boolean fullScreen, int heapMiB, int width, int height) {
 			this.launcherSign = Arrays.copyOf(launcherSign, launcherSign.length);
 
 			// Client paths
@@ -325,7 +326,7 @@ public final class ClientLauncher {
 			this.accessToken = SecurityHelper.verifyToken(accessToken);
 			this.autoEnter = autoEnter;
 			this.fullScreen = fullScreen;
-			this.ram = ram;
+			this.heapMiB = heapMiB;
 			this.width = width;
 			this.height = height;
 		}
@@ -343,7 +344,7 @@ public final class ClientLauncher {
 			accessToken = SecurityHelper.verifyToken(input.readASCII(-SecurityHelper.TOKEN_STRING_LENGTH));
 			autoEnter = input.readBoolean();
 			fullScreen = input.readBoolean();
-			ram = input.readVarInt();
+			heapMiB = input.readVarInt();
 			width = input.readVarInt();
 			height = input.readVarInt();
 		}
@@ -361,7 +362,7 @@ public final class ClientLauncher {
 			output.writeASCII(accessToken, -SecurityHelper.TOKEN_STRING_LENGTH);
 			output.writeBoolean(autoEnter);
 			output.writeBoolean(fullScreen);
-			output.writeVarInt(ram);
+			output.writeVarInt(heapMiB);
 			output.writeVarInt(width);
 			output.writeVarInt(height);
 		}

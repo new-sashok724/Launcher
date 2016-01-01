@@ -1,8 +1,10 @@
 package launcher.runtime.dialog.overlay;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.security.SignatureException;
+import java.util.ResourceBundle;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -44,6 +46,11 @@ public final class SpinnerController extends OverlayController {
 	}
 
 	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		reset();
+	}
+
+	@Override
 	public void reset() {
 		spinner.setImage(SPINNER_IMAGE);
 		description.getStyleClass().remove("error");
@@ -63,7 +70,7 @@ public final class SpinnerController extends OverlayController {
 		setTaskProperties(task, callback, null);
 
 		// Start task
-		task.updateMessage("Запуск выбранного клиента");
+		task.updateMessage("dialog.spinner.launchClient");
 		task.start();
 	}
 
@@ -74,7 +81,7 @@ public final class SpinnerController extends OverlayController {
 		setTaskProperties(task, callback, null);
 
 		// Start task
-		task.updateMessage("Авторизация на сервере");
+		task.updateMessage("dialog.spinner.auth");
 		task.start();
 	}
 
@@ -94,22 +101,19 @@ public final class SpinnerController extends OverlayController {
 		});
 
 		// Start task
-		task.updateMessage("Обновление списка серверов");
+		task.updateMessage("dialog.spinner.updateLauncher");
 		task.start();
 	}
 
 	public void setError(String error) {
 		spinner.setImage(ERROR_IMAGE);
 		description.getStyleClass().add("error");
-		description.setText(error);
+		setLocalizedDescription(error);
 	}
 
 	public <V> void setTaskProperties(Task<V> task, Callback<V, Void> callback, Callback<Throwable, Void> eCallback) {
-		description.textProperty().bind(task.messageProperty());
+		task.messageProperty().addListener((o, ov, nv) -> setLocalizedDescription(nv));
 		task.setOnFailed(e -> {
-			description.textProperty().unbind();
-
-			// Set error message
 			Throwable exc = task.getException();
 			setError(exc.toString());
 			if (eCallback != null) {
@@ -120,11 +124,18 @@ public final class SpinnerController extends OverlayController {
 			LogHelper.error(exc);
 		});
 		task.setOnSucceeded(e -> {
-			description.textProperty().unbind();
 			if (callback != null) {
 				callback.call(task.getValue());
 			}
 		});
+	}
+
+	private void setLocalizedDescription(String description) {
+		if (DialogController.LOCALE.containsKey(description)) {
+			this.description.setText(DialogController.LOCALE.getString(description));
+		} else {
+			this.description.setText(description);
+		}
 	}
 
 	private static AuthRequest.Result offlineAuthRequest(String username) throws RequestException {

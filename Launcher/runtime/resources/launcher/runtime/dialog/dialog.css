@@ -9,10 +9,7 @@
 	-fx-prompt-text-fill: black;
 }
 
-#layout > #authPane > #profiles > .arrow-button {
-	-fx-padding: 0;
-}
-
+#layout > #authPane > #profiles > .arrow-button,
 #layout > #authPane > #profiles > .arrow-button > .arrow {
 	-fx-padding: 0;
 }

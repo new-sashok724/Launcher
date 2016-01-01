@@ -13,7 +13,7 @@
 	<!-- Left side -->
 	<Label fx:id="title">
 		<graphic>
-			<Circle fx:id="titleCirc" radius="3.0" />
+			<Circle fx:id="statusCirc" radius="3.0" />
 		</graphic>
 	</Label>
 

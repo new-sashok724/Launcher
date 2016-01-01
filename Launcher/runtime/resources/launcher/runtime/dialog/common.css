@@ -2,7 +2,7 @@
 	-fx-font-family: "Open Sans", sans-serif;
 }
 
-Button, CheckBox, ComboBox {
+Button, CheckBox, ComboBox, ScrollBar {
 	-fx-cursor: hand;
 }
 
@@ -58,10 +58,37 @@ Button, CheckBox, ComboBox {
 
 /* Combobox-specific */
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
+	-fx-text-fill: rgba(0, 0, 0, .8);
 	-fx-background-color: white;
-	-fx-text-fill: black;
 }
 
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
 	-fx-background-color: #efefef;
+}
+
+/* Scrollbar */
+.scroll-bar {
+	-fx-background-color: #e0e1e2;
+}
+
+.scroll-bar > .thumb,
+.scroll-bar > .increment-button,
+.scroll-bar > .decrement-button {
+	-fx-background-insets: none;
+	-fx-background-radius: 0;
+}
+
+.scroll-bar > .thumb {
+	-fx-background-color: #cacbcd;
+}
+
+.scroll-bar > .increment-button,
+.scroll-bar > .decrement-button {
+	-fx-background-color: #babbbc;
+	-fx-color: transparent;
+}
+
+.scroll-bar > .increment-button > .increment-arrow,
+.scroll-bar > .decrement-button > .decrement-arrow {
+	-fx-background-color: rgba(0, 0, 0, .8);
 }

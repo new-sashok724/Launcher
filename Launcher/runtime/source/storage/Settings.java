@@ -3,6 +3,7 @@ package launcher.runtime.storage;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
@@ -13,8 +14,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import launcher.Launcher;
 import launcher.hasher.HashedDir;
 import launcher.helper.IOHelper;
+import launcher.helper.JVMHelper;
+import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.update.LauncherUpdateRequest;
+import launcher.runtime.Mainclass;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.signed.SignedObjectHolder;
@@ -31,11 +35,30 @@ public final class Settings extends StreamObject {
 	private byte[] password = null;
 	private int profileIndex = 0;
 
+	// Client launch data
+	private Path updatesDir;
+	private boolean autoEnter;
+	private boolean fullScreen;
+	private int heap;
+
 	// Offline cache
 	private LauncherUpdateRequest.Result launcherUpdateRequest = null;
 	private final Map<String, SignedObjectHolder<HashedDir>> offlineHDirs;
 
 	public Settings() {
+		boolean debug = Boolean.parseBoolean(Mainclass.CONFIG.getProperty("settings.default.debug"));
+		if (!LogHelper.isDebugEnabled() && debug) {
+			LogHelper.setDebugEnabled(true);
+		}
+
+		// Client launch data
+		updatesDir = Mainclass.DIR.resolve("updates");
+		autoEnter = Boolean.parseBoolean(Mainclass.CONFIG.getProperty("settings.default.autoEnter"));
+		fullScreen = Boolean.parseBoolean(Mainclass.CONFIG.getProperty("settings.default.fullScreen"));
+		heap = Math.min(Integer.parseInt(Mainclass.CONFIG.getProperty(
+			"settings.default.heap", "1024")), JVMHelper.RAM);
+
+		// Offline cache
 		offlineHDirs = new HashMap<>(4);
 	}
 
@@ -45,10 +68,22 @@ public final class Settings extends StreamObject {
 			throw new IOException("Settings magic mismatch");
 		}
 
+		// Read debug state
+		boolean debug = input.readBoolean();
+		if (!LogHelper.isDebugEnabled() && debug) {
+			LogHelper.setDebugEnabled(true);
+		}
+
 		// Read dialog data
 		login = input.readBoolean() ? input.readString(255) : null;
 		password = input.readBoolean() ? input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH) : null;
 		profileIndex = input.readLength(0);
+
+		// Read cient launch data
+		updatesDir = IOHelper.toPath(input.readString(0));
+		autoEnter = input.readBoolean();
+		fullScreen = input.readBoolean();
+		setHeap(input.readLength(0));
 
 		// Read offline cache
 		RSAPublicKey publicKey = Launcher.Config.getDefault().publicKey;
@@ -67,6 +102,9 @@ public final class Settings extends StreamObject {
 		try {
 			output.writeInt(SETTINGS_MAGIC);
 
+			// Write debug state
+			output.writeBoolean(LogHelper.isDebugEnabled());
+
 			// Write dialog data
 			output.writeBoolean(login != null);
 			if (login != null) {
@@ -77,6 +115,12 @@ public final class Settings extends StreamObject {
 				output.writeByteArray(password, SecurityHelper.CRYPTO_MAX_LENGTH);
 			}
 			output.writeLength(profileIndex, 0);
+
+			// Write client launch data
+			output.writeString(IOHelper.toString(updatesDir), 0);
+			output.writeBoolean(autoEnter);
+			output.writeBoolean(fullScreen);
+			output.writeLength(heap, 0);
 
 			// Write offline cache
 			output.writeBoolean(launcherUpdateRequest != null);
@@ -109,6 +153,15 @@ public final class Settings extends StreamObject {
 		lock.readLock().lock();
 		try {
 			return offlineHDirs.get(name);
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	public int getHeap() {
+		lock.readLock().lock();
+		try {
+			return heap;
 		} finally {
 			lock.readLock().unlock();
 		}
@@ -150,6 +203,33 @@ public final class Settings extends StreamObject {
 		}
 	}
 
+	public Path getUpdatesDir() {
+		lock.readLock().lock();
+		try {
+			return updatesDir;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	public boolean isAutoEnter() {
+		lock.readLock().lock();
+		try {
+			return autoEnter;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
+	public boolean isFullScreen() {
+		lock.readLock().lock();
+		try {
+			return fullScreen;
+		} finally {
+			lock.readLock().unlock();
+		}
+	}
+
 	public boolean isPasswordSaved() {
 		lock.readLock().lock();
 		try {
@@ -168,6 +248,39 @@ public final class Settings extends StreamObject {
 		lock.writeLock().lock();
 		try {
 			offlineHDirs.put(name, dir);
+		} finally {
+			lock.writeLock().unlock();
+		}
+		return true;
+	}
+
+	public void setAutoEnter(boolean autoEnter) {
+		lock.writeLock().lock();
+		try {
+			this.autoEnter = autoEnter;
+		} finally {
+			lock.writeLock().unlock();
+		}
+	}
+
+	public void setFullScreen(boolean fullScreen) {
+		lock.writeLock().lock();
+		try {
+			this.fullScreen = fullScreen;
+		} finally {
+			lock.writeLock().unlock();
+		}
+	}
+
+	public boolean setHeap(int heap) {
+		if (heap <= 0 || heap > JVMHelper.RAM || JVMHelper.RAM % 256 != 0) {
+			return false;
+		}
+
+		// Apply changes
+		lock.writeLock().lock();
+		try {
+			this.heap = heap;
 		} finally {
 			lock.writeLock().unlock();
 		}
@@ -224,6 +337,21 @@ public final class Settings extends StreamObject {
 			this.profileIndex = profileIndex;
 		} finally {
 			lock.writeLock().unlock();
+		}
+		return true;
+	}
+
+	public boolean setUpdatesDir(Path updatesDir) {
+		if (updatesDir == null || !IOHelper.isDir(updatesDir)) {
+			return false;
+		}
+
+		// Apply changes
+		lock.readLock().lock();
+		try {
+			this.updatesDir = updatesDir;
+		} finally {
+			lock.readLock().unlock();
 		}
 		return true;
 	}

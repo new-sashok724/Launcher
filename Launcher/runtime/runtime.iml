@@ -5,6 +5,7 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/source" isTestSource="false" packagePrefix="launcher.runtime" />
       <sourceFolder url="file://$MODULE_DIR$/resources" type="java-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/source-testing" isTestSource="true" packagePrefix="launcher.runtime" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="module" module-name="Launcher" exported="" />

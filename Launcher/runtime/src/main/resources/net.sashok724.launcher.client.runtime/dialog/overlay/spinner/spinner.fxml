@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<BorderPane fx:id="overlay" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" maxWidth="400.0" maxHeight="100.0">
+	<stylesheets>
+		<URL value="@spinner.css" />
+	</stylesheets>
+
+	<!-- Icon -->
+	<left>
+		<ImageView fx:id="spinner" BorderPane.alignment="CENTER">
+			<BorderPane.margin>
+				<Insets left="26.0" right="26.0" />
+			</BorderPane.margin>
+		</ImageView>
+	</left>
+
+	<!-- Description -->
+	<center>
+		<Label fx:id="description" BorderPane.alignment="CENTER_LEFT">
+			<BorderPane.margin>
+				<Insets top="10.0" bottom="10.0" right="26.0" />
+			</BorderPane.margin>
+		</Label>
+	</center>
+</BorderPane>

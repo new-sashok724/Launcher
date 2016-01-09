@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/LaunchServer/LaunchServer.iml" filepath="$PROJECT_DIR$/LaunchServer/LaunchServer.iml" />
       <module fileurl="file://$PROJECT_DIR$/Launcher/Launcher.iml" filepath="$PROJECT_DIR$/Launcher/Launcher.iml" />
       <module fileurl="file://$PROJECT_DIR$/LauncherAuthlib/LauncherAuthlib.iml" filepath="$PROJECT_DIR$/LauncherAuthlib/LauncherAuthlib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Launcher/runtime/runtime.iml" filepath="$PROJECT_DIR$/Launcher/runtime/runtime.iml" />
     </modules>
   </component>
 </project>

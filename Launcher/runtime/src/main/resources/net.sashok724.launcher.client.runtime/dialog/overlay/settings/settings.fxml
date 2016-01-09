@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<AnchorPane fx:id="overlay" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" maxWidth="500.0" maxHeight="250.0">
+	<stylesheets>
+		<URL value="@settings.css" />
+	</stylesheets>
+
+	<HBox spacing="5.0">
+		<Button text="KeK" />
+	</HBox>
+</AnchorPane>

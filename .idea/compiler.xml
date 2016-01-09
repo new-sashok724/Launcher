@@ -17,6 +17,40 @@
       <profile default="true" name="Default" enabled="true">
         <processorPath useClasspath="true" />
       </profile>
+      <profile default="false" name="Annotation profile for LaunchServer" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="LaunchServer" />
+      </profile>
+      <profile default="false" name="Annotation profile for LauncherAuthlib" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="LauncherAuthlib" />
+      </profile>
+      <profile default="false" name="Annotation profile for Launcher" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="Launcher" />
+      </profile>
+      <profile default="false" name="Annotation profile for runtime" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target\generated-test-sources\test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="runtime" />
+      </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Launcher" target="1.8" />
+      <module name="LauncherAuthlib" target="1.8" />
+      <module name="LaunchServer" target="1.8" />
+      <module name="runtime" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

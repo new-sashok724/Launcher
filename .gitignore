@@ -11,4 +11,5 @@ buildnumber
 
 Launcher.jar
 LauncherAuthlib.jar
+LauncherRuntime.jar
 LaunchServer.jar

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.web.WebView?>
+<StackPane fx:id="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml" prefWidth="600.0" prefHeight="400.0">
+	<stylesheets>
+		<URL value="@dialog.css" />
+	</stylesheets>
+
+	<!-- Dialog layout -->
+	<BorderPane fx:id="layout">
+		<center>
+			<WebView fx:id="news" />
+		</center>
+
+		<!-- Auth layout -->
+		<bottom>
+			<GridPane fx:id="authPane" hgap="5.0" vgap="5.0">
+				<padding>
+					<Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
+				</padding>
+
+				<!-- First row -->
+				<TextField fx:id="login" GridPane.rowIndex="1" GridPane.columnIndex="1" prefWidth="200.0" prefHeight="30.0" promptText="%dialog.login" />
+				<PasswordField fx:id="password" GridPane.rowIndex="1" GridPane.columnIndex="2" prefWidth="200.0" prefHeight="30.0" promptText="%dialog.password" />
+				<Button fx:id="play" GridPane.rowIndex="1" GridPane.columnIndex="3" prefWidth="135.0" prefHeight="30.0" text="%dialog.play" defaultButton="true" />
+				<Button fx:id="settings" GridPane.rowIndex="1" GridPane.columnIndex="4" prefWidth="30.0" prefHeight="30.0" />
+
+				<!-- Second row -->
+				<ComboBox fx:id="profiles" GridPane.rowIndex="2" GridPane.columnIndex="1" prefWidth="200.0" prefHeight="30.0" />
+				<CheckBox fx:id="savePassword" GridPane.rowIndex="2" GridPane.columnIndex="2" prefWidth="200.0" prefHeight="30.0" text="%dialog.savePassword">
+					<GridPane.margin>
+						<Insets left="5.0" />
+					</GridPane.margin>
+				</CheckBox>
+				<Hyperlink fx:id="link" GridPane.rowIndex="2" GridPane.columnIndex="3" GridPane.columnSpan="2" prefWidth="170.0" prefHeight="30.0" />
+			</GridPane>
+		</bottom>
+	</BorderPane>
+
+	<!-- Overlay dim -->
+	<StackPane fx:id="overlayDim" visible="false" />
+</StackPane>

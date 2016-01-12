@@ -67,7 +67,7 @@ public final class IOHelper {
 		Integer.parseUnsignedInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
 		VerifyHelper.POSITIVE, "launcher.httpTimeout can't be <= 0");
 	@LauncherAPI public static final int BUFFER_SIZE = VerifyHelper.verifyInt(
-		Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(0x10000))),
+		Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(4096))),
 		VerifyHelper.POSITIVE, "launcher.bufferSize can't be <= 0");
 
 	// Platform-dependent
@@ -225,17 +225,17 @@ public final class IOHelper {
 
 	@LauncherAPI
 	public static byte[] newBuffer() {
-		return new byte[BUFFER_SIZE];
+		return new byte[4096];
 	}
 
 	@LauncherAPI
 	public static ByteArrayOutputStream newByteArrayOutput() {
-		return new ByteArrayOutputStream(BUFFER_SIZE);
+		return new ByteArrayOutputStream();
 	}
 
 	@LauncherAPI
 	public static char[] newCharBuffer() {
-		return new char[BUFFER_SIZE];
+		return new char[4096];
 	}
 
 	@LauncherAPI
@@ -273,7 +273,7 @@ public final class IOHelper {
 
 	@LauncherAPI
 	public static BufferedReader newReader(InputStream input, Charset charset) {
-		return new BufferedReader(new InputStreamReader(input, charset), BUFFER_SIZE);
+		return new BufferedReader(new InputStreamReader(input, charset));
 	}
 
 	@LauncherAPI
@@ -295,7 +295,7 @@ public final class IOHelper {
 
 	@LauncherAPI
 	public static BufferedWriter newWriter(OutputStream output) {
-		return new BufferedWriter(new OutputStreamWriter(output, UNICODE_CHARSET), BUFFER_SIZE);
+		return new BufferedWriter(new OutputStreamWriter(output, UNICODE_CHARSET));
 	}
 
 	@LauncherAPI
@@ -481,9 +481,9 @@ public final class IOHelper {
 		// Set socket options
 		socket.setSoTimeout(SOCKET_TIMEOUT);
 		socket.setTrafficClass(0b11100);
-		socket.setSendBufferSize(BUFFER_SIZE);
-		socket.setReceiveBufferSize(BUFFER_SIZE);
-		socket.setPerformancePreferences(0, 1, 2);
+		socket.setSendBufferSize(0x100000);
+		socket.setReceiveBufferSize(0x100000);
+		socket.setPerformancePreferences(1, 0, 2);
 	}
 
 	@LauncherAPI

@@ -343,8 +343,8 @@ public final class ClientLauncher {
 			launcherSign = input.readByteArray(-SecurityHelper.RSA_KEY_LENGTH);
 
 			// Client paths
-			assetDir = IOHelper.toPath(input.readString(IOHelper.BUFFER_SIZE));
-			clientDir = IOHelper.toPath(input.readString(IOHelper.BUFFER_SIZE));
+			assetDir = IOHelper.toPath(input.readString(0));
+			clientDir = IOHelper.toPath(input.readString(0));
 
 			// Client params
 			pp = new PlayerProfile(input);
@@ -361,8 +361,8 @@ public final class ClientLauncher {
 			output.writeByteArray(launcherSign, -SecurityHelper.RSA_KEY_LENGTH);
 
 			// Client paths
-			output.writeString(assetDir.toString(), IOHelper.BUFFER_SIZE);
-			output.writeString(clientDir.toString(), IOHelper.BUFFER_SIZE);
+			output.writeString(assetDir.toString(), 0);
+			output.writeString(clientDir.toString(), 0);
 
 			// Client params
 			pp.write(output);

@@ -25,7 +25,7 @@ public final class AuthResponse extends Response {
 	@Override
 	public void reply() throws Exception {
 		String login = input.readString(255);
-		byte[] encryptedPassword = input.readByteArray(IOHelper.BUFFER_SIZE);
+		byte[] encryptedPassword = input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH);
 
 		// Decrypt password
 		String password;

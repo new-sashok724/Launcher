@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import com.zaxxer.hikari.HikariDataSource;
 import launcher.LauncherAPI;
-import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.ConfigObject;
@@ -76,7 +75,7 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
 			mysqlSource.setLoginTimeout(TIMEOUT);
 			mysqlSource.setConnectTimeout(TIMEOUT * 1000);
 			mysqlSource.setPrepStmtCacheSize(STMT_CACHE_SIZE);
-			mysqlSource.setPrepStmtCacheSqlLimit(IOHelper.BUFFER_SIZE);
+			mysqlSource.setPrepStmtCacheSqlLimit(2048);
 
 			// Set credentials
 			mysqlSource.setServerName(address);

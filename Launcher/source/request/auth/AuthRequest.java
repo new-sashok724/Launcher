@@ -6,7 +6,6 @@ import java.util.Arrays;
 import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
-import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.Request;
@@ -37,7 +36,7 @@ public final class AuthRequest extends Request<AuthRequest.Result> {
 	@Override
 	protected Result requestDo(HInput input, HOutput output) throws IOException {
 		output.writeString(login, 255);
-		output.writeByteArray(encryptedPassword, IOHelper.BUFFER_SIZE);
+		output.writeByteArray(encryptedPassword, SecurityHelper.CRYPTO_MAX_LENGTH);
 		output.flush();
 
 		// Read UUID and access token

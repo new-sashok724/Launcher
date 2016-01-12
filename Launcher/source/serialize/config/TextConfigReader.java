@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import launcher.LauncherAPI;
-import launcher.helper.IOHelper;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.BooleanConfigEntry;
@@ -159,7 +158,7 @@ public final class TextConfigReader {
 	}
 
 	private ConfigEntry<?> readString(int cc) throws IOException {
-		StringBuilder builder = new StringBuilder(IOHelper.BUFFER_SIZE);
+		StringBuilder builder = new StringBuilder();
 
 		// Read string chars
 		while (nextChar(true) != '"') {
@@ -206,7 +205,7 @@ public final class TextConfigReader {
 
 	private String readToken() throws IOException {
 		// Read token
-		StringBuilder builder = new StringBuilder(IOHelper.BUFFER_SIZE);
+		StringBuilder builder = new StringBuilder();
 		while (VerifyHelper.isValidIDNameChar(ch)) {
 			builder.append((char) ch);
 			nextChar(false);
@@ -228,7 +227,7 @@ public final class TextConfigReader {
 	}
 
 	private int skipWhitespace(boolean eof) throws IOException {
-		StringBuilder skippedBuilder = new StringBuilder(IOHelper.BUFFER_SIZE);
+		StringBuilder skippedBuilder = new StringBuilder();
 		while (Character.isWhitespace(ch) || ch == '#') {
 			if (ch == '#') {
 				skipComment(skippedBuilder, eof);

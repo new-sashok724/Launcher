@@ -34,8 +34,8 @@ public abstract class FileAuthHandler extends AuthHandler {
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
 	// Storage
-	private final Map<UUID, Entry> entryMap = new HashMap<>(IOHelper.BUFFER_SIZE);
-	private final Map<String, UUID> usernamesMap = new HashMap<>(IOHelper.BUFFER_SIZE);
+	private final Map<UUID, Entry> entryMap = new HashMap<>();
+	private final Map<String, UUID> usernamesMap = new HashMap<>();
 
 	@LauncherAPI
 	protected FileAuthHandler(BlockConfigEntry block) {

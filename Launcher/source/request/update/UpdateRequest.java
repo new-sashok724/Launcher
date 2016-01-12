@@ -9,7 +9,7 @@ import java.security.MessageDigest;
 import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayDeque;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
@@ -84,7 +84,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 		totalSize = diff.mismatch.size();
 
 		// Build actions queue
-		Queue<Action> queue = new ArrayDeque<>(IOHelper.BUFFER_SIZE);
+		Queue<Action> queue = new LinkedList<>();
 		fillActionsQueue(queue, diff.mismatch);
 		queue.add(Action.FINISH);
 
@@ -175,7 +175,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 			long downloaded = 0L;
 
 			// Download with digest update
-			byte[] bytes = new byte[IOHelper.BUFFER_SIZE];
+			byte[] bytes = IOHelper.newBuffer();
 			while (downloaded < hFile.size) {
 				int remaining = (int) Math.min(hFile.size - downloaded, bytes.length);
 				int length = input.stream.read(bytes, 0, remaining);

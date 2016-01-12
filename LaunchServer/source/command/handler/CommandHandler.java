@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import launcher.LauncherAPI;
-import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launchserver.LaunchServer;
@@ -146,7 +145,7 @@ public abstract class CommandHandler implements Runnable {
 
 		// Read line char by char
 		Collection<String> result = new LinkedList<>();
-		StringBuilder builder = new StringBuilder(IOHelper.BUFFER_SIZE);
+		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < line.length() + 1; i++) {
 			boolean end = i >= line.length();
 			char ch = end ? 0 : line.charAt(i);

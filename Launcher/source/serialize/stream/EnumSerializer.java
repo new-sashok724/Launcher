@@ -9,9 +9,9 @@ import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
-import launcher.serialize.stream.EnumSerializer.Itf;
+import launcher.serialize.stream.EnumSerializer.Serializable;
 
-public final class EnumSerializer<E extends Enum<?> & Itf> {
+public final class EnumSerializer<E extends Enum<?> & Serializable> {
 	private final Map<Integer, E> map = new HashMap<>(16);
 
 	@LauncherAPI
@@ -21,14 +21,16 @@ public final class EnumSerializer<E extends Enum<?> & Itf> {
 				continue;
 			}
 
-			// Add to map
-			Itf itf;
+			// Get enum value
+			Serializable value;
 			try {
-				itf = (Itf) field.get(null);
+				value = (Serializable) field.get(null);
 			} catch (IllegalAccessException e) {
 				throw new InternalError(e);
 			}
-			VerifyHelper.putIfAbsent(map, itf.getNumber(), clazz.cast(itf),
+
+			// Put value into map
+			VerifyHelper.putIfAbsent(map, value.getNumber(), clazz.cast(value),
 				"Duplicate number for enum constant " + field.getName());
 		}
 	}
@@ -40,12 +42,12 @@ public final class EnumSerializer<E extends Enum<?> & Itf> {
 	}
 
 	@LauncherAPI
-	public static void write(HOutput output, Itf itf) throws IOException {
-		output.writeVarInt(itf.getNumber());
+	public static void write(HOutput output, Serializable value) throws IOException {
+		output.writeVarInt(value.getNumber());
 	}
 
 	@FunctionalInterface
-	public interface Itf {
+	public interface Serializable {
 		@LauncherAPI
 		int getNumber();
 	}

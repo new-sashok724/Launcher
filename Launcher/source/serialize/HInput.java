@@ -61,7 +61,7 @@ public final class HInput implements AutoCloseable {
 
 	@LauncherAPI
 	public int readInt() throws IOException {
-		return (readUnsignedByte() << 24) + (readUnsignedByte() << 16) + (readUnsignedByte() << 8) + readUnsignedByte();
+		return (readUnsignedByte() << 24) | (readUnsignedByte() << 16) | (readUnsignedByte() << 8) | readUnsignedByte();
 	}
 
 	@LauncherAPI

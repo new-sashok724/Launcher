@@ -37,7 +37,7 @@ public final class JARLauncherBinary extends LauncherBinary {
 		try (JarOutputStream output = new JarOutputStream(IOHelper.newOutput(JAR_BINARY_FILE))) {
 			output.setMethod(ZipOutputStream.DEFLATED);
 			output.setLevel(Deflater.BEST_COMPRESSION);
-			try (InputStream input = new GZIPInputStream(IOHelper.newInput(IOHelper.getResourceURL("Launcher.pack.gz")), IOHelper.BUFFER_SIZE)) {
+			try (InputStream input = new GZIPInputStream(IOHelper.newInput(IOHelper.getResourceURL("Launcher.pack.gz")))) {
 				Pack200.newUnpacker().unpack(input, output);
 			}
 
@@ -52,7 +52,7 @@ public final class JARLauncherBinary extends LauncherBinary {
 
 			// Create launcher config file
 			byte[] launcherConfigBytes;
-			try (ByteArrayOutputStream configArray = IOHelper.newByteArrayOutput()) {
+			try (ByteArrayOutputStream configArray = new ByteArrayOutputStream()) {
 				try (HOutput configOutput = new HOutput(configArray)) {
 					new Launcher.Config(server.config.getAddress(), server.config.port,
 						server.publicKey).write(configOutput);

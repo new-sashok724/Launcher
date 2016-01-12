@@ -8,14 +8,13 @@ import java.util.UUID;
 
 import launcher.LauncherAPI;
 import launcher.helper.CommonHelper;
-import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.auth.JoinServerRequest;
 import launcher.serialize.config.entry.BlockConfigEntry;
 
 public abstract class CachedAuthHandler extends AuthHandler {
-	private final Map<UUID, Entry> entryCache = new HashMap<>(IOHelper.BUFFER_SIZE);
-	private final Map<String, UUID> usernamesCache = new HashMap<>(IOHelper.BUFFER_SIZE);
+	private final Map<UUID, Entry> entryCache = new HashMap<>();
+	private final Map<String, UUID> usernamesCache = new HashMap<>();
 
 	@LauncherAPI
 	protected CachedAuthHandler(BlockConfigEntry block) {

@@ -22,7 +22,7 @@ public final class FileAuthProvider extends DigestAuthProvider {
 	private final Path file;
 
 	// Cache
-	private final Map<String, Entry> entries = new HashMap<>(IOHelper.BUFFER_SIZE);
+	private final Map<String, Entry> entries = new HashMap<>();
 	private final Object cacheLock = new Object();
 	private FileTime cacheLastModified;
 

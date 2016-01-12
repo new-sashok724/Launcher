@@ -1,6 +1,5 @@
 package launcher.request.update;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -9,7 +8,8 @@ import java.security.MessageDigest;
 import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
@@ -84,22 +84,22 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 		totalSize = diff.mismatch.size();
 
 		// Build actions queue
-		Queue<Action> queue = new ArrayDeque<>(IOHelper.BUFFER_SIZE);
-		fillActionsQueue(queue, diff.mismatch);
-		queue.add(Action.FINISH);
+		Deque<Action> deque = new LinkedList<>();
+		fillActionsQueue(deque, diff.mismatch);
+		deque.add(Action.FINISH);
 
 		// Download missing first
 		// (otherwise it will cause mustdie indexing bug)
 		startTime = Instant.now();
 		Path currentDir = dir;
 		Action[] actionsSlice = new Action[MAX_QUEUE_SIZE];
-		while (!queue.isEmpty()) {
-			int length = Math.min(queue.size(), MAX_QUEUE_SIZE);
+		while (!deque.isEmpty()) {
+			int length = Math.min(deque.size(), MAX_QUEUE_SIZE);
 
 			// Write actions slice
 			output.writeLength(length, MAX_QUEUE_SIZE);
 			for (int i = 0; i < length; i++) {
-				Action action = queue.remove();
+				Action action = deque.remove();
 				actionsSlice[i] = action;
 				action.write(output);
 			}
@@ -175,12 +175,12 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 			long downloaded = 0L;
 
 			// Download with digest update
-			byte[] bytes = new byte[IOHelper.BUFFER_SIZE];
+			byte[] bytes = IOHelper.newBuffer();
 			while (downloaded < hFile.size) {
 				int remaining = (int) Math.min(hFile.size - downloaded, bytes.length);
 				int length = input.stream.read(bytes, 0, remaining);
 				if (length < 0) {
-					throw new EOFException(String.format("%d bytes remaining", hFile.size - downloaded));
+					throw IOHelper.newEOFException(downloaded, hFile.size);
 				}
 
 				// Update file
@@ -257,7 +257,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 			}
 		}
 
-		public enum Type implements EnumSerializer.Itf {
+		public enum Type implements EnumSerializer.Serializable {
 			CD(1), CD_BACK(2), GET(3), FINISH(255);
 			private static final EnumSerializer<Type> SERIALIZER = new EnumSerializer<>(Type.class);
 			private final int n;

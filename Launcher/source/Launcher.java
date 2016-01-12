@@ -49,14 +49,10 @@ public final class Launcher {
 
 	public static final class Config extends StreamObject {
 		private static final AtomicReference<Config> DEFAULT = new AtomicReference<>();
-		private static final String ADDRESS_OVERRIDE = System.getProperty("launcher.addressOverride", null);
-
-		// Instance
 		@LauncherAPI public final InetSocketAddress address;
 		@LauncherAPI public final RSAPublicKey publicKey;
 
 		@LauncherAPI
-		@SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")
 		public Config(String address, int port, RSAPublicKey publicKey) {
 			this.address = InetSocketAddress.createUnresolved(address, port);
 			this.publicKey = Objects.requireNonNull(publicKey, "publicKey");
@@ -64,15 +60,8 @@ public final class Launcher {
 
 		@LauncherAPI
 		public Config(HInput input) throws IOException, InvalidKeySpecException {
-			String localAddress = input.readASCII(255);
-			address = InetSocketAddress.createUnresolved(
-				ADDRESS_OVERRIDE == null ? localAddress : ADDRESS_OVERRIDE, input.readLength(65535));
+			address = InetSocketAddress.createUnresolved(input.readASCII(255), input.readLength(65535));
 			publicKey = SecurityHelper.toPublicRSAKey(input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH));
-
-			// Print warning if address override has been enabled
-			if (ADDRESS_OVERRIDE != null) {
-				LogHelper.warning("Address override enabled: '%s'", ADDRESS_OVERRIDE);
-			}
 		}
 
 		@Override

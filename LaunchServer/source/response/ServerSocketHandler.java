@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import launcher.LauncherAPI;
 import launcher.helper.CommonHelper;
-import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.Request;
@@ -55,7 +54,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 	}
 
 	@Override
-	public void run() {
+	public void run() { // TODO Configurable
 		LogHelper.info("Starting server socket thread");
 		try (ServerSocket serverSocket = new ServerSocket()) {
 			if (!this.serverSocket.compareAndSet(null, serverSocket)) {
@@ -64,8 +63,8 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 
 			// Set socket params
 			serverSocket.setReuseAddress(true);
-			serverSocket.setPerformancePreferences(2, 1, 0);
-			serverSocket.setReceiveBufferSize(IOHelper.BUFFER_SIZE);
+			serverSocket.setReceiveBufferSize(0x100000); // 1 MiB
+			serverSocket.setPerformancePreferences(1, 0, 2);
 			serverSocket.bind(server.config.getSocketAddress());
 			LogHelper.info("Server socket thread successfully started");
 

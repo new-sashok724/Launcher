@@ -36,7 +36,7 @@ public final class ResponseThread implements Runnable {
 		this.socket = socket;
 
 		// Fix socket flags
-		IOHelper.setSocketFlags(socket);
+		IOHelper.setSocketFlags(socket, 0x100000 /* TODO */);
 	}
 
 	@Override

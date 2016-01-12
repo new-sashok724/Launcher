@@ -23,6 +23,7 @@ public final class ServerPinger {
 	private static final String LEGACY_PING_HOST_MAGIC = "§1";
 	private static final String LEGACY_PING_HOST_CHANNEL = "MC|PingHost";
 	private static final Pattern LEGACY_PING_HOST_DELIMETER = Pattern.compile("\0", Pattern.LITERAL);
+	private static final int PACKET_LENGTH = 65536;
 
 	// Instance
 	private final InetSocketAddress address;
@@ -52,7 +53,7 @@ public final class ServerPinger {
 	}
 
 	private Result doPing() throws IOException {
-		try (Socket socket = IOHelper.newSocket()) {
+		try (Socket socket = IOHelper.newSocket(-1)) {
 			socket.connect(IOHelper.resolve(address), IOHelper.SOCKET_TIMEOUT);
 			try (HInput input = new HInput(socket.getInputStream());
 				 HOutput output = new HOutput(socket.getOutputStream())) {
@@ -70,7 +71,7 @@ public final class ServerPinger {
 
 		// Prepare custom payload packet
 		byte[] customPayloadPacket;
-		try (ByteArrayOutputStream packetArray = IOHelper.newByteArrayOutput()) {
+		try (ByteArrayOutputStream packetArray = new ByteArrayOutputStream(PACKET_LENGTH)) {
 			try (HOutput packetOutput = new HOutput(packetArray)) {
 				packetOutput.writeUnsignedByte(version.protocol); // Protocol version
 				writeUTF16String(packetOutput, address.getHostString()); // Server address
@@ -124,7 +125,7 @@ public final class ServerPinger {
 	private Result modernPing(HInput input, HOutput output) throws IOException {
 		// Prepare handshake packet
 		byte[] handshakePacket;
-		try (ByteArrayOutputStream packetArray = IOHelper.newByteArrayOutput()) {
+		try (ByteArrayOutputStream packetArray = new ByteArrayOutputStream(PACKET_LENGTH)) {
 			try (HOutput packetOutput = new HOutput(packetArray)) {
 				packetOutput.writeVarInt(0x0); // Handshake packet ID
 				packetOutput.writeVarInt(version.protocol); // Protocol version
@@ -136,7 +137,7 @@ public final class ServerPinger {
 		}
 
 		// Write handshake packet
-		output.writeByteArray(handshakePacket, IOHelper.BUFFER_SIZE);
+		output.writeByteArray(handshakePacket, PACKET_LENGTH);
 
 		// Request status packet
 		output.writeVarInt(1); // Status packet size (single byte)
@@ -146,14 +147,14 @@ public final class ServerPinger {
 		// Read outer status response packet ID
 		// ab - dirty fix for some servers (e.g. KCauldron 1.7.10)
 		String response;
-		int ab = IOHelper.verifyLength(input.readVarInt(), IOHelper.BUFFER_SIZE);
-		byte[] statusPacket = ab == 0x0 ? input.readByteArray(IOHelper.BUFFER_SIZE) : input.readByteArray(-ab);
+		int ab = IOHelper.verifyLength(input.readVarInt(), PACKET_LENGTH);
+		byte[] statusPacket = ab == 0x0 ? input.readByteArray(PACKET_LENGTH) : input.readByteArray(-ab);
 		try (HInput packetInput = new HInput(statusPacket)) {
 			int statusPacketID = packetInput.readVarInt();
 			if (statusPacketID != 0x0) {
 				throw new IOException("Illegal status packet ID: " + statusPacketID);
 			}
-			response = packetInput.readString(IOHelper.BUFFER_SIZE);
+			response = packetInput.readString(0);
 			LogHelper.debug("Ping response (modern): '%s'", response);
 		}
 

@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import launcher.LauncherAPI;
-import launcher.helper.IOHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 
@@ -16,7 +15,7 @@ public abstract class StreamObject {
 
 	@LauncherAPI
 	public final byte[] write() throws IOException {
-		try (ByteArrayOutputStream array = IOHelper.newByteArrayOutput()) {
+		try (ByteArrayOutputStream array = new ByteArrayOutputStream()) {
 			try (HOutput output = new HOutput(array)) {
 				write(output);
 			}

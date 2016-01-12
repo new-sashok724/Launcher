@@ -37,7 +37,7 @@ public abstract class Request<R> {
 		}
 
 		// Make request to LaunchServer
-		try (Socket socket = IOHelper.newSocket()) {
+		try (Socket socket = IOHelper.newSocket(0x100000 /* TODO */)) {
 			socket.connect(IOHelper.resolve(config.address));
 			try (HInput input = new HInput(socket.getInputStream());
 				 HOutput output = new HOutput(socket.getOutputStream())) {
@@ -77,7 +77,7 @@ public abstract class Request<R> {
 	}
 
 	@LauncherAPI
-	public enum Type implements EnumSerializer.Itf {
+	public enum Type implements EnumSerializer.Serializable {
 		PING(0), // Ping request
 		LAUNCHER(1), UPDATE(2), UPDATE_LIST(3), // Update requests
 		AUTH(4), JOIN_SERVER(5), CHECK_SERVER(6), // Auth requests

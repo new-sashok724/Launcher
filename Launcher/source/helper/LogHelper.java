@@ -163,7 +163,7 @@ public final class LogHelper {
 
 	@LauncherAPI
 	public static String toString(Throwable exc) {
-		try (StringWriter sw = new StringWriter(IOHelper.BUFFER_SIZE)) {
+		try (StringWriter sw = new StringWriter()) {
 			try (PrintWriter pw = new PrintWriter(sw)) {
 				exc.printStackTrace(pw);
 			}
@@ -199,7 +199,7 @@ public final class LogHelper {
 		}
 
 		// Date-time
-		Ansi ansi = new Ansi(IOHelper.BUFFER_SIZE);
+		Ansi ansi = new Ansi();
 		ansi.fg(Ansi.Color.WHITE).a(dateTime);
 
 		// Level
@@ -227,7 +227,7 @@ public final class LogHelper {
 	}
 
 	private static String ansiFormatVersion(String product) {
-		return new Ansi(IOHelper.BUFFER_SIZE).bold(). // Setup
+		return new Ansi().bold(). // Setup
 			fgBright(Ansi.Color.MAGENTA).a("sashok724's "). // sashok724's
 			fgBright(Ansi.Color.CYAN).a(product). // Product
 			fgBright(Ansi.Color.WHITE).a(" v").fgBright(Ansi.Color.BLUE).a(Launcher.VERSION). // Version

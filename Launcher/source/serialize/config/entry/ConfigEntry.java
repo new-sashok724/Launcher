@@ -83,7 +83,7 @@ public abstract class ConfigEntry<V> extends StreamObject {
 	}
 
 	@LauncherAPI
-	public enum Type implements EnumSerializer.Itf {
+	public enum Type implements EnumSerializer.Serializable {
 		BLOCK(1), BOOLEAN(2), INTEGER(3), STRING(4), LIST(5);
 		private static final EnumSerializer<Type> SERIALIZER = new EnumSerializer<>(Type.class);
 		private final int n;

@@ -66,9 +66,6 @@ public final class IOHelper {
 	@LauncherAPI public static final int HTTP_TIMEOUT = VerifyHelper.verifyInt(
 		Integer.parseUnsignedInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
 		VerifyHelper.POSITIVE, "launcher.httpTimeout can't be <= 0");
-	@LauncherAPI public static final int BUFFER_SIZE = VerifyHelper.verifyInt(
-		Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(0x10000))),
-		VerifyHelper.POSITIVE, "launcher.bufferSize can't be <= 0");
 
 	// Platform-dependent
 	@LauncherAPI public static final String CROSS_SEPARATOR = "/";
@@ -225,17 +222,17 @@ public final class IOHelper {
 
 	@LauncherAPI
 	public static byte[] newBuffer() {
-		return new byte[BUFFER_SIZE];
-	}
-
-	@LauncherAPI
-	public static ByteArrayOutputStream newByteArrayOutput() {
-		return new ByteArrayOutputStream(BUFFER_SIZE);
+		return new byte[4096];
 	}
 
 	@LauncherAPI
 	public static char[] newCharBuffer() {
-		return new char[BUFFER_SIZE];
+		return new char[4096];
+	}
+
+	@LauncherAPI
+	public static EOFException newEOFException(long read, long size) {
+		return new EOFException(String.format("%d bytes remaining", size - read));
 	}
 
 	@LauncherAPI
@@ -273,7 +270,7 @@ public final class IOHelper {
 
 	@LauncherAPI
 	public static BufferedReader newReader(InputStream input, Charset charset) {
-		return new BufferedReader(new InputStreamReader(input, charset), BUFFER_SIZE);
+		return new BufferedReader(new InputStreamReader(input, charset));
 	}
 
 	@LauncherAPI
@@ -287,15 +284,13 @@ public final class IOHelper {
 	}
 
 	@LauncherAPI
-	public static Socket newSocket() throws SocketException {
-		Socket socket = new Socket();
-		setSocketFlags(socket);
-		return socket;
+	public static Socket newSocket(int bufferSize) throws SocketException {
+		return setSocketFlags(new Socket(), bufferSize);
 	}
 
 	@LauncherAPI
 	public static BufferedWriter newWriter(OutputStream output) {
-		return new BufferedWriter(new OutputStreamWriter(output, UNICODE_CHARSET), BUFFER_SIZE);
+		return new BufferedWriter(new OutputStreamWriter(output, UNICODE_CHARSET));
 	}
 
 	@LauncherAPI
@@ -371,7 +366,7 @@ public final class IOHelper {
 		while (offset < bytes.length) {
 			int length = input.read(bytes, offset, bytes.length - offset);
 			if (length < 0) {
-				throw new EOFException(String.format("%d bytes remaining", bytes.length - offset));
+				throw newEOFException(offset, bytes.length);
 			}
 			offset += length;
 		}
@@ -379,7 +374,7 @@ public final class IOHelper {
 
 	@LauncherAPI
 	public static byte[] read(InputStream input) throws IOException {
-		try (ByteArrayOutputStream output = newByteArrayOutput()) {
+		try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
 			transfer(input, output);
 			return output.toByteArray();
 		}
@@ -472,18 +467,23 @@ public final class IOHelper {
 	}
 
 	@LauncherAPI
-	public static void setSocketFlags(Socket socket) throws SocketException {
+	public static Socket setSocketFlags(Socket socket, int bufferSize) throws SocketException {
 		// Set socket flags
 		socket.setKeepAlive(false);
 		socket.setTcpNoDelay(false);
 		socket.setReuseAddress(true);
 
 		// Set socket options
-		socket.setSoTimeout(SOCKET_TIMEOUT);
 		socket.setTrafficClass(0b11100);
-		socket.setSendBufferSize(BUFFER_SIZE);
-		socket.setReceiveBufferSize(BUFFER_SIZE);
-		socket.setPerformancePreferences(0, 1, 2);
+		socket.setSoTimeout(SOCKET_TIMEOUT);
+		if (bufferSize > 0) {
+			socket.setSendBufferSize(bufferSize);
+			socket.setReceiveBufferSize(bufferSize);
+		}
+		socket.setPerformancePreferences(1, 0, 2);
+
+		// Return exactly what we got
+		return socket;
 	}
 
 	@LauncherAPI

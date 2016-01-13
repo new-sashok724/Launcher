@@ -474,21 +474,22 @@ public final class IOHelper {
 	@LauncherAPI
 	public static void setSocketFlags(Socket socket) throws SocketException {
 		// Set socket flags
-		socket.setKeepAlive(false);
+		socket.setKeepAlive(false); // TODO To socket channels
 		socket.setTcpNoDelay(false);
 		socket.setReuseAddress(true);
 
 		// Set socket options
 		socket.setSoTimeout(SOCKET_TIMEOUT);
 		socket.setTrafficClass(0b11100);
-		socket.setSendBufferSize(0x100000);
-		socket.setReceiveBufferSize(0x100000);
+		// Allow OS to adjust buffer sizes
+//		socket.setSendBufferSize(0x100000);
+//		socket.setReceiveBufferSize(0x100000);
 		socket.setPerformancePreferences(1, 0, 2);
 	}
 
 	@LauncherAPI
 	public static Path toPath(String path) {
-		return Paths.get(path.replace(PLATFORM_SEPARATOR, CROSS_SEPARATOR));
+		return Paths.get(path.replace(CROSS_SEPARATOR, PLATFORM_SEPARATOR));
 	}
 
 	@LauncherAPI

@@ -64,7 +64,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
 			// Set socket params
 			serverSocket.setReuseAddress(true);
 			serverSocket.setPerformancePreferences(1, 0, 2);
-			serverSocket.setReceiveBufferSize(0x10000);
+			//serverSocket.setReceiveBufferSize(0x10000);
 			serverSocket.bind(server.config.getSocketAddress());
 			LogHelper.info("Server socket thread successfully started");
 

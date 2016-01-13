@@ -9,14 +9,14 @@ import launcher.LauncherAPI;
 import launcher.hasher.FileNameMatcher;
 import launcher.helper.IOHelper;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.config.ConfigObject;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.ConfigEntry;
-import launcher.serialize.config.entry.IntegerConfigEntry;
-import launcher.serialize.config.entry.ListConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.config.ConfigObject;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.ConfigEntry;
+import launcher.transport.config.entry.IntegerConfigEntry;
+import launcher.transport.config.entry.ListConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
+import launcher.transport.stream.StreamObject;
 
 @SuppressWarnings("ComparableImplementedButEqualsNotOverridden")
 public final class ClientProfile extends ConfigObject implements Comparable<ClientProfile> {

@@ -10,9 +10,9 @@ import java.util.UUID;
 
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.BooleanConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.BooleanConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
 import launchserver.auth.MySQLSourceConfig;
 
 public final class MySQLAuthHandler extends CachedAuthHandler {

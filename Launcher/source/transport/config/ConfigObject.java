@@ -1,12 +1,12 @@
-package launcher.serialize.config;
+package launcher.transport.config;
 
 import java.io.IOException;
 import java.util.Objects;
 
 import launcher.LauncherAPI;
-import launcher.serialize.HOutput;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HOutput;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.stream.StreamObject;
 
 public abstract class ConfigObject extends StreamObject {
 	@LauncherAPI public final BlockConfigEntry block;

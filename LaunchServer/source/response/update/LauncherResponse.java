@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import launcher.request.RequestException;
 import launcher.request.update.LauncherUpdateRequest;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.signed.SignedBytesHolder;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.signed.SignedBytesHolder;
 import launchserver.LaunchServer;
 import launchserver.response.Response;
 

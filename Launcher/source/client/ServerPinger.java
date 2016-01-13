@@ -15,8 +15,8 @@ import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class ServerPinger {
 	// Constants
@@ -54,7 +54,7 @@ public final class ServerPinger {
 
 	private Result doPing() throws IOException {
 		try (Socket socket = IOHelper.newSocket(-1)) {
-			socket.connect(IOHelper.resolve(address), IOHelper.SOCKET_TIMEOUT);
+			socket.connect(IOHelper.resolve(address), IOHelper.SECONDARY_TIMEOUT);
 			try (HInput input = new HInput(socket.getInputStream());
 				 HOutput output = new HOutput(socket.getOutputStream())) {
 				return version.compareTo(ClientProfile.Version.MC172) >= 0 ?

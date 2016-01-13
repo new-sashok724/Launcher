@@ -1,4 +1,4 @@
-package launcher.serialize.signed;
+package launcher.transport.signed;
 
 import java.io.IOException;
 import java.security.SignatureException;
@@ -6,8 +6,8 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 
 import launcher.LauncherAPI;
-import launcher.serialize.HInput;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.stream.StreamObject;
 
 public final class SignedObjectHolder<O extends StreamObject> extends SignedBytesHolder {
 	@LauncherAPI public final O object;

@@ -27,7 +27,7 @@ import launcher.request.update.LauncherUpdateRequest;
 import launcher.runtime.Mainclass;
 import launcher.runtime.dialog.DialogController;
 import launcher.runtime.dialog.DialogTask;
-import launcher.serialize.signed.SignedObjectHolder;
+import launcher.transport.signed.SignedObjectHolder;
 
 public final class SpinnerController extends OverlayController {
 	private static final Image SPINNER_IMAGE, ERROR_IMAGE;

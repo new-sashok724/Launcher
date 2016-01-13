@@ -3,9 +3,9 @@ package launcher.hasher;
 import java.io.IOException;
 
 import launcher.LauncherAPI;
-import launcher.serialize.HInput;
-import launcher.serialize.stream.EnumSerializer;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.stream.EnumSerializer;
+import launcher.transport.stream.StreamObject;
 
 public abstract class HashedEntry extends StreamObject {
 	@LauncherAPI public boolean flag; // For external usage

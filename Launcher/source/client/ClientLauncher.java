@@ -37,10 +37,10 @@ import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.update.LauncherUpdateRequest;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.signed.SignedObjectHolder;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.signed.SignedObjectHolder;
+import launcher.transport.stream.StreamObject;
 
 public final class ClientLauncher {
 	private static final Set<PosixFilePermission> BIN_POSIX_PERMISSIONS = Collections.unmodifiableSet(EnumSet.of(

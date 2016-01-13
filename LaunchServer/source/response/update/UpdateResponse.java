@@ -11,9 +11,9 @@ import launcher.hasher.HashedEntry;
 import launcher.helper.IOHelper;
 import launcher.request.RequestException;
 import launcher.request.update.UpdateRequest;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.signed.SignedObjectHolder;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.signed.SignedObjectHolder;
 import launchserver.LaunchServer;
 import launchserver.response.Response;
 

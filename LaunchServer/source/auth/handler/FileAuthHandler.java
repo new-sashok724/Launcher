@@ -18,12 +18,12 @@ import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.auth.JoinServerRequest;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.BooleanConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.BooleanConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
+import launcher.transport.stream.StreamObject;
 
 public abstract class FileAuthHandler extends AuthHandler {
 	@LauncherAPI public final Path file;

@@ -18,10 +18,10 @@ import launcher.helper.JVMHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.Request;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.signed.SignedObjectHolder;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.signed.SignedObjectHolder;
+import launcher.transport.stream.StreamObject;
 
 public final class LauncherUpdateRequest extends Request<LauncherUpdateRequest.Result> {
 	@LauncherAPI public static final Path BINARY_PATH = IOHelper.getCodeSource(Launcher.class);

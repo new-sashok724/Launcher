@@ -19,7 +19,7 @@ import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
-import launcher.serialize.HOutput;
+import launcher.transport.HOutput;
 import launchserver.LaunchServer;
 
 public final class JARLauncherBinary extends LauncherBinary {

@@ -60,12 +60,12 @@ public final class IOHelper {
 	@LauncherAPI public static final Charset ASCII_CHARSET = StandardCharsets.US_ASCII;
 
 	// Constants
-	@LauncherAPI public static final int SOCKET_TIMEOUT = VerifyHelper.verifyInt(
-		Integer.parseUnsignedInt(System.getProperty("launcher.socketTimeout", Integer.toString(30000))),
-		VerifyHelper.POSITIVE, "launcher.socketTimeout can't be <= 0");
-	@LauncherAPI public static final int HTTP_TIMEOUT = VerifyHelper.verifyInt(
-		Integer.parseUnsignedInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
-		VerifyHelper.POSITIVE, "launcher.httpTimeout can't be <= 0");
+	@LauncherAPI public static final int PRIMARY_TIMEOUT = VerifyHelper.verifyInt(
+		Integer.parseUnsignedInt(System.getProperty("launcher.primaryTimeout", Integer.toString(30000))),
+		VerifyHelper.POSITIVE, "launcher.primaryTimeout can't be <= 0");
+	@LauncherAPI public static final int SECONDARY_TIMEOUT = VerifyHelper.verifyInt(
+		Integer.parseUnsignedInt(System.getProperty("launcher.secondaryTimeout", Integer.toString(5000))),
+		VerifyHelper.POSITIVE, "launcher.secondaryTimeout can't be <= 0");
 
 	// Platform-dependent
 	@LauncherAPI public static final String CROSS_SEPARATOR = "/";
@@ -239,8 +239,8 @@ public final class IOHelper {
 	public static InputStream newInput(URL url) throws IOException {
 		URLConnection connection = url.openConnection();
 		if (connection instanceof HttpURLConnection) {
-			connection.setReadTimeout(HTTP_TIMEOUT);
-			connection.setConnectTimeout(HTTP_TIMEOUT);
+			connection.setReadTimeout(SECONDARY_TIMEOUT);
+			connection.setConnectTimeout(SECONDARY_TIMEOUT);
 		}
 		connection.setDoInput(true);
 		connection.setDoOutput(false);
@@ -475,7 +475,7 @@ public final class IOHelper {
 
 		// Set socket options
 		socket.setTrafficClass(0b11100);
-		socket.setSoTimeout(SOCKET_TIMEOUT);
+		socket.setSoTimeout(PRIMARY_TIMEOUT); // TODO To socket channels
 		if (bufferSize > 0) {
 			socket.setSendBufferSize(bufferSize);
 			socket.setReceiveBufferSize(bufferSize);
@@ -488,7 +488,7 @@ public final class IOHelper {
 
 	@LauncherAPI
 	public static Path toPath(String path) {
-		return Paths.get(path.replace(PLATFORM_SEPARATOR, CROSS_SEPARATOR));
+		return Paths.get(path.replace(CROSS_SEPARATOR, PLATFORM_SEPARATOR));
 	}
 
 	@LauncherAPI

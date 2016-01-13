@@ -1,10 +1,10 @@
-package launcher.serialize.config.entry;
+package launcher.transport.config.entry;
 
 import java.io.IOException;
 
 import launcher.LauncherAPI;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class StringConfigEntry extends ConfigEntry<String> {
 	@LauncherAPI

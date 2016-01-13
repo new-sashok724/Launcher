@@ -8,7 +8,7 @@ import java.util.UUID;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
 
 public final class MemoryAuthHandler extends CachedAuthHandler {
 	public MemoryAuthHandler(BlockConfigEntry block) {

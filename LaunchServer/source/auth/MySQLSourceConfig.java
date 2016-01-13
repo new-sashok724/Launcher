@@ -9,10 +9,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import launcher.LauncherAPI;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.ConfigObject;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.IntegerConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
+import launcher.transport.config.ConfigObject;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.IntegerConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
 
 public final class MySQLSourceConfig extends ConfigObject implements AutoCloseable {
 	@LauncherAPI public static final int TIMEOUT = VerifyHelper.verifyInt(

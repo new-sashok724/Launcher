@@ -12,11 +12,11 @@ import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.ConfigObject;
-import launcher.serialize.config.TextConfigReader;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.ConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
+import launcher.transport.config.ConfigObject;
+import launcher.transport.config.TextConfigReader;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.ConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
 
 public final class FileAuthProvider extends DigestAuthProvider {
 	private final Path file;

@@ -1,4 +1,4 @@
-package launcher.serialize.config.entry;
+package launcher.transport.config.entry;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import launcher.LauncherAPI;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class ListConfigEntry extends ConfigEntry<List<ConfigEntry<?>>> {
 	@LauncherAPI

@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.ConfigObject;
-import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.transport.config.ConfigObject;
+import launcher.transport.config.entry.BlockConfigEntry;
 
 public abstract class TextureProvider extends ConfigObject implements AutoCloseable {
 	private static final Map<String, Adapter<TextureProvider>> TEXTURE_PROVIDERS = new ConcurrentHashMap<>(2);

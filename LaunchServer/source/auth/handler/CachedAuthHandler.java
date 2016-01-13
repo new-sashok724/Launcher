@@ -10,7 +10,7 @@ import launcher.LauncherAPI;
 import launcher.helper.CommonHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.auth.JoinServerRequest;
-import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
 
 public abstract class CachedAuthHandler extends AuthHandler {
 	private final Map<UUID, Entry> entryCache = new HashMap<>();

@@ -5,8 +5,8 @@ import java.util.Arrays;
 
 import launcher.helper.VerifyHelper;
 import launcher.request.uuid.BatchProfileByUsernameRequest;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 import launchserver.LaunchServer;
 import launchserver.response.Response;
 

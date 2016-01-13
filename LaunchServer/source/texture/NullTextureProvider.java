@@ -6,7 +6,7 @@ import java.util.UUID;
 import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
 
 public final class NullTextureProvider extends TextureProvider {
 	private volatile TextureProvider provider;

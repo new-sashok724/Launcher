@@ -1,11 +1,11 @@
-package launcher.serialize.stream;
+package launcher.transport.stream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import launcher.LauncherAPI;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public abstract class StreamObject {
 	/* public StreamObject(HInput input) */

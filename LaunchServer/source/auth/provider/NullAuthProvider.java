@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
 
 public final class NullAuthProvider extends AuthProvider {
 	private volatile AuthProvider provider;

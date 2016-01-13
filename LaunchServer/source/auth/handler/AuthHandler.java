@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.ConfigObject;
-import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.transport.config.ConfigObject;
+import launcher.transport.config.entry.BlockConfigEntry;
 
 public abstract class AuthHandler extends ConfigObject implements AutoCloseable {
 	private static final Map<String, Adapter<AuthHandler>> AUTH_HANDLERS = new ConcurrentHashMap<>(4);

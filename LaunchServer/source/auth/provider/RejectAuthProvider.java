@@ -1,8 +1,8 @@
 package launchserver.auth.provider;
 
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
 import launchserver.auth.AuthException;
 
 public final class RejectAuthProvider extends AuthProvider {

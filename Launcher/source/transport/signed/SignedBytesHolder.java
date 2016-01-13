@@ -1,4 +1,4 @@
-package launcher.serialize.signed;
+package launcher.transport.signed;
 
 import java.io.IOException;
 import java.security.SignatureException;
@@ -8,9 +8,9 @@ import java.util.Arrays;
 
 import launcher.LauncherAPI;
 import launcher.helper.SecurityHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.stream.StreamObject;
 
 public class SignedBytesHolder extends StreamObject {
 	protected final byte[] bytes;

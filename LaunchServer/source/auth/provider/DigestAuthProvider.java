@@ -2,8 +2,8 @@ package launchserver.auth.provider;
 
 import launcher.LauncherAPI;
 import launcher.helper.SecurityHelper;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
 import launchserver.auth.AuthException;
 
 public abstract class DigestAuthProvider extends AuthProvider {

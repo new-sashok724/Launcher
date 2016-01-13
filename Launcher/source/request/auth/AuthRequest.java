@@ -9,9 +9,9 @@ import launcher.client.PlayerProfile;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.Request;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.stream.StreamObject;
 
 public final class AuthRequest extends Request<AuthRequest.Result> {
 	private final String login;

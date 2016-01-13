@@ -9,9 +9,9 @@ import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.stream.StreamObject;
 
 public final class PlayerProfile extends StreamObject {
 	@LauncherAPI public final UUID uuid;

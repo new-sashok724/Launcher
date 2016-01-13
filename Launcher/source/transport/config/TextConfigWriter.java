@@ -1,4 +1,4 @@
-package launcher.serialize.config;
+package launcher.transport.config;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import launcher.LauncherAPI;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.BooleanConfigEntry;
-import launcher.serialize.config.entry.ConfigEntry;
-import launcher.serialize.config.entry.IntegerConfigEntry;
-import launcher.serialize.config.entry.ListConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.BooleanConfigEntry;
+import launcher.transport.config.entry.ConfigEntry;
+import launcher.transport.config.entry.IntegerConfigEntry;
+import launcher.transport.config.entry.ListConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
 
 public final class TextConfigWriter {
 	private final Writer writer;

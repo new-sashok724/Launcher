@@ -18,8 +18,8 @@ import launcher.helper.CommonHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.Request;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 import launchserver.LaunchServer;
 
 public final class ServerSocketHandler implements Runnable, AutoCloseable {

@@ -8,8 +8,8 @@ import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class HashedFile extends HashedEntry {
 	private static final byte[] DUMMY_HASH = new byte[0];

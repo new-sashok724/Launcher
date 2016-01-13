@@ -9,8 +9,8 @@ import launcher.client.PlayerProfile;
 import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
 
 public final class RequestTextureProvider extends TextureProvider {
 	private static final UUID ZERO_UUID = new UUID(0, 0);

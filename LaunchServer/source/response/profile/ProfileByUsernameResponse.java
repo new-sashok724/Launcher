@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.UUID;
 
 import launcher.helper.VerifyHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 import launchserver.LaunchServer;
 import launchserver.response.Response;
 

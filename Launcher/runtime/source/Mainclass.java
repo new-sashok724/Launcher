@@ -17,8 +17,8 @@ import launcher.helper.JVMHelper;
 import launcher.helper.LogHelper;
 import launcher.runtime.dialog.DialogController;
 import launcher.runtime.storage.Settings;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class Mainclass extends Application {
 	public static final Properties CONFIG = new Properties();

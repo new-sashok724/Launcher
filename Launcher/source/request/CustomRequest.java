@@ -3,8 +3,8 @@ package launcher.request;
 import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public abstract class CustomRequest<T> extends Request<T> {
 	@LauncherAPI

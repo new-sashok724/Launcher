@@ -9,8 +9,8 @@ import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.request.Request;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class UpdateListRequest extends Request<Set<String>> {
 	@LauncherAPI

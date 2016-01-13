@@ -19,10 +19,10 @@ import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.update.LauncherUpdateRequest;
 import launcher.runtime.Mainclass;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.signed.SignedObjectHolder;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.signed.SignedObjectHolder;
+import launcher.transport.stream.StreamObject;
 
 public final class Settings extends StreamObject {
 	private static final int SETTINGS_MAGIC = 0x724724_E4;

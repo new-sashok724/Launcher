@@ -1,4 +1,4 @@
-package launcher.serialize;
+package launcher.transport;
 
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;

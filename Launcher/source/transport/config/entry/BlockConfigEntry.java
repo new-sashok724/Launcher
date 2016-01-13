@@ -1,4 +1,4 @@
-package launcher.serialize.config.entry;
+package launcher.transport.config.entry;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -9,8 +9,8 @@ import java.util.Set;
 
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class BlockConfigEntry extends ConfigEntry<Map<String, ConfigEntry<?>>> {
 	@LauncherAPI

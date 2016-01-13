@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.Set;
 
 import launcher.hasher.HashedDir;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.signed.SignedObjectHolder;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.signed.SignedObjectHolder;
 import launchserver.LaunchServer;
 import launchserver.response.Response;
 

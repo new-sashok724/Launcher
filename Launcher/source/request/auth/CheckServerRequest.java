@@ -7,8 +7,8 @@ import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
 import launcher.helper.VerifyHelper;
 import launcher.request.Request;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class CheckServerRequest extends Request<PlayerProfile> {
 	private final String username;

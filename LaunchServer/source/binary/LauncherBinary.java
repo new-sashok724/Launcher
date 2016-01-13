@@ -5,7 +5,7 @@ import java.nio.file.Path;
 
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
-import launcher.serialize.signed.SignedBytesHolder;
+import launcher.transport.signed.SignedBytesHolder;
 import launchserver.LaunchServer;
 
 public abstract class LauncherBinary {

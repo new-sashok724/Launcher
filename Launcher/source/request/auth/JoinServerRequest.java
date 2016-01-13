@@ -8,8 +8,8 @@ import launcher.LauncherAPI;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.Request;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class JoinServerRequest extends Request<Boolean> {
 	private static final Pattern SERVERID_PATTERN = Pattern.compile("-?[0-9a-f]{1,40}");

@@ -1,4 +1,4 @@
-package launcher.serialize.stream;
+package launcher.transport.stream;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -7,9 +7,9 @@ import java.util.Map;
 
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.stream.EnumSerializer.Serializable;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.stream.EnumSerializer.Serializable;
 
 public final class EnumSerializer<E extends Enum<?> & Serializable> {
 	private final Map<Integer, E> map = new HashMap<>(16);

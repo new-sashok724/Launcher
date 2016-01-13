@@ -8,8 +8,8 @@ import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.client.PlayerProfile;
 import launcher.request.Request;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class ProfileByUUIDRequest extends Request<PlayerProfile> {
 	private final UUID uuid;

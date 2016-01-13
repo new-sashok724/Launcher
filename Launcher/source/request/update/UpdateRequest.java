@@ -23,11 +23,11 @@ import launcher.hasher.HashedFile;
 import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.Request;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.signed.SignedObjectHolder;
-import launcher.serialize.stream.EnumSerializer;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.signed.SignedObjectHolder;
+import launcher.transport.stream.EnumSerializer;
+import launcher.transport.stream.StreamObject;
 
 public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> { // TODO Controllable through API
 	@LauncherAPI public static final int MAX_QUEUE_SIZE = 128;

@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
 
 public final class NullAuthHandler extends AuthHandler {
 	private volatile AuthHandler handler;

@@ -3,8 +3,8 @@ package launchserver.response;
 import java.io.IOException;
 
 import launcher.request.PingRequest;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 import launchserver.LaunchServer;
 
 public final class PingResponse extends Response {

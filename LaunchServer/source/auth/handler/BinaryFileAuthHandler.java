@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.UUID;
 
 import launcher.helper.IOHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.config.entry.BlockConfigEntry;
 
 public final class BinaryFileAuthHandler extends FileAuthHandler {
 	public BinaryFileAuthHandler(BlockConfigEntry block) {

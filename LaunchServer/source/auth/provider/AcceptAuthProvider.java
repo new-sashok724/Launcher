@@ -1,6 +1,6 @@
 package launchserver.auth.provider;
 
-import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
 
 public final class AcceptAuthProvider extends AuthProvider {
 	public AcceptAuthProvider(BlockConfigEntry block) {

@@ -12,9 +12,9 @@ import launcher.helper.IOHelper;
 import launcher.helper.JVMHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.stream.StreamObject;
 
 public final class Launcher {
 	@LauncherAPI public static final String VERSION = "15.1";

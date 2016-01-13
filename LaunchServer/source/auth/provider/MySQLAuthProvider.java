@@ -7,9 +7,9 @@ import java.sql.SQLException;
 
 import launcher.helper.CommonHelper;
 import launcher.helper.VerifyHelper;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.ListConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
+import launcher.transport.config.entry.BlockConfigEntry;
+import launcher.transport.config.entry.ListConfigEntry;
+import launcher.transport.config.entry.StringConfigEntry;
 import launchserver.auth.AuthException;
 import launchserver.auth.MySQLSourceConfig;
 

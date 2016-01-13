@@ -1,13 +1,13 @@
-package launcher.serialize.config.entry;
+package launcher.transport.config.entry;
 
 import java.io.IOException;
 import java.util.Objects;
 
 import launcher.LauncherAPI;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.stream.EnumSerializer;
-import launcher.serialize.stream.StreamObject;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.stream.EnumSerializer;
+import launcher.transport.stream.StreamObject;
 
 public abstract class ConfigEntry<V> extends StreamObject {
 	@LauncherAPI public final boolean ro;

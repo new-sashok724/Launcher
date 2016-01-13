@@ -8,9 +8,9 @@ import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
-import launcher.serialize.stream.EnumSerializer;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
+import launcher.transport.stream.EnumSerializer;
 
 public abstract class Request<R> {
 	private final AtomicBoolean started = new AtomicBoolean(false);

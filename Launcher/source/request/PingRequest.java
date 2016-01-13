@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import launcher.Launcher;
 import launcher.LauncherAPI;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class PingRequest extends Request<Void> {
 	@LauncherAPI public static final byte EXPECTED_BYTE = 0b01010101;

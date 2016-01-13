@@ -9,8 +9,8 @@ import launcher.client.PlayerProfile;
 import launcher.helper.IOHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.Request;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 
 public final class BatchProfileByUsernameRequest extends Request<PlayerProfile[]> {
 	@LauncherAPI public static final int MAX_BATCH_SIZE = 128;

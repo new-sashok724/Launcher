@@ -41,7 +41,7 @@ import launcher.helper.VerifyHelper;
 import launcher.runtime.Mainclass;
 import launcher.runtime.dialog.overlay.SettingsController;
 import launcher.runtime.dialog.overlay.SpinnerController;
-import launcher.serialize.signed.SignedObjectHolder;
+import launcher.transport.signed.SignedObjectHolder;
 
 public final class DialogController implements Initializable {
 	public static final ResourceBundle LOCALE = ResourceBundle.getBundle("launcher.runtime.dialog.locale");

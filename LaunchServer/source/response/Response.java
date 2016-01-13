@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import launcher.LauncherAPI;
 import launcher.helper.LogHelper;
-import launcher.serialize.HInput;
-import launcher.serialize.HOutput;
+import launcher.transport.HInput;
+import launcher.transport.HOutput;
 import launchserver.LaunchServer;
 
 public abstract class Response {

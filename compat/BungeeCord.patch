@@ -1,28 +1,11 @@
-diff --git a/api/src/main/java/net/md_5/bungee/api/connection/PendingConnection.java b/api/src/main/java/net/md_5/bungee/api/connection/PendingConnection.java
-index cc511ef..28ac38c 100644
---- a/api/src/main/java/net/md_5/bungee/api/connection/PendingConnection.java
-+++ b/api/src/main/java/net/md_5/bungee/api/connection/PendingConnection.java
-@@ -70,12 +70,4 @@ public interface PendingConnection extends Connection
-      * Set this connection's online mode.
-      */
-     void setOnlineMode(boolean onlineMode);
--
--    /**
--     * Check if the client is using the older unsupported Minecraft protocol
--     * used by Minecraft clients older than 1.7.
--     *
--     * @return Whether the client is using a legacy client.
--     */
--    boolean isLegacy();
- }
 diff --git a/bootstrap/pom.xml b/bootstrap/pom.xml
-index 48f56b3..238ab60 100644
+index 48f56b3..96d748e 100644
 --- a/bootstrap/pom.xml
 +++ b/bootstrap/pom.xml
 @@ -58,6 +58,7 @@
                      <archive>
                          <manifestEntries>
-                             <Main-Class>net.md_5.bungee.Bootstrap</Main-Class> 
+                             <Main-Class>net.md_5.bungee.Bootstrap</Main-Class>
 +                            <Class-Path>Launcher.jar</Class-Path>
                              <Implementation-Version>${describe}</Implementation-Version>
                              <Specification-Version>${maven.build.timestamp}</Specification-Version>
@@ -44,13 +27,13 @@ index b7cb81e..6be2273 100644
              return;
          }
 diff --git a/pom.xml b/pom.xml
-index 1376c1a..92550b6 100644
+index 7ebde38..a94d818 100644
 --- a/pom.xml
 +++ b/pom.xml
 @@ -66,8 +66,8 @@
      <properties>
          <build.number>unknown</build.number>
-         <netty.version>4.0.31.Final</netty.version>
+         <netty.version>4.0.33.Final</netty.version>
 -        <maven.compiler.source>1.7</maven.compiler.source>
 -        <maven.compiler.target>1.7</maven.compiler.target>
 +        <maven.compiler.source>1.8</maven.compiler.source>
@@ -72,7 +55,7 @@ index 1376c1a..92550b6 100644
      </dependencies>
  
      <build>
-@@ -117,31 +124,6 @@
+@@ -116,31 +123,6 @@
                      </execution>
                  </executions>
              </plugin>
@@ -104,224 +87,13 @@ index 1376c1a..92550b6 100644
              <!-- OSS Parent 9 uses 2.7, 2.10+ is broken anyway -->
              <plugin>
                  <groupId>org.apache.maven.plugins</groupId>
-diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/AbstractPacketHandler.java b/protocol/src/main/java/net/md_5/bungee/protocol/AbstractPacketHandler.java
-index d292ecd..327b129 100644
---- a/protocol/src/main/java/net/md_5/bungee/protocol/AbstractPacketHandler.java
-+++ b/protocol/src/main/java/net/md_5/bungee/protocol/AbstractPacketHandler.java
-@@ -19,8 +19,6 @@ import net.md_5.bungee.protocol.packet.Kick;
- import net.md_5.bungee.protocol.packet.Respawn;
- import net.md_5.bungee.protocol.packet.Handshake;
- import net.md_5.bungee.protocol.packet.EncryptionResponse;
--import net.md_5.bungee.protocol.packet.LegacyHandshake;
--import net.md_5.bungee.protocol.packet.LegacyPing;
- import net.md_5.bungee.protocol.packet.LoginRequest;
- import net.md_5.bungee.protocol.packet.LoginSuccess;
- import net.md_5.bungee.protocol.packet.PingPacket;
-@@ -32,10 +30,6 @@ import net.md_5.bungee.protocol.packet.Title;
- public abstract class AbstractPacketHandler
- {
- 
--    public void handle(LegacyPing ping) throws Exception
--    {
--    }
--
-     public void handle(TabCompleteResponse tabResponse) throws Exception
-     {
-     }
-@@ -136,10 +130,6 @@ public abstract class AbstractPacketHandler
-     {
-     }
- 
--    public void handle(LegacyHandshake legacyHandshake) throws Exception
--    {
--    }
--
-     public void handle(SetCompression setCompression) throws Exception
-     {
-     }
-diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/KickStringWriter.java b/protocol/src/main/java/net/md_5/bungee/protocol/KickStringWriter.java
-deleted file mode 100644
-index eda9571..0000000
---- a/protocol/src/main/java/net/md_5/bungee/protocol/KickStringWriter.java
-+++ /dev/null
-@@ -1,20 +0,0 @@
--package net.md_5.bungee.protocol;
--
--import io.netty.buffer.ByteBuf;
--import io.netty.channel.ChannelHandlerContext;
--import io.netty.handler.codec.MessageToByteEncoder;
--
--public class KickStringWriter extends MessageToByteEncoder<String>
--{
--
--    @Override
--    protected void encode(ChannelHandlerContext ctx, String msg, ByteBuf out) throws Exception
--    {
--        out.writeByte( 0xFF );
--        out.writeShort( msg.length() );
--        for ( char c : msg.toCharArray() )
--        {
--            out.writeChar( c );
--        }
--    }
--}
-diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/LegacyDecoder.java b/protocol/src/main/java/net/md_5/bungee/protocol/LegacyDecoder.java
-deleted file mode 100644
-index 334a8ea..0000000
---- a/protocol/src/main/java/net/md_5/bungee/protocol/LegacyDecoder.java
-+++ /dev/null
-@@ -1,39 +0,0 @@
--package net.md_5.bungee.protocol;
--
--import io.netty.buffer.ByteBuf;
--import io.netty.buffer.Unpooled;
--import io.netty.channel.ChannelHandlerContext;
--import io.netty.handler.codec.ByteToMessageDecoder;
--import java.util.List;
--import net.md_5.bungee.protocol.packet.LegacyHandshake;
--import net.md_5.bungee.protocol.packet.LegacyPing;
--
--public class LegacyDecoder extends ByteToMessageDecoder
--{
--
--    @Override
--    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception
--    {
--        if ( !in.isReadable() )
--        {
--            return;
--        }
--
--        in.markReaderIndex();
--        short packetID = in.readUnsignedByte();
--
--        if ( packetID == 0xFE )
--        {
--            out.add( new PacketWrapper( new LegacyPing( in.isReadable() && in.readUnsignedByte() == 0x01 ), Unpooled.EMPTY_BUFFER ) );
--            return;
--        } else if ( packetID == 0x02 && in.isReadable() )
--        {
--            in.skipBytes( in.readableBytes() );
--            out.add( new PacketWrapper( new LegacyHandshake(), Unpooled.EMPTY_BUFFER ) );
--            return;
--        }
--
--        in.resetReaderIndex();
--        ctx.pipeline().remove( this );
--    }
--}
-diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/Varint21FrameDecoder.java b/protocol/src/main/java/net/md_5/bungee/protocol/Varint21FrameDecoder.java
-index 0f3b5b6..870bf0f 100644
---- a/protocol/src/main/java/net/md_5/bungee/protocol/Varint21FrameDecoder.java
-+++ b/protocol/src/main/java/net/md_5/bungee/protocol/Varint21FrameDecoder.java
-@@ -29,11 +29,6 @@ public class Varint21FrameDecoder extends ByteToMessageDecoder
-             if ( buf[i] >= 0 )
-             {
-                 int length = DefinedPacket.readVarInt( Unpooled.wrappedBuffer( buf ) );
--                if ( length == 0 )
--                {
--                    throw new CorruptedFrameException( "Empty Packet!" );
--                }
--
-                 if ( in.readableBytes() < length )
-                 {
-                     in.resetReaderIndex();
-diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/LegacyHandshake.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/LegacyHandshake.java
-deleted file mode 100644
-index 50d7381..0000000
---- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/LegacyHandshake.java
-+++ /dev/null
-@@ -1,33 +0,0 @@
--package net.md_5.bungee.protocol.packet;
--
--import io.netty.buffer.ByteBuf;
--import lombok.Data;
--import lombok.EqualsAndHashCode;
--import lombok.NoArgsConstructor;
--import net.md_5.bungee.protocol.AbstractPacketHandler;
--import net.md_5.bungee.protocol.DefinedPacket;
--
--@Data
--@NoArgsConstructor
--@EqualsAndHashCode(callSuper = false)
--public class LegacyHandshake extends DefinedPacket
--{
--
--    @Override
--    public void read(ByteBuf buf)
--    {
--        throw new UnsupportedOperationException( "Not supported yet." );
--    }
--
--    @Override
--    public void write(ByteBuf buf)
--    {
--        throw new UnsupportedOperationException( "Not supported yet." );
--    }
--
--    @Override
--    public void handle(AbstractPacketHandler handler) throws Exception
--    {
--        handler.handle( this );
--    }
--}
-diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/packet/LegacyPing.java b/protocol/src/main/java/net/md_5/bungee/protocol/packet/LegacyPing.java
-deleted file mode 100644
-index b0f9be2..0000000
---- a/protocol/src/main/java/net/md_5/bungee/protocol/packet/LegacyPing.java
-+++ /dev/null
-@@ -1,36 +0,0 @@
--package net.md_5.bungee.protocol.packet;
--
--import lombok.Data;
--import lombok.EqualsAndHashCode;
--import lombok.RequiredArgsConstructor;
--
--import io.netty.buffer.ByteBuf;
--import net.md_5.bungee.protocol.AbstractPacketHandler;
--import net.md_5.bungee.protocol.DefinedPacket;
--
--@Data
--@RequiredArgsConstructor
--@EqualsAndHashCode(callSuper = false)
--public class LegacyPing extends DefinedPacket
--{
--
--    private final boolean v1_5;
--
--    @Override
--    public void read(ByteBuf buf)
--    {
--        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
--    }
--
--    @Override
--    public void write(ByteBuf buf)
--    {
--        throw new UnsupportedOperationException( "Not supported yet." ); //To change body of generated methods, choose Tools | Templates.
--    }
--
--    @Override
--    public void handle(AbstractPacketHandler handler) throws Exception
--    {
--        handler.handle( this );
--    }
--}
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index c13d2e6..b1a380b 100644
+index ce78e19..dcf2240 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-@@ -51,14 +51,15 @@ import net.md_5.bungee.api.event.PreLoginEvent;
- import net.md_5.bungee.jni.cipher.BungeeCipher;
- import net.md_5.bungee.protocol.Protocol;
- import net.md_5.bungee.protocol.ProtocolConstants;
--import net.md_5.bungee.protocol.packet.LegacyHandshake;
--import net.md_5.bungee.protocol.packet.LegacyPing;
- import net.md_5.bungee.protocol.packet.LoginRequest;
- import net.md_5.bungee.protocol.packet.LoginSuccess;
- import net.md_5.bungee.protocol.packet.PingPacket;
- import net.md_5.bungee.protocol.packet.StatusRequest;
+@@ -60,6 +60,9 @@ import net.md_5.bungee.protocol.packet.StatusRequest;
  import net.md_5.bungee.protocol.packet.StatusResponse;
+ import net.md_5.bungee.util.BoundedArrayList;
  
 +import launcher.client.PlayerProfile;
 +import launcher.request.auth.CheckServerRequest;
@@ -329,77 +101,7 @@ index c13d2e6..b1a380b 100644
  @RequiredArgsConstructor
  public class InitialHandler extends PacketHandler implements PendingConnection
  {
-@@ -94,8 +95,6 @@ public class InitialHandler extends PacketHandler implements PendingConnection
-     @Getter
-     private LoginResult loginProfile;
-     @Getter
--    private boolean legacy;
--    @Getter
-     private String extraDataInHandshake = "";
- 
-     private enum State
-@@ -127,60 +126,6 @@ public class InitialHandler extends PacketHandler implements PendingConnection
-         }
-     }
- 
--    @Override
--    public void handle(LegacyHandshake legacyHandshake) throws Exception
--    {
--        this.legacy = true;
--        ch.getHandle().writeAndFlush( bungee.getTranslation( "outdated_client" ) );
--        ch.close();
--    }
--
--    @Override
--    public void handle(LegacyPing ping) throws Exception
--    {
--        this.legacy = true;
--        final boolean v1_5 = ping.isV1_5();
--
--        ServerPing legacy = new ServerPing( new ServerPing.Protocol( bungee.getName() + " " + bungee.getGameVersion(), bungee.getProtocolVersion() ),
--                new ServerPing.Players( listener.getMaxPlayers(), bungee.getOnlineCount(), null ), listener.getMotd(), (Favicon) null );
--
--        Callback<ProxyPingEvent> callback = new Callback<ProxyPingEvent>()
--        {
--            @Override
--            public void done(ProxyPingEvent result, Throwable error)
--            {
--                if ( ch.isClosed() )
--                {
--                    return;
--                }
--
--                ServerPing legacy = result.getResponse();
--                String kickMessage;
--
--                if ( v1_5 )
--                {
--                    kickMessage = ChatColor.DARK_BLUE
--                            + "\00" + 127
--                            + '\00' + legacy.getVersion().getName()
--                            + '\00' + getFirstLine( legacy.getDescription() )
--                            + '\00' + legacy.getPlayers().getOnline()
--                            + '\00' + legacy.getPlayers().getMax();
--                } else
--                {
--                    // Clients <= 1.3 don't support colored motds because the color char is used as delimiter
--                    kickMessage = ChatColor.stripColor( getFirstLine( legacy.getDescription() ) )
--                            + '\u00a7' + legacy.getPlayers().getOnline()
--                            + '\u00a7' + legacy.getPlayers().getMax();
--                }
--
--                ch.getHandle().writeAndFlush( kickMessage );
--                ch.close();
--            }
--        };
--
--        bungee.getPluginManager().callEvent( new ProxyPingEvent( this, legacy, callback ) );
--    }
--
-     private static String getFirstLine(String str)
-     {
-         int pos = str.indexOf( '\n' );
-@@ -383,35 +328,26 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -383,35 +386,26 @@ public class InitialHandler extends PacketHandler implements PendingConnection
          {
              sha.update( bit );
          }
@@ -453,7 +155,7 @@ index c13d2e6..b1a380b 100644
  
      private void finish()
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
-index 9311ef7..dead91f 100644
+index 9311ef7..1126a58 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
 @@ -3,6 +3,17 @@ package net.md_5.bungee.connection;
@@ -465,7 +167,7 @@ index 9311ef7..dead91f 100644
 +import java.io.FileNotFoundException;
 +import java.net.UnknownHostException;
 +import java.util.List;
-+import java.util.LinkedList;
++import java.util.ArrayList;
 +import launcher.client.PlayerProfile;
 +import launcher.client.ClientLauncher;
 +import launcher.helper.LogHelper;
@@ -480,7 +182,7 @@ index 9311ef7..dead91f 100644
  
 +    public LoginResult(PlayerProfile pp) {
 +        id = ClientLauncher.toHash(pp.uuid);
-+        List<Property> properitesList = new LinkedList<>();
++        List<Property> properitesList = new ArrayList<>(4);
 +        if(pp.skin != null) {
 +            properitesList.add(new Property(ClientLauncher.SKIN_URL_PROPERTY, pp.skin.url, ""));
 +            properitesList.add(new Property(ClientLauncher.SKIN_DIGEST_PROPERTY,
@@ -489,7 +191,7 @@ index 9311ef7..dead91f 100644
 +        if(pp.cloak != null) {
 +            properitesList.add(new Property(ClientLauncher.CLOAK_URL_PROPERTY, pp.cloak.url, ""));
 +            properitesList.add(new Property(ClientLauncher.CLOAK_DIGEST_PROPERTY,
-+                 SecurityHelper.toHex(pp.cloak.digest), ""));
++                SecurityHelper.toHex(pp.cloak.digest), ""));
 +        }
 +        properties = properitesList.toArray(new Property[properitesList.size()]);
 +    }
@@ -497,68 +199,3 @@ index 9311ef7..dead91f 100644
      @Data
      @AllArgsConstructor
      public static class Property
-diff --git a/proxy/src/main/java/net/md_5/bungee/connection/UpstreamBridge.java b/proxy/src/main/java/net/md_5/bungee/connection/UpstreamBridge.java
-index 13637df..d013304 100644
---- a/proxy/src/main/java/net/md_5/bungee/connection/UpstreamBridge.java
-+++ b/proxy/src/main/java/net/md_5/bungee/connection/UpstreamBridge.java
-@@ -58,27 +58,6 @@ public class UpstreamBridge extends PacketHandler
- 
-         if ( con.getServer() != null )
-         {
--            // Manually remove from everyone's tab list
--            // since the packet from the server arrives
--            // too late
--            // TODO: This should only done with server_unique
--            //       tab list (which is the only one supported
--            //       currently)
--            PlayerListItem packet = new PlayerListItem();
--            packet.setAction( PlayerListItem.Action.REMOVE_PLAYER );
--            PlayerListItem.Item item = new PlayerListItem.Item();
--            item.setUuid( con.getUniqueId() );
--            packet.setItems( new PlayerListItem.Item[]
--            {
--                item
--            } );
--            for ( ProxiedPlayer player : con.getServer().getInfo().getPlayers() )
--            {
--                if ( player.getPendingConnection().getVersion() >= ProtocolConstants.MINECRAFT_1_8 )
--                {
--                    player.unsafe().sendPacket( packet );
--                }
--            }
-             con.getServer().disconnect( "Quitting" );
-         }
-     }
-diff --git a/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java b/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java
-index 7b705fc..c549187 100644
---- a/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java
-+++ b/proxy/src/main/java/net/md_5/bungee/netty/PipelineUtils.java
-@@ -30,8 +30,6 @@ import net.md_5.bungee.Util;
- import net.md_5.bungee.connection.InitialHandler;
- import net.md_5.bungee.api.ProxyServer;
- import net.md_5.bungee.api.config.ListenerInfo;
--import net.md_5.bungee.protocol.KickStringWriter;
--import net.md_5.bungee.protocol.LegacyDecoder;
- import net.md_5.bungee.protocol.MinecraftDecoder;
- import net.md_5.bungee.protocol.MinecraftEncoder;
- import net.md_5.bungee.protocol.Protocol;
-@@ -57,10 +55,8 @@ public class PipelineUtils
-             }
- 
-             BASE.initChannel( ch );
--            ch.pipeline().addBefore( FRAME_DECODER, LEGACY_DECODER, new LegacyDecoder() );
-             ch.pipeline().addAfter( FRAME_DECODER, PACKET_DECODER, new MinecraftDecoder( Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion() ) );
-             ch.pipeline().addAfter( FRAME_PREPENDER, PACKET_ENCODER, new MinecraftEncoder( Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion() ) );
--            ch.pipeline().addBefore( FRAME_PREPENDER, LEGACY_KICKER, new KickStringWriter() );
-             ch.pipeline().get( HandlerBoss.class ).setHandler( new InitialHandler( ProxyServer.getInstance(), ch.attr( LISTENER ).get() ) );
-         }
-     };
-@@ -74,8 +70,6 @@ public class PipelineUtils
-     public static final String DECRYPT_HANDLER = "decrypt";
-     public static final String FRAME_DECODER = "frame-decoder";
-     public static final String FRAME_PREPENDER = "frame-prepender";
--    public static final String LEGACY_DECODER = "legacy-decoder";
--    public static final String LEGACY_KICKER = "legacy-kick";
- 
-     private static boolean epoll;
- 

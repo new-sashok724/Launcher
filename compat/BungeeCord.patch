@@ -5,7 +5,7 @@ index 48f56b3..96d748e 100644
 @@ -58,6 +58,7 @@
                      <archive>
                          <manifestEntries>
-                             <Main-Class>net.md_5.bungee.Bootstrap</Main-Class>
+                             <Main-Class>net.md_5.bungee.Bootstrap</Main-Class> 
 +                            <Class-Path>Launcher.jar</Class-Path>
                              <Implementation-Version>${describe}</Implementation-Version>
                              <Specification-Version>${maven.build.timestamp}</Specification-Version>

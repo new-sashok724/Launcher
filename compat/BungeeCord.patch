@@ -1,5 +1,5 @@
 diff --git a/bootstrap/pom.xml b/bootstrap/pom.xml
-index 48f56b3..96d748e 100644
+index 48f56b3..238ab60 100644
 --- a/bootstrap/pom.xml
 +++ b/bootstrap/pom.xml
 @@ -58,6 +58,7 @@
@@ -27,15 +27,17 @@ index b7cb81e..6be2273 100644
              return;
          }
 diff --git a/pom.xml b/pom.xml
-index 7ebde38..a94d818 100644
+index 7ebde38..b327a25 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -66,8 +66,8 @@
+@@ -65,9 +65,9 @@
+ 
      <properties>
          <build.number>unknown</build.number>
-         <netty.version>4.0.33.Final</netty.version>
+-        <netty.version>4.0.33.Final</netty.version>
 -        <maven.compiler.source>1.7</maven.compiler.source>
 -        <maven.compiler.target>1.7</maven.compiler.target>
++        <netty.version>4.0.34.Final</netty.version>
 +        <maven.compiler.source>1.8</maven.compiler.source>
 +        <maven.compiler.target>1.8</maven.compiler.target>
          <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -88,7 +90,7 @@ index 7ebde38..a94d818 100644
              <plugin>
                  <groupId>org.apache.maven.plugins</groupId>
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index ce78e19..dcf2240 100644
+index bcc6f9a..7829b8b 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 @@ -60,6 +60,9 @@ import net.md_5.bungee.protocol.packet.StatusRequest;
@@ -101,14 +103,14 @@ index ce78e19..dcf2240 100644
  @RequiredArgsConstructor
  public class InitialHandler extends PacketHandler implements PendingConnection
  {
-@@ -383,35 +386,26 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -383,35 +386,25 @@ public class InitialHandler extends PacketHandler implements PendingConnection
          {
              sha.update( bit );
          }
 -        String encodedHash = URLEncoder.encode( new BigInteger( sha.digest() ).toString( 16 ), "UTF-8" );
 -
 -        String authURL = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash;
- 
+-
 -        Callback<String> handler = new Callback<String>()
 -        {
 -            @Override
@@ -155,7 +157,7 @@ index ce78e19..dcf2240 100644
  
      private void finish()
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
-index 9311ef7..1126a58 100644
+index 9311ef7..98bba42 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
 @@ -3,6 +3,17 @@ package net.md_5.bungee.connection;
@@ -176,7 +178,7 @@ index 9311ef7..1126a58 100644
  @Data
  @AllArgsConstructor
  public class LoginResult
-@@ -11,6 +22,22 @@ public class LoginResult
+@@ -11,6 +22,20 @@ public class LoginResult
      private String id;
      private Property[] properties;
  
@@ -185,13 +187,11 @@ index 9311ef7..1126a58 100644
 +        List<Property> properitesList = new ArrayList<>(4);
 +        if(pp.skin != null) {
 +            properitesList.add(new Property(ClientLauncher.SKIN_URL_PROPERTY, pp.skin.url, ""));
-+            properitesList.add(new Property(ClientLauncher.SKIN_DIGEST_PROPERTY,
-+                SecurityHelper.toHex(pp.skin.digest), ""));
++            properitesList.add(new Property(ClientLauncher.SKIN_DIGEST_PROPERTY, SecurityHelper.toHex(pp.skin.digest), ""));
 +        }
 +        if(pp.cloak != null) {
 +            properitesList.add(new Property(ClientLauncher.CLOAK_URL_PROPERTY, pp.cloak.url, ""));
-+            properitesList.add(new Property(ClientLauncher.CLOAK_DIGEST_PROPERTY,
-+                SecurityHelper.toHex(pp.cloak.digest), ""));
++            properitesList.add(new Property(ClientLauncher.CLOAK_DIGEST_PROPERTY, SecurityHelper.toHex(pp.cloak.digest), ""));
 +        }
 +        properties = properitesList.toArray(new Property[properitesList.size()]);
 +    }

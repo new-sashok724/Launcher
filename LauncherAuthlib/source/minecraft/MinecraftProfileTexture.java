@@ -1,6 +1,9 @@
 package com.mojang.authlib.minecraft;
 
 public final class MinecraftProfileTexture {
+	public static final int PROFILE_TEXTURE_COUNT = Type.values().length;
+
+	// Instance
 	private final String url;
 	private final String hash;
 
@@ -31,6 +34,7 @@ public final class MinecraftProfileTexture {
 
 	public enum Type {
 		SKIN,
-		CAPE
+		CAPE,
+		ELYTRA
 	}
 }

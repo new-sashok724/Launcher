@@ -1,6 +1,6 @@
 // ====== LAUNCHER CONFIG ====== //
 var config = {
-	dir: "sashok724", // Launcher directory
+	dir: "launcher", // Launcher directory
 	title: "sashok724's Launcher", // Window title
 	icons: [ "favicon.png" ], // Window icon paths
 

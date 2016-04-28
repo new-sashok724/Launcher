@@ -15,7 +15,7 @@ import launchserver.LaunchServer;
 import launchserver.command.Command;
 
 public final class DownloadAssetCommand extends Command {
-	private static final String ASSET_URL_MASK = "https://launcher.sashok724.net/download/assets/%s.zip";
+	private static final String ASSET_URL_MASK = "http://launcher.sashok724.net/download/assets/%s.zip";
 
 	public DownloadAssetCommand(LaunchServer server) {
 		super(server);

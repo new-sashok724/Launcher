@@ -112,14 +112,13 @@ public final class ServerPinger {
 		if (!clientVersion.equals(version.name)) {
 			throw new IOException(String.format("Version mismatch: '%s'", clientVersion));
 		}
-		String title = splitted[3];
 		int onlinePlayers = VerifyHelper.verifyInt(Integer.parseInt(splitted[4]),
 			VerifyHelper.NOT_NEGATIVE, "onlinePlayers can't be < 0");
 		int maxPlayers = VerifyHelper.verifyInt(Integer.parseInt(splitted[5]),
 			VerifyHelper.NOT_NEGATIVE, "maxPlayers can't be < 0");
 
 		// Return ping status
-		return new Result(onlinePlayers, maxPlayers, title, response);
+		return new Result(onlinePlayers, maxPlayers, response);
 	}
 
 	private Result modernPing(HInput input, HOutput output) throws IOException {
@@ -160,13 +159,12 @@ public final class ServerPinger {
 
 		// Parse JSON response
 		JsonObject object = Json.parse(response).asObject();
-		String description = object.get("description").asString();
 		JsonObject playersObject = object.get("players").asObject();
 		int online = playersObject.get("online").asInt();
 		int max = playersObject.get("max").asInt();
 
 		// Return ping status
-		return new Result(online, max, description, response);
+		return new Result(online, max, response);
 	}
 
 	private static String readUTF16String(HInput input) throws IOException {
@@ -186,25 +184,19 @@ public final class ServerPinger {
 		// Instance
 		@LauncherAPI public final int onlinePlayers;
 		@LauncherAPI public final int maxPlayers;
-		@LauncherAPI public final String description;
 		@LauncherAPI public final String raw;
 
-		public Result(int onlinePlayers, int maxPlayers, CharSequence description, String raw) {
+		public Result(int onlinePlayers, int maxPlayers, String raw) {
 			this.onlinePlayers = VerifyHelper.verifyInt(onlinePlayers,
 				VerifyHelper.NOT_NEGATIVE, "onlinePlayers can't be < 0");
 			this.maxPlayers = VerifyHelper.verifyInt(maxPlayers,
 				VerifyHelper.NOT_NEGATIVE, "maxPlayers can't be < 0");
-			this.description = stripColorCodes(description);
 			this.raw = raw;
 		}
 
 		@LauncherAPI
 		public boolean isOverfilled() {
 			return onlinePlayers >= maxPlayers;
-		}
-
-		private static String stripColorCodes(CharSequence s) {
-			return CODES_PATTERN.matcher(s).replaceAll("");
 		}
 	}
 }

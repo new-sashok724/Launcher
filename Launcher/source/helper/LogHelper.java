@@ -23,6 +23,7 @@ import org.fusesource.jansi.AnsiOutputStream;
 
 public final class LogHelper {
 	@LauncherAPI public static final String DEBUG_PROPERTY = "launcher.debug";
+	@LauncherAPI public static final String NO_JANSI_PROPERTY = "launcher.noJAnsi";
 	@LauncherAPI public static final boolean JANSI;
 
 	// Output settings
@@ -250,9 +251,13 @@ public final class LogHelper {
 		// Use JAnsi if available
 		boolean jansi;
 		try {
-			Class.forName("org.fusesource.jansi.Ansi");
-			AnsiConsole.systemInstall();
-			jansi = true;
+            if (Boolean.getBoolean(NO_JANSI_PROPERTY)) {
+                jansi = false;
+            } else {
+                Class.forName("org.fusesource.jansi.Ansi");
+                AnsiConsole.systemInstall();
+                jansi = true;
+			}
 		} catch (ClassNotFoundException ignored) {
 			jansi = false;
 		}

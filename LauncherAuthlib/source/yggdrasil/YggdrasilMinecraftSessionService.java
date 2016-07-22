@@ -142,7 +142,6 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
 			properties.put(ClientLauncher.CLOAK_DIGEST_PROPERTY, new Property(
 				ClientLauncher.CLOAK_DIGEST_PROPERTY, SecurityHelper.toHex(pp.cloak.digest), ""));
 		}
-		properties.put("textures", new Property("textures", "")); // To make sure it's not queried every time
 	}
 
 	public static GameProfile toGameProfile(PlayerProfile pp) {

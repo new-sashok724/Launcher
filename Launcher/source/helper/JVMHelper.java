@@ -16,6 +16,7 @@ import sun.misc.URLClassPath;
 public final class JVMHelper {
 	// System properties
 	@LauncherAPI public static final OS OS_TYPE = OS.byName(System.getProperty("os.name"));
+	@LauncherAPI public static final String OS_VERSION = System.getProperty("os.version");
 	@LauncherAPI public static final int OS_BITS = getCorrectOSArch();
 	@LauncherAPI public static final int JVM_BITS = Integer.parseInt(System.getProperty("sun.arch.data.model"));
 	@LauncherAPI public static final int RAM = getRAMAmount();

@@ -44,6 +44,7 @@ import launcher.serialize.signed.SignedObjectHolder;
 import launcher.serialize.stream.StreamObject;
 
 public final class ClientLauncher {
+	private static final String MAGICAL_INTEL_OPTION = "-XX:HeapDumpPath=ThisTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump";
 	private static final Set<PosixFilePermission> BIN_POSIX_PERMISSIONS = Collections.unmodifiableSet(EnumSet.of(
 		PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, // Owner
 		PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE, // Group
@@ -103,10 +104,16 @@ public final class ClientLauncher {
 		// Fill CLI arguments
 		List<String> args = new LinkedList<>();
 		args.add(javaBin.toString());
+		args.add(MAGICAL_INTEL_OPTION);
 		if (params.ram > 0 && params.ram <= JVMHelper.RAM) {
 			args.add("-Xmx" + params.ram + 'M');
 		}
 		args.add(jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())));
+		if (JVMHelper.OS_TYPE == JVMHelper.OS.MUSTDIE && JVMHelper.OS_VERSION.startsWith("10.")) {
+		    LogHelper.debug("MustDie 10 fix is applied");
+		    args.add(jvmProperty("os.name", "Windows 10"));
+		    args.add(jvmProperty("os.version", "10.0"));
+		}
 
 		// Add classpath and main class
 		Collections.addAll(args, profile.object.getJvmArgs());

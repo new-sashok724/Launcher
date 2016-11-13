@@ -1,7 +1,5 @@
 package launcher.helper;
 
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -29,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.jar.JarFile;
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 
 import launcher.LauncherAPI;
 import sun.misc.Resource;

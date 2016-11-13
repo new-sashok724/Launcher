@@ -49,6 +49,7 @@ public final class RequestTextureProvider extends TextureProvider {
 		try {
 			return new PlayerProfile.Texture(url);
 		} catch (FileNotFoundException e) {
+			LogHelper.subDebug("Texture not found :(");
 			return null; // Simply not found
 		}
 	}

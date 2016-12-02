@@ -19,112 +19,114 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import launcher.Launcher;
+import launcher.Launcher.Config;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
+import launcher.helper.SecurityHelper.DigestAlgorithm;
 import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
 
 public final class JARLauncherBinary extends LauncherBinary {
-	@LauncherAPI public static final Path RUNTIME_DIR = IOHelper.WORKING_DIR.resolve(Launcher.RUNTIME_DIR);
-	@LauncherAPI public static final Path INIT_SCRIPT_FILE = RUNTIME_DIR.resolve(Launcher.INIT_SCRIPT_FILE);
-	@LauncherAPI public static final Path JAR_BINARY_FILE = IOHelper.WORKING_DIR.resolve("Launcher.jar");
+    @LauncherAPI public static final Path RUNTIME_DIR = IOHelper.WORKING_DIR.resolve(Launcher.RUNTIME_DIR);
+    @LauncherAPI public static final Path INIT_SCRIPT_FILE = RUNTIME_DIR.resolve(Launcher.INIT_SCRIPT_FILE);
+    @LauncherAPI public static final Path JAR_BINARY_FILE = IOHelper.WORKING_DIR.resolve("Launcher.jar");
 
-	@LauncherAPI
-	public JARLauncherBinary(LaunchServer server) throws IOException {
-		super(server, JAR_BINARY_FILE);
-		tryUnpackRuntime();
-	}
+    @LauncherAPI
+    public JARLauncherBinary(LaunchServer server) throws IOException {
+        super(server, JAR_BINARY_FILE);
+        tryUnpackRuntime();
+    }
 
-	@Override
-	public void build() throws IOException {
-		LogHelper.info("Building launcher binary file");
-		try (JarOutputStream output = new JarOutputStream(IOHelper.newOutput(JAR_BINARY_FILE))) {
-			output.setMethod(ZipOutputStream.DEFLATED);
-			output.setLevel(Deflater.BEST_COMPRESSION);
-			try (InputStream input = new GZIPInputStream(IOHelper.newInput(IOHelper.getResourceURL("Launcher.pack.gz")))) {
-				Pack200.newUnpacker().unpack(input, output);
-			}
+    @Override
+    public void build() throws IOException {
+        LogHelper.info("Building launcher binary file");
+        try (JarOutputStream output = new JarOutputStream(IOHelper.newOutput(JAR_BINARY_FILE))) {
+            output.setMethod(ZipOutputStream.DEFLATED);
+            output.setLevel(Deflater.BEST_COMPRESSION);
+            try (InputStream input = new GZIPInputStream(IOHelper.newInput(IOHelper.getResourceURL("Launcher.pack.gz")))) {
+                Pack200.newUnpacker().unpack(input, output);
+            }
 
-			// Verify has init script file
-			if (!IOHelper.isFile(INIT_SCRIPT_FILE)) {
-				throw new IOException(String.format("Missing init script file ('%s')", Launcher.INIT_SCRIPT_FILE));
-			}
+            // Verify has init script file
+            if (!IOHelper.isFile(INIT_SCRIPT_FILE)) {
+                throw new IOException(String.format("Missing init script file ('%s')", Launcher.INIT_SCRIPT_FILE));
+            }
 
-			// Write launcher runtime dir
-			Map<String, byte[]> runtime = new HashMap<>();
-			IOHelper.walk(RUNTIME_DIR, new RuntimeDirVisitor(output, runtime), false);
+            // Write launcher runtime dir
+            Map<String, byte[]> runtime = new HashMap<>();
+            IOHelper.walk(RUNTIME_DIR, new RuntimeDirVisitor(output, runtime), false);
 
-			// Create launcher config file
-			byte[] launcherConfigBytes;
-			try (ByteArrayOutputStream configArray = IOHelper.newByteArrayOutput()) {
-				try (HOutput configOutput = new HOutput(configArray)) {
-					new Launcher.Config(server.config.getAddress(), server.config.port,
-						server.publicKey, runtime).write(configOutput);
-				}
-				launcherConfigBytes = configArray.toByteArray();
-			}
+            // Create launcher config file
+            byte[] launcherConfigBytes;
+            try (ByteArrayOutputStream configArray = IOHelper.newByteArrayOutput()) {
+                try (HOutput configOutput = new HOutput(configArray)) {
+                    new Config(server.config.getAddress(), server.config.port,
+                        server.publicKey, runtime).write(configOutput);
+                }
+                launcherConfigBytes = configArray.toByteArray();
+            }
 
-			// Write launcher config file
-			output.putNextEntry(IOHelper.newZipEntry(Launcher.CONFIG_FILE));
-			output.write(launcherConfigBytes);
-		}
-	}
+            // Write launcher config file
+            output.putNextEntry(IOHelper.newZipEntry(Launcher.CONFIG_FILE));
+            output.write(launcherConfigBytes);
+        }
+    }
 
-	@LauncherAPI
-	public void tryUnpackRuntime() throws IOException {
-		// Verify is runtime dir unpacked
-		if (IOHelper.isDir(RUNTIME_DIR)) {
-			return; // Already unpacked
-		}
+    @LauncherAPI
+    public void tryUnpackRuntime() throws IOException {
+        // Verify is runtime dir unpacked
+        if (IOHelper.isDir(RUNTIME_DIR)) {
+            return; // Already unpacked
+        }
 
-		// Unpack launcher runtime files
-		Files.createDirectory(RUNTIME_DIR);
-		LogHelper.info("Unpacking launcher runtime files");
-		try (ZipInputStream input = IOHelper.newZipInput(IOHelper.getResourceURL("launchserver/defaults/runtime.zip"))) {
-			for (ZipEntry entry = input.getNextEntry(); entry != null; entry = input.getNextEntry()) {
-				if (entry.isDirectory()) {
-					continue; // Skip dirs
-				}
+        // Unpack launcher runtime files
+        Files.createDirectory(RUNTIME_DIR);
+        LogHelper.info("Unpacking launcher runtime files");
+        try (ZipInputStream input = IOHelper.newZipInput(IOHelper.getResourceURL("launchserver/defaults/runtime.zip"))) {
+            for (ZipEntry entry = input.getNextEntry(); entry != null; entry = input.getNextEntry()) {
+                if (entry.isDirectory()) {
+                    continue; // Skip dirs
+                }
 
-				// Unpack runtime file
-				IOHelper.transfer(input, RUNTIME_DIR.resolve(IOHelper.toPath(entry.getName())));
-			}
-		}
-	}
+                // Unpack runtime file
+                IOHelper.transfer(input, RUNTIME_DIR.resolve(IOHelper.toPath(entry.getName())));
+            }
+        }
+    }
 
-	private static final class RuntimeDirVisitor extends SimpleFileVisitor<Path> {
-		private final ZipOutputStream output;
-		private final Map<String, byte[]> runtime;
+    private static final class RuntimeDirVisitor extends SimpleFileVisitor<Path> {
+        private final ZipOutputStream output;
+        private final Map<String, byte[]> runtime;
 
-		private RuntimeDirVisitor(ZipOutputStream output, Map<String, byte[]> runtime) {
-			this.output = output;
-			this.runtime = runtime;
-		}
+        private RuntimeDirVisitor(ZipOutputStream output, Map<String, byte[]> runtime) {
+            this.output = output;
+            this.runtime = runtime;
+        }
 
-		@Override
-		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-			String dirName = IOHelper.toString(RUNTIME_DIR.relativize(dir));
-			output.putNextEntry(newEntry(dirName + '/'));
-			return super.preVisitDirectory(dir, attrs);
-		}
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            String dirName = IOHelper.toString(RUNTIME_DIR.relativize(dir));
+            output.putNextEntry(newEntry(dirName + '/'));
+            return super.preVisitDirectory(dir, attrs);
+        }
 
-		@Override
-		public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-			String fileName = IOHelper.toString(RUNTIME_DIR.relativize(file));
-			runtime.put(fileName, SecurityHelper.digest(SecurityHelper.DigestAlgorithm.MD5, file));
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            String fileName = IOHelper.toString(RUNTIME_DIR.relativize(file));
+            runtime.put(fileName, SecurityHelper.digest(DigestAlgorithm.MD5, file));
 
-			// Create zip entry and transfer contents
-			output.putNextEntry(newEntry(fileName));
-			IOHelper.transfer(file, output);
+            // Create zip entry and transfer contents
+            output.putNextEntry(newEntry(fileName));
+            IOHelper.transfer(file, output);
 
-			// Return result
-			return super.visitFile(file, attrs);
-		}
+            // Return result
+            return super.visitFile(file, attrs);
+        }
 
-		private static ZipEntry newEntry(String fileName) {
-			return IOHelper.newZipEntry(Launcher.RUNTIME_DIR + IOHelper.CROSS_SEPARATOR + fileName);
-		}
-	}
+        private static ZipEntry newEntry(String fileName) {
+            return IOHelper.newZipEntry(Launcher.RUNTIME_DIR + IOHelper.CROSS_SEPARATOR + fileName);
+        }
+    }
 }

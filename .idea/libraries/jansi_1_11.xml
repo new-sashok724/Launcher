@@ -4,8 +4,6 @@
       <root url="jar://$PROJECT_DIR$/build/libraries/jansi-1.11.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$PROJECT_DIR$/build/libraries/jansi-1.11-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

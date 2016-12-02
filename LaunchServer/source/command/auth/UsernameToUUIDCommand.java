@@ -9,32 +9,32 @@ import launchserver.command.Command;
 import launchserver.command.CommandException;
 
 public final class UsernameToUUIDCommand extends Command {
-	public UsernameToUUIDCommand(LaunchServer server) {
-		super(server);
-	}
+    public UsernameToUUIDCommand(LaunchServer server) {
+        super(server);
+    }
 
-	@Override
-	public String getArgsDescription() {
-		return "<username>";
-	}
+    @Override
+    public String getArgsDescription() {
+        return "<username>";
+    }
 
-	@Override
-	public String getUsageDescription() {
-		return "Convert player username to UUID";
-	}
+    @Override
+    public String getUsageDescription() {
+        return "Convert player username to UUID";
+    }
 
-	@Override
-	public void invoke(String... args) throws CommandException, IOException {
-		verifyArgs(args, 1);
-		String username = parseUsername(args[0]);
+    @Override
+    public void invoke(String... args) throws CommandException, IOException {
+        verifyArgs(args, 1);
+        String username = parseUsername(args[0]);
 
-		// Get UUID by username
-		UUID uuid = server.config.authHandler.usernameToUUID(username);
-		if (uuid == null) {
-			throw new CommandException(String.format("Unknown username: '%s'", username));
-		}
+        // Get UUID by username
+        UUID uuid = server.config.authHandler.usernameToUUID(username);
+        if (uuid == null) {
+            throw new CommandException(String.format("Unknown username: '%s'", username));
+        }
 
-		// Print UUID
-		LogHelper.subInfo("UUID of player '%s': %s", username, uuid);
-	}
+        // Print UUID
+        LogHelper.subInfo("UUID of player '%s': %s", username, uuid);
+    }
 }

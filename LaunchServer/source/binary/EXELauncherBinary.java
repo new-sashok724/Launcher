@@ -10,18 +10,18 @@ import launcher.helper.LogHelper;
 import launchserver.LaunchServer;
 
 public final class EXELauncherBinary extends LauncherBinary {
-	@LauncherAPI public static final Path EXE_BINARY_FILE = IOHelper.toPath("Launcher.exe");
+    @LauncherAPI public static final Path EXE_BINARY_FILE = IOHelper.toPath("Launcher.exe");
 
-	@LauncherAPI
-	public EXELauncherBinary(LaunchServer server) {
-		super(server, IOHelper.WORKING_DIR.resolve(EXE_BINARY_FILE));
-	}
+    @LauncherAPI
+    public EXELauncherBinary(LaunchServer server) {
+        super(server, IOHelper.WORKING_DIR.resolve(EXE_BINARY_FILE));
+    }
 
-	@Override
-	public void build() throws IOException {
-		if (IOHelper.isFile(binaryFile)) {
-			LogHelper.subWarning("Deleting obsolete launcher EXE binary file");
-			Files.delete(binaryFile);
-		}
-	}
+    @Override
+    public void build() throws IOException {
+        if (IOHelper.isFile(binaryFile)) {
+            LogHelper.subWarning("Deleting obsolete launcher EXE binary file");
+            Files.delete(binaryFile);
+        }
+    }
 }

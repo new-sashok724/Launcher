@@ -4,8 +4,6 @@
       <root url="jar://$PROJECT_DIR$/build/libraries/minimal-json-0.9.4.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$PROJECT_DIR$/build/libraries/minimal-json-0.9.4-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

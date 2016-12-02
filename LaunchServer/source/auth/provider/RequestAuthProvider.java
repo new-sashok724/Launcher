@@ -11,34 +11,34 @@ import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 
 public final class RequestAuthProvider extends AuthProvider {
-	private final String url;
-	private final Pattern response;
+    private final String url;
+    private final Pattern response;
 
-	public RequestAuthProvider(BlockConfigEntry block) {
-		super(block);
-		url = block.getEntryValue("url", StringConfigEntry.class);
-		response = Pattern.compile(block.getEntryValue("response", StringConfigEntry.class));
+    public RequestAuthProvider(BlockConfigEntry block) {
+        super(block);
+        url = block.getEntryValue("url", StringConfigEntry.class);
+        response = Pattern.compile(block.getEntryValue("response", StringConfigEntry.class));
 
-		// Verify is valid URL
-		IOHelper.verifyURL(getFormattedURL("urlAuthLogin", "urlAuthPassword"));
-	}
+        // Verify is valid URL
+        IOHelper.verifyURL(getFormattedURL("urlAuthLogin", "urlAuthPassword"));
+    }
 
-	@Override
-	public String auth(String login, String password) throws IOException {
-		String currentResponse = IOHelper.request(new URL(getFormattedURL(login, password)));
+    @Override
+    public String auth(String login, String password) throws IOException {
+        String currentResponse = IOHelper.request(new URL(getFormattedURL(login, password)));
 
-		// Match username
-		Matcher matcher = response.matcher(currentResponse);
-		return matcher.matches() && matcher.groupCount() >= 1 ?
-			matcher.group("username") : authError(currentResponse);
-	}
+        // Match username
+        Matcher matcher = response.matcher(currentResponse);
+        return matcher.matches() && matcher.groupCount() >= 1 ?
+            matcher.group("username") : authError(currentResponse);
+    }
 
-	@Override
-	public void close() {
-		// Do nothing
-	}
+    @Override
+    public void close() {
+        // Do nothing
+    }
 
-	private String getFormattedURL(String login, String password) {
-		return CommonHelper.replace(url, "login", IOHelper.urlEncode(login), "password", IOHelper.urlEncode(password));
-	}
+    private String getFormattedURL(String login, String password) {
+        return CommonHelper.replace(url, "login", IOHelper.urlEncode(login), "password", IOHelper.urlEncode(password));
+    }
 }

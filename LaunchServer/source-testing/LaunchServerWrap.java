@@ -1,10 +1,10 @@
 package launchserver;
 
 public final class LaunchServerWrap {
-	private LaunchServerWrap() {
-	}
+    private LaunchServerWrap() {
+    }
 
-	public static void main(String... args) throws Throwable {
-		LaunchServer.main(args); // Just for test runtime
-	}
+    public static void main(String... args) throws Throwable {
+        LaunchServer.main(args); // Just for test runtime
+    }
 }

@@ -13,32 +13,32 @@ import launchserver.auth.AuthException;
 import launchserver.response.Response;
 
 public final class JoinServerResponse extends Response {
-	public JoinServerResponse(LaunchServer server, long id, HInput input, HOutput output) {
-		super(server, id, input, output);
-	}
+    public JoinServerResponse(LaunchServer server, long id, HInput input, HOutput output) {
+        super(server, id, input, output);
+    }
 
-	@Override
-	public void reply() throws IOException {
-		String username = VerifyHelper.verifyUsername(input.readASCII(16));
-		String accessToken = SecurityHelper.verifyToken(input.readASCII(-SecurityHelper.TOKEN_STRING_LENGTH));
-		String serverID = JoinServerRequest.verifyServerID(input.readASCII(41)); // With minus sign
+    @Override
+    public void reply() throws IOException {
+        String username = VerifyHelper.verifyUsername(input.readASCII(16));
+        String accessToken = SecurityHelper.verifyToken(input.readASCII(-SecurityHelper.TOKEN_STRING_LENGTH));
+        String serverID = JoinServerRequest.verifyServerID(input.readASCII(41)); // With minus sign
 
-		// Try join server with auth handler
-		debug("Username: '%s', Access token: %s, Server ID: %s", username, accessToken, serverID);
-		boolean success;
-		try {
-			success = server.config.authHandler.joinServer(username, accessToken, serverID);
-		} catch (AuthException e) {
-			requestError(e.getMessage());
-			return;
-		} catch (Exception e) {
-			LogHelper.error(e);
-			requestError("Internal auth handler error");
-			return;
-		}
-		writeNoError(output);
+        // Try join server with auth handler
+        debug("Username: '%s', Access token: %s, Server ID: %s", username, accessToken, serverID);
+        boolean success;
+        try {
+            success = server.config.authHandler.joinServer(username, accessToken, serverID);
+        } catch (AuthException e) {
+            requestError(e.getMessage());
+            return;
+        } catch (Exception e) {
+            LogHelper.error(e);
+            requestError("Internal auth handler error");
+            return;
+        }
+        writeNoError(output);
 
-		// Write response
-		output.writeBoolean(success);
-	}
+        // Write response
+        output.writeBoolean(success);
+    }
 }

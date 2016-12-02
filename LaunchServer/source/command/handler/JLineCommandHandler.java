@@ -4,48 +4,49 @@ import java.io.IOException;
 
 import jline.console.ConsoleReader;
 import launcher.helper.LogHelper;
+import launcher.helper.LogHelper.Output;
 import launchserver.LaunchServer;
 
 public final class JLineCommandHandler extends CommandHandler {
-	private final ConsoleReader reader;
+    private final ConsoleReader reader;
 
-	public JLineCommandHandler(LaunchServer server) throws IOException {
-		super(server);
+    public JLineCommandHandler(LaunchServer server) throws IOException {
+        super(server);
 
-		// Set reader
-		reader = new ConsoleReader();
-		reader.setExpandEvents(false);
+        // Set reader
+        reader = new ConsoleReader();
+        reader.setExpandEvents(false);
 
-		// Replace writer
-		LogHelper.removeStdOutput();
-		LogHelper.addOutput(new JLineOutput());
-	}
+        // Replace writer
+        LogHelper.removeStdOutput();
+        LogHelper.addOutput(new JLineOutput());
+    }
 
-	@Override
-	public void bell() throws IOException {
-		reader.beep();
-	}
+    @Override
+    public void bell() throws IOException {
+        reader.beep();
+    }
 
-	@Override
-	public void clear() throws IOException {
-		reader.clearScreen();
-	}
+    @Override
+    public void clear() throws IOException {
+        reader.clearScreen();
+    }
 
-	@Override
-	public String readLine() throws IOException {
-		return reader.readLine();
-	}
+    @Override
+    public String readLine() throws IOException {
+        return reader.readLine();
+    }
 
-	private final class JLineOutput implements LogHelper.Output {
-		@Override
-		public void println(String message) {
-			try {
-				reader.println(ConsoleReader.RESET_LINE + message);
-				reader.drawLine();
-				reader.flush();
-			} catch (IOException ignored) {
-				// Ignored
-			}
-		}
-	}
+    private final class JLineOutput implements Output {
+        @Override
+        public void println(String message) {
+            try {
+                reader.println(ConsoleReader.RESET_LINE + message);
+                reader.drawLine();
+                reader.flush();
+            } catch (IOException ignored) {
+                // Ignored
+            }
+        }
+    }
 }

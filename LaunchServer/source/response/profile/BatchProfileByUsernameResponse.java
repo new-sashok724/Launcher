@@ -11,21 +11,21 @@ import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class BatchProfileByUsernameResponse extends Response {
-	public BatchProfileByUsernameResponse(LaunchServer server, long id, HInput input, HOutput output) {
-		super(server, id, input, output);
-	}
+    public BatchProfileByUsernameResponse(LaunchServer server, long id, HInput input, HOutput output) {
+        super(server, id, input, output);
+    }
 
-	@Override
-	public void reply() throws IOException {
-		String[] usernames = new String[input.readLength(BatchProfileByUsernameRequest.MAX_BATCH_SIZE)];
-		for (int i = 0; i < usernames.length; i++) {
-			usernames[i] = VerifyHelper.verifyUsername(input.readASCII(16));
-		}
-		debug("Usernames: " + Arrays.toString(usernames));
+    @Override
+    public void reply() throws IOException {
+        String[] usernames = new String[input.readLength(BatchProfileByUsernameRequest.MAX_BATCH_SIZE)];
+        for (int i = 0; i < usernames.length; i++) {
+            usernames[i] = VerifyHelper.verifyUsername(input.readASCII(16));
+        }
+        debug("Usernames: " + Arrays.toString(usernames));
 
-		// Respond with profiles array
-		for (String username : usernames) {
-			ProfileByUsernameResponse.writeProfile(server, output, username);
-		}
-	}
+        // Respond with profiles array
+        for (String username : usernames) {
+            ProfileByUsernameResponse.writeProfile(server, output, username);
+        }
+    }
 }

@@ -10,28 +10,28 @@ import launchserver.LaunchServer;
 import launchserver.response.Response;
 
 public final class ProfileByUsernameResponse extends Response {
-	public ProfileByUsernameResponse(LaunchServer server, long id, HInput input, HOutput output) {
-		super(server, id, input, output);
-	}
+    public ProfileByUsernameResponse(LaunchServer server, long id, HInput input, HOutput output) {
+        super(server, id, input, output);
+    }
 
-	@Override
-	public void reply() throws IOException {
-		String username = VerifyHelper.verifyUsername(input.readASCII(16));
-		debug("Username: " + username);
+    @Override
+    public void reply() throws IOException {
+        String username = VerifyHelper.verifyUsername(input.readASCII(16));
+        debug("Username: " + username);
 
-		// Write response
-		writeProfile(server, output, username);
-	}
+        // Write response
+        writeProfile(server, output, username);
+    }
 
-	public static void writeProfile(LaunchServer server, HOutput output, String username) throws IOException {
-		UUID uuid = server.config.authHandler.usernameToUUID(username);
-		if (uuid == null) {
-			output.writeBoolean(false);
-			return;
-		}
+    public static void writeProfile(LaunchServer server, HOutput output, String username) throws IOException {
+        UUID uuid = server.config.authHandler.usernameToUUID(username);
+        if (uuid == null) {
+            output.writeBoolean(false);
+            return;
+        }
 
-		// Write profile
-		output.writeBoolean(true);
-		ProfileByUUIDResponse.getProfile(server, uuid, username).write(output);
-	}
+        // Write profile
+        output.writeBoolean(true);
+        ProfileByUUIDResponse.getProfile(server, uuid, username).write(output);
+    }
 }

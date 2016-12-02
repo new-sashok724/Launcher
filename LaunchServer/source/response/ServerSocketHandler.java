@@ -18,114 +18,114 @@ import launcher.helper.CommonHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.request.Request;
+import launcher.request.Request.Type;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
+import launchserver.response.Response.Factory;
 
 public final class ServerSocketHandler implements Runnable, AutoCloseable {
-	private static final ThreadFactory THREAD_FACTORY = r -> CommonHelper.newThread("Network Thread", true, r);
+    private static final ThreadFactory THREAD_FACTORY = r -> CommonHelper.newThread("Network Thread", true, r);
+    @LauncherAPI public volatile boolean logConnections = Boolean.getBoolean("launcher.logConnections");
+    // Instance
+    private final LaunchServer server;
+    private final AtomicReference<ServerSocket> serverSocket = new AtomicReference<>();
+    private final ExecutorService threadPool = Executors.newCachedThreadPool(THREAD_FACTORY);
+    // API
+    private final Map<String, Factory> customResponses = new ConcurrentHashMap<>(2);
+    private final AtomicLong idCounter = new AtomicLong(0L);
+    private volatile Listener listener;
 
-	// Instance
-	private final LaunchServer server;
-	private final AtomicReference<ServerSocket> serverSocket = new AtomicReference<>();
-	private final ExecutorService threadPool = Executors.newCachedThreadPool(THREAD_FACTORY);
-	@LauncherAPI public volatile boolean logConnections = Boolean.getBoolean("launcher.logConnections");
+    public ServerSocketHandler(LaunchServer server) {
+        this.server = server;
+    }
 
-	// API
-	private final Map<String, Response.Factory> customResponses = new ConcurrentHashMap<>(2);
-	private final AtomicLong idCounter = new AtomicLong(0L);
-	private volatile Listener listener;
+    @Override
+    public void close() {
+        ServerSocket socket = serverSocket.getAndSet(null);
+        if (socket != null) {
+            LogHelper.info("Closing server socket listener");
+            try {
+                socket.close();
+            } catch (IOException e) {
+                LogHelper.error(e);
+            }
+        }
+    }
 
-	public ServerSocketHandler(LaunchServer server) {
-		this.server = server;
-	}
+    @Override
+    public void run() {
+        LogHelper.info("Starting server socket thread");
+        try (ServerSocket serverSocket = new ServerSocket()) {
+            if (!this.serverSocket.compareAndSet(null, serverSocket)) {
+                throw new IllegalStateException("Previous socket wasn't closed");
+            }
 
-	@Override
-	public void close() {
-		ServerSocket socket = serverSocket.getAndSet(null);
-		if (socket != null) {
-			LogHelper.info("Closing server socket listener");
-			try {
-				socket.close();
-			} catch (IOException e) {
-				LogHelper.error(e);
-			}
-		}
-	}
+            // Set socket params
+            serverSocket.setReuseAddress(true);
+            serverSocket.setPerformancePreferences(1, 0, 2);
+            //serverSocket.setReceiveBufferSize(0x10000);
+            serverSocket.bind(server.config.getSocketAddress());
+            LogHelper.info("Server socket thread successfully started");
 
-	@Override
-	public void run() {
-		LogHelper.info("Starting server socket thread");
-		try (ServerSocket serverSocket = new ServerSocket()) {
-			if (!this.serverSocket.compareAndSet(null, serverSocket)) {
-				throw new IllegalStateException("Previous socket wasn't closed");
-			}
+            // Listen for incoming connections
+            while (serverSocket.isBound()) {
+                Socket socket = serverSocket.accept();
 
-			// Set socket params
-			serverSocket.setReuseAddress(true);
-			serverSocket.setPerformancePreferences(1, 0, 2);
-			//serverSocket.setReceiveBufferSize(0x10000);
-			serverSocket.bind(server.config.getSocketAddress());
-			LogHelper.info("Server socket thread successfully started");
+                // Invoke pre-connect listener
+                long id = idCounter.incrementAndGet();
+                if (listener != null && !listener.onConnect(id, socket.getInetAddress())) {
+                    continue; // Listener didn't accepted this connection
+                }
 
-			// Listen for incoming connections
-			while (serverSocket.isBound()) {
-				Socket socket = serverSocket.accept();
+                // Reply in separate thread
+                threadPool.execute(new ResponseThread(server, id, socket));
+            }
+        } catch (IOException e) {
+            // Ignore error after close/rebind
+            if (serverSocket.get() != null) {
+                LogHelper.error(e);
+            }
+        }
+    }
 
-				// Invoke pre-connect listener
-				long id = idCounter.incrementAndGet();
-				if (listener != null && !listener.onConnect(id, socket.getInetAddress())) {
-					continue; // Listener didn't accepted this connection
-				}
+    @LauncherAPI
+    public Response newCustomResponse(String name, long id, HInput input, HOutput output) {
+        Factory factory = VerifyHelper.getMapValue(customResponses, name,
+            String.format("Unknown custom response: '%s'", name));
+        return factory.newResponse(server, id, input, output);
+    }
 
-				// Reply in separate thread
-				threadPool.execute(new ResponseThread(server, id, socket));
-			}
-		} catch (IOException e) {
-			// Ignore error after close/rebind
-			if (serverSocket.get() != null) {
-				LogHelper.error(e);
-			}
-		}
-	}
+    @LauncherAPI
+    public void registerCustomResponse(String name, Factory factory) {
+        VerifyHelper.verifyIDName(name);
+        VerifyHelper.putIfAbsent(customResponses, name, Objects.requireNonNull(factory, "factory"),
+            String.format("Custom response has been already registered: '%s'", name));
+    }
 
-	@LauncherAPI
-	public Response newCustomResponse(String name, long id, HInput input, HOutput output) throws IOException {
-		Response.Factory factory = VerifyHelper.getMapValue(customResponses, name,
-			String.format("Unknown custom response: '%s'", name));
-		return factory.newResponse(server, id, input, output);
-	}
+    @LauncherAPI
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
 
-	@LauncherAPI
-	public void registerCustomResponse(String name, Response.Factory factory) {
-		VerifyHelper.verifyIDName(name);
-		VerifyHelper.putIfAbsent(customResponses, name, Objects.requireNonNull(factory, "factory"),
-			String.format("Custom response has been already registered: '%s'", name));
-	}
+    /*package*/ void onDisconnect(long id, Exception e) {
+        if (listener != null) {
+            listener.onDisconnect(id, e);
+        }
+    }
 
-	@LauncherAPI
-	public void setListener(Listener listener) {
-		this.listener = listener;
-	}
+    /*package*/ boolean onHandshake(long id, Type type) {
+        return listener == null || listener.onHandshake(id, type);
+    }
 
-	/*package*/ void onDisconnect(long id, Exception e) {
-		if (listener != null) {
-			listener.onDisconnect(id, e);
-		}
-	}
+    public interface Listener {
+        @LauncherAPI
+        boolean onConnect(long id, InetAddress address);
 
-	/*package*/ boolean onHandshake(long id, Request.Type type) {
-		return listener == null || listener.onHandshake(id, type);
-	}
+        @LauncherAPI
+        void onDisconnect(long id, Exception e);
 
-	public interface Listener {
-		@LauncherAPI
-		boolean onConnect(long id, InetAddress address);
-
-		@LauncherAPI
-		void onDisconnect(long id, Exception e);
-
-		@LauncherAPI
-		boolean onHandshake(long id, Request.Type type);
-	}
+        @LauncherAPI
+        boolean onHandshake(long id, Type type);
+    }
 }

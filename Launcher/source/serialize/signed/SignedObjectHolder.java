@@ -10,39 +10,39 @@ import launcher.serialize.HInput;
 import launcher.serialize.stream.StreamObject;
 
 public final class SignedObjectHolder<O extends StreamObject> extends SignedBytesHolder {
-	@LauncherAPI public final O object;
+    @LauncherAPI public final O object;
 
-	@LauncherAPI
-	public SignedObjectHolder(HInput input, RSAPublicKey publicKey, Adapter<O> adapter) throws IOException, SignatureException {
-		super(input, publicKey);
-		object = newInstance(adapter);
-	}
+    @LauncherAPI
+    public SignedObjectHolder(HInput input, RSAPublicKey publicKey, Adapter<O> adapter) throws IOException, SignatureException {
+        super(input, publicKey);
+        object = newInstance(adapter);
+    }
 
-	@LauncherAPI
-	public SignedObjectHolder(O object, RSAPrivateKey privateKey) throws IOException {
-		super(object.write(), privateKey);
-		this.object = object;
-	}
+    @LauncherAPI
+    public SignedObjectHolder(O object, RSAPrivateKey privateKey) throws IOException {
+        super(object.write(), privateKey);
+        this.object = object;
+    }
 
-	@LauncherAPI
-	public O newInstance(Adapter<O> adapter) throws IOException {
-		try (HInput input = new HInput(bytes)) {
-			return adapter.convert(input);
-		}
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof SignedObjectHolder && object.equals(((SignedObjectHolder<?>) obj).object);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return obj instanceof SignedObjectHolder && object.equals(((SignedObjectHolder<?>) obj).object);
-	}
+    @Override
+    public int hashCode() {
+        return object.hashCode();
+    }
 
-	@Override
-	public int hashCode() {
-		return object.hashCode();
-	}
+    @Override
+    public String toString() {
+        return object.toString();
+    }
 
-	@Override
-	public String toString() {
-		return object.toString();
-	}
+    @LauncherAPI
+    public O newInstance(Adapter<O> adapter) throws IOException {
+        try (HInput input = new HInput(bytes)) {
+            return adapter.convert(input);
+        }
+    }
 }

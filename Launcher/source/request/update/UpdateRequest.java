@@ -10,12 +10,10 @@ import java.security.SignatureException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Queue;
 
-import launcher.Launcher;
 import launcher.Launcher.Config;
 import launcher.LauncherAPI;
 import launcher.hasher.FileNameMatcher;
@@ -120,7 +118,11 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
                         Files.createDirectories(currentDir);
                         break;
                     case GET:
-                        downloadFile(currentDir.resolve(action.name), (HashedFile) action.entry, input);
+                        Path targetFile = currentDir.resolve(action.name);
+                        if (!input.readBoolean()) {
+                            throw new IOException("Serverside cached size mismath for file " + action.name);
+                        }
+                        downloadFile(targetFile, (HashedFile) action.entry, input);
                         break;
                     case CD_BACK:
                         currentDir = currentDir.getParent();

@@ -2,6 +2,7 @@ package launchserver.response.update;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -82,6 +83,12 @@ public final class UpdateResponse extends Response {
 
                         // Resolve and write file
                         Path file = dir.resolve(action.name);
+                        if (Files.size(file) != hFile.size()) {
+                            output.writeBoolean(false);
+                            output.flush();
+                            throw new IOException("Unknown hashed file: " + action.name);
+                        }
+                        output.writeBoolean(true);
                         try (InputStream fileInput = IOHelper.newInput(file)) {
                             IOHelper.transfer(fileInput, output.stream);
                         }

@@ -65,7 +65,6 @@ import launcher.serialize.config.TextConfigReader;
 import launcher.serialize.config.TextConfigWriter;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.BooleanConfigEntry;
-import launcher.serialize.config.entry.ConfigEntry;
 import launcher.serialize.config.entry.ConfigEntry.Type;
 import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.ListConfigEntry;
@@ -79,7 +78,7 @@ public final class Launcher {
     private static final AtomicReference<Config> CONFIG = new AtomicReference<>();
 
     // Version info
-    @LauncherAPI public static final String VERSION = "15.2.1";
+    @LauncherAPI public static final String VERSION = "15.3";
     @LauncherAPI public static final String BUILD = readBuildNumber();
     @LauncherAPI public static final int PROTOCOL_MAGIC = 0x724724_16;
 

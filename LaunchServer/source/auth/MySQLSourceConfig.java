@@ -16,14 +16,11 @@ import launcher.serialize.config.entry.StringConfigEntry;
 
 public final class MySQLSourceConfig extends ConfigObject implements AutoCloseable {
     @LauncherAPI public static final int TIMEOUT = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.mysql.timeout", Integer.toString(5))),
-        VerifyHelper.POSITIVE, "launcher.mysql.timeout can't be <= 0");
+        Integer.parseUnsignedInt(System.getProperty("launcher.mysql.idleTimeout", Integer.toString(5000))),
+        VerifyHelper.POSITIVE, "launcher.mysql.idleTimeout can't be <= 5000");
     private static final int MAX_POOL_SIZE = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.mysql.maxPoolSize", Integer.toString(25))),
+        Integer.parseUnsignedInt(System.getProperty("launcher.mysql.maxPoolSize", Integer.toString(3))),
         VerifyHelper.POSITIVE, "launcher.mysql.maxPoolSize can't be <= 0");
-    private static final int STMT_CACHE_SIZE = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.mysql.stmtCacheSize", Integer.toString(250))),
-        VerifyHelper.NOT_NEGATIVE, "launcher.mysql.stmtCacheSize can't be < 0");
 
     // Instance
     private final String poolName;
@@ -68,14 +65,20 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
         if (source == null) { // New data source
             MysqlDataSource mysqlSource = new MysqlDataSource();
             mysqlSource.setUseUnicode(true);
-            mysqlSource.setCachePrepStmts(true);
 
-            // Set timeouts and cache
-            mysqlSource.setEnableQueryTimeouts(true);
-            mysqlSource.setLoginTimeout(TIMEOUT);
-            mysqlSource.setConnectTimeout(TIMEOUT * 1000);
-            mysqlSource.setPrepStmtCacheSize(STMT_CACHE_SIZE);
+            // Prep statements cache
+            mysqlSource.setPrepStmtCacheSize(250);
             mysqlSource.setPrepStmtCacheSqlLimit(2048);
+            mysqlSource.setCachePrepStmts(true);
+            mysqlSource.setUseServerPrepStmts(true);
+
+            // General optimizations
+            mysqlSource.setCacheServerConfiguration(true);
+            mysqlSource.setUseLocalSessionState(true);
+            mysqlSource.setRewriteBatchedStatements(true);
+            mysqlSource.setMaintainTimeStats(false);
+            mysqlSource.setUseUnbufferedInput(false);
+            mysqlSource.setUseReadAheadInput(false);
 
             // Set credentials
             mysqlSource.setServerName(address);
@@ -96,8 +99,9 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
 
                 // Set pool settings
                 hikariSource.setPoolName(poolName);
+                hikariSource.setMinimumIdle(0);
                 hikariSource.setMaximumPoolSize(MAX_POOL_SIZE);
-                hikariSource.setValidationTimeout(TIMEOUT * 1000L);
+                hikariSource.setIdleTimeout(TIMEOUT * 1000L);
 
                 // Replace source with hds
                 source = hikariSource;

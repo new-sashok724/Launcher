@@ -189,7 +189,14 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
 
     @LauncherAPI
     public enum Version {
-        MC164("1.6.4", 78), MC172("1.7.2", 4), MC1710("1.7.10", 5), MC189("1.8.9", 47), MC194("1.9.4", 110), MC1102("1.10.2", 210);
+        MC152("1.5.2", 61),
+        MC164("1.6.4", 78),
+        MC172("1.7.2", 4),
+        MC1710("1.7.10", 5),
+        MC189("1.8.9", 47),
+        MC194("1.9.4", 110),
+        MC1102("1.10.2", 210),
+        MC111("1.11", 315);
         private static final Map<String, Version> VERSIONS;
         public final String name;
         public final int protocol;

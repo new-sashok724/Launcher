@@ -67,7 +67,7 @@ public final class IOHelper {
         Integer.parseUnsignedInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
         VerifyHelper.POSITIVE, "launcher.httpTimeout can't be <= 0");
     @LauncherAPI public static final int BUFFER_SIZE = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(4096))),
+        Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(65536))),
         VerifyHelper.POSITIVE, "launcher.bufferSize can't be <= 0");
 
     // Platform-dependent
@@ -225,7 +225,7 @@ public final class IOHelper {
 
     @LauncherAPI
     public static byte[] newBuffer() {
-        return new byte[4096];
+        return new byte[BUFFER_SIZE];
     }
 
     @LauncherAPI
@@ -235,7 +235,7 @@ public final class IOHelper {
 
     @LauncherAPI
     public static char[] newCharBuffer() {
-        return new char[4096];
+        return new char[BUFFER_SIZE];
     }
 
     @LauncherAPI

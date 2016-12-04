@@ -1,5 +1,6 @@
 package com.mojang.authlib.yggdrasil;
 
+import java.net.InetAddress;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -61,8 +62,7 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
     @Override
     public Map<Type, MinecraftProfileTexture> getTextures(GameProfile profile, boolean requireSecure) {
         LogHelper.debug("getTextures, Username: '%s'", profile.getName());
-        Map<Type, MinecraftProfileTexture> textures =
-            new EnumMap<>(Type.class);
+        Map<Type, MinecraftProfileTexture> textures = new EnumMap<>(Type.class);
 
         // Add skin URL to textures map
         Iterator<Property> skinURL = profile.getProperties().get(ClientLauncher.SKIN_URL_PROPERTY).iterator();
@@ -105,6 +105,11 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
     }
 
     @Override
+    public GameProfile hasJoinedServer(GameProfile profile, String serverID, InetAddress address) throws AuthenticationUnavailableException {
+        return hasJoinedServer(profile, serverID);
+    }
+
+    @Override
     public void joinServer(GameProfile profile, String accessToken, String serverID) throws AuthenticationException {
         if (!ClientLauncher.isLaunched()) {
             throw new AuthenticationException("Bad Login (Cheater)");
@@ -112,8 +117,7 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
 
         // Join server
         String username = profile.getName();
-        LogHelper.debug("joinServer, Username: '%s', Access token: %s, Server ID: %s",
-            username, accessToken, serverID);
+        LogHelper.debug("joinServer, Username: '%s', Access token: %s, Server ID: %s", username, accessToken, serverID);
 
         // Make joinServer request
         boolean success;
@@ -132,16 +136,12 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
     public static void fillTextureProperties(GameProfile profile, PlayerProfile pp) {
         PropertyMap properties = profile.getProperties();
         if (pp.skin != null) {
-            properties.put(ClientLauncher.SKIN_URL_PROPERTY, new Property(
-                ClientLauncher.SKIN_URL_PROPERTY, pp.skin.url, ""));
-            properties.put(ClientLauncher.SKIN_DIGEST_PROPERTY, new Property(
-                ClientLauncher.SKIN_DIGEST_PROPERTY, SecurityHelper.toHex(pp.skin.digest), ""));
+            properties.put(ClientLauncher.SKIN_URL_PROPERTY, new Property(ClientLauncher.SKIN_URL_PROPERTY, pp.skin.url, ""));
+            properties.put(ClientLauncher.SKIN_DIGEST_PROPERTY, new Property(ClientLauncher.SKIN_DIGEST_PROPERTY, SecurityHelper.toHex(pp.skin.digest), ""));
         }
         if (pp.cloak != null) {
-            properties.put(ClientLauncher.CLOAK_URL_PROPERTY, new Property(
-                ClientLauncher.CLOAK_URL_PROPERTY, pp.cloak.url, ""));
-            properties.put(ClientLauncher.CLOAK_DIGEST_PROPERTY, new Property(
-                ClientLauncher.CLOAK_DIGEST_PROPERTY, SecurityHelper.toHex(pp.cloak.digest), ""));
+            properties.put(ClientLauncher.CLOAK_URL_PROPERTY, new Property(ClientLauncher.CLOAK_URL_PROPERTY, pp.cloak.url, ""));
+            properties.put(ClientLauncher.CLOAK_DIGEST_PROPERTY, new Property(ClientLauncher.CLOAK_DIGEST_PROPERTY, SecurityHelper.toHex(pp.cloak.digest), ""));
         }
     }
 

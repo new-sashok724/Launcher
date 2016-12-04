@@ -272,13 +272,21 @@ public final class ClientLauncher {
         }
     }
 
+    private static void addClientLegacyArgs(Collection<String> args, ClientProfile profile, Params params) {
+        // TODO
+    }
+
     private static void launch(ClientProfile profile, Params params) throws Throwable {
         // Add natives path
         JVMHelper.addNativePath(params.clientDir.resolve(NATIVES_DIR));
 
         // Add client args
         Collection<String> args = new LinkedList<>();
-        addClientArgs(args, profile, params);
+        if (profile.getVersion().compareTo(Version.MC152) > 0) {
+            addClientArgs(args, profile, params);
+        } else {
+            addClientLegacyArgs(args, profile, params);
+        }
         Collections.addAll(args, profile.getClientArgs());
 
         // Add client classpath

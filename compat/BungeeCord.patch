@@ -1,11 +1,13 @@
 diff --git a/bootstrap/pom.xml b/bootstrap/pom.xml
-index 48f56b3..238ab60 100644
+index 5c42c6f..2f5ac13 100644
 --- a/bootstrap/pom.xml
 +++ b/bootstrap/pom.xml
-@@ -58,6 +58,7 @@
+@@ -57,7 +57,8 @@
+                 <configuration>
                      <archive>
                          <manifestEntries>
-                             <Main-Class>net.md_5.bungee.Bootstrap</Main-Class>
+-                            <Main-Class>net.md_5.bungee.Bootstrap</Main-Class> 
++                            <Main-Class>net.md_5.bungee.Bootstrap</Main-Class>
 +                            <Class-Path>Launcher.jar</Class-Path>
                              <Implementation-Version>${describe}</Implementation-Version>
                              <Specification-Version>${maven.build.timestamp}</Specification-Version>
@@ -15,7 +17,7 @@ index b7cb81e..6be2273 100644
 --- a/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
 +++ b/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
 @@ -5,9 +5,9 @@ public class Bootstrap
-
+ 
      public static void main(String[] args) throws Exception
      {
 -        if ( Float.parseFloat( System.getProperty( "java.class.version" ) ) < 51.0 )
@@ -27,23 +29,21 @@ index b7cb81e..6be2273 100644
              return;
          }
 diff --git a/pom.xml b/pom.xml
-index 7ebde38..b327a25 100644
+index 7f9564c..1d04d57 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -65,9 +65,9 @@
-
+@@ -67,8 +67,8 @@
      <properties>
          <build.number>unknown</build.number>
--        <netty.version>4.0.33.Final</netty.version>
+         <netty.version>4.1.6.Final</netty.version>
 -        <maven.compiler.source>1.7</maven.compiler.source>
 -        <maven.compiler.target>1.7</maven.compiler.target>
-+        <netty.version>4.0.37.Final</netty.version>
 +        <maven.compiler.source>1.8</maven.compiler.source>
 +        <maven.compiler.target>1.8</maven.compiler.target>
          <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
      </properties>
-
-@@ -96,6 +96,13 @@
+ 
+@@ -97,6 +97,13 @@
              <version>1.14.8</version>
              <scope>provided</scope>
          </dependency>
@@ -55,9 +55,9 @@ index 7ebde38..b327a25 100644
 +            <systemPath>/full/path/to/Launcher.jar</systemPath>
 +        </dependency>
      </dependencies>
-
+ 
      <build>
-@@ -116,31 +123,6 @@
+@@ -117,31 +124,6 @@
                      </execution>
                  </executions>
              </plugin>
@@ -90,20 +90,29 @@ index 7ebde38..b327a25 100644
              <plugin>
                  <groupId>org.apache.maven.plugins</groupId>
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index bcc6f9a..7829b8b 100644
+index d87b03c..08efeb4 100644
 --- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
 +++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-@@ -60,6 +60,9 @@ import net.md_5.bungee.protocol.packet.StatusRequest;
+@@ -63,6 +63,9 @@ import net.md_5.bungee.protocol.packet.StatusRequest;
  import net.md_5.bungee.protocol.packet.StatusResponse;
  import net.md_5.bungee.util.BoundedArrayList;
-
+ 
 +import launcher.client.PlayerProfile;
 +import launcher.request.auth.CheckServerRequest;
 +
  @RequiredArgsConstructor
  public class InitialHandler extends PacketHandler implements PendingConnection
  {
-@@ -383,35 +386,25 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -262,7 +265,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+         this.handshake = handshake;
+         ch.setVersion( handshake.getProtocolVersion() );
+ 
+-        // Starting with FML 1.8, a "\0FML\0" token is appended to the handshake. This interferes 
++        // Starting with FML 1.8, a "\0FML\0" token is appended to the handshake. This interferes
+         // with Bungee's IP forwarding, so we detect it, and remove it from the host string, for now.
+         // We know FML appends \00FML\00. However, we need to also consider that other systems might
+         // add their own data to the end of the string. So, we just take everything from the \0 character
+@@ -403,35 +406,25 @@ public class InitialHandler extends PacketHandler implements PendingConnection
          {
              sha.update( bit );
          }
@@ -142,7 +151,7 @@ index bcc6f9a..7829b8b 100644
                  }
 -            }
 -        };
-
+ 
 -        HttpClient.get( authURL, ch.getHandle().eventLoop(), handler );
 +                // Successful login
 +                loginProfile = new LoginResult(pp);
@@ -154,7 +163,7 @@ index bcc6f9a..7829b8b 100644
 +            }
 +        });
      }
-
+ 
      private void finish()
 diff --git a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
 index 9311ef7..98bba42 100644
@@ -163,7 +172,7 @@ index 9311ef7..98bba42 100644
 @@ -3,6 +3,17 @@ package net.md_5.bungee.connection;
  import lombok.AllArgsConstructor;
  import lombok.Data;
-
+ 
 +import java.net.URL;
 +import java.io.IOException;
 +import java.io.FileNotFoundException;
@@ -181,7 +190,7 @@ index 9311ef7..98bba42 100644
 @@ -11,6 +22,20 @@ public class LoginResult
      private String id;
      private Property[] properties;
-
+ 
 +    public LoginResult(PlayerProfile pp) {
 +        id = ClientLauncher.toHash(pp.uuid);
 +        List<Property> properitesList = new ArrayList<>(4);

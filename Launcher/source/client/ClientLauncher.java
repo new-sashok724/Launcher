@@ -273,7 +273,13 @@ public final class ClientLauncher {
     }
 
     private static void addClientLegacyArgs(Collection<String> args, ClientProfile profile, Params params) {
-        // TODO
+        args.add(params.pp.username);
+        args.add(params.accessToken);
+
+        // Add args for tweaker
+        Collections.addAll(args, "--version", profile.getVersion().name);
+        Collections.addAll(args, "--gameDir", params.clientDir.toString());
+        Collections.addAll(args, "--assetsDir", params.assetDir.toString());
     }
 
     private static void launch(ClientProfile profile, Params params) throws Throwable {
@@ -303,11 +309,10 @@ public final class ClientLauncher {
         LAUNCHED.set(true);
         JVMHelper.fullGC();
         try {
+            System.setProperty("minecraft.applet.TargetDirectory", params.clientDir.toString()); // For 1.5.2
             mainMethod.invoke(null, (Object) args.toArray(new String[args.size()]));
         } catch (InvocationTargetException e) {
             throw e.getTargetException();
-        } finally {
-            LAUNCHED.set(false);
         }
     }
 

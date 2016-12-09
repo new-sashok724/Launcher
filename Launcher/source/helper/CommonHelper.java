@@ -8,7 +8,6 @@ import launcher.LauncherAPI;
 
 public final class CommonHelper {
     private static final String[] SCRIPT_ENGINE_ARGS = { "-strict" };
-    private static final NashornScriptEngineFactory SCRIPT_ENGINE_FACTORY = new NashornScriptEngineFactory();
 
     private CommonHelper() {
     }
@@ -20,7 +19,7 @@ public final class CommonHelper {
 
     @LauncherAPI
     public static ScriptEngine newScriptEngine() {
-        return SCRIPT_ENGINE_FACTORY.getScriptEngine(SCRIPT_ENGINE_ARGS);
+        return new NashornScriptEngineFactory().getScriptEngine(SCRIPT_ENGINE_ARGS);
     }
 
     @LauncherAPI

@@ -8,17 +8,17 @@ echo -n $(($(cat buildnumber | cut -d ',' -f 1)+1)), $(date +'%d.%m.%Y') > build
 echo 'Packing Launcher.jar binary'
 zip -9 Launcher.jar buildnumber
 pack200 -E9 -Htrue -mlatest -Uerror -r Launcher.jar
-jarsigner -keystore build/sashok724.jks -storepass PSP1004 -sigfile LAUNCHER Launcher.jar sashok724 > /dev/null
+jarsigner -keystore build/sashok724.jks -storepass PSP1004 -sigfile LAUNCHER Launcher.jar sashok724
 pack200 Launcher.pack.gz Launcher.jar
 
 # Build LauncherAuthlib.jar
 echo 'Packing LauncherAuthlib.jar binary'
 pack200 -E9 -Htrue -mlatest -Uerror -r LauncherAuthlib.jar
-jarsigner -keystore build/sashok724.jks -storepass PSP1004 -sigfile LAUNCHER LauncherAuthlib.jar sashok724 > /dev/null
+jarsigner -keystore build/sashok724.jks -storepass PSP1004 -sigfile LAUNCHER LauncherAuthlib.jar sashok724
 
 # Build LaunchServer.jar
 echo 'Packing LaunchServer.jar binary'
 zip -9 LaunchServer.jar Launcher.pack.gz buildnumber
 pack200 -E9 -Htrue -mlatest -Uerror -r LaunchServer.jar
-jarsigner -keystore build/sashok724.jks -storepass PSP1004 -sigfile LAUNCHER LaunchServer.jar sashok724 > /dev/null
+jarsigner -keystore build/sashok724.jks -storepass PSP1004 -sigfile LAUNCHER LaunchServer.jar sashok724
 rm Launcher.pack.gz

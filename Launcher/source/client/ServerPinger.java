@@ -58,32 +58,33 @@ public final class ServerPinger {
             socket.connect(IOHelper.resolve(address), IOHelper.SOCKET_TIMEOUT);
             try (HInput input = new HInput(socket.getInputStream());
                 HOutput output = new HOutput(socket.getOutputStream())) {
-                return version.compareTo(Version.MC172) >= 0 ?
-                    modernPing(input, output) : legacyPing(input, output);
+                return version.compareTo(Version.MC172) >= 0 ? modernPing(input, output) : legacyPing(input, output, version.compareTo(Version.MC164) >= 0);
             }
         }
     }
 
-    private Result legacyPing(HInput input, HOutput output) throws IOException {
+    private Result legacyPing(HInput input, HOutput output, boolean mc16) throws IOException {
         output.writeUnsignedByte(0xFE); // 254 packet ID, Server list ping
         output.writeUnsignedByte(0x01); // Server ping payload
-        output.writeUnsignedByte(0xFA); // 250 packet ID, Custom payload
-        writeUTF16String(output, LEGACY_PING_HOST_CHANNEL); // Custom payload name
+        if (mc16) {
+            output.writeUnsignedByte(0xFA); // 250 packet ID, Custom payload
+            writeUTF16String(output, LEGACY_PING_HOST_CHANNEL); // Custom payload name
 
-        // Prepare custom payload packet
-        byte[] customPayloadPacket;
-        try (ByteArrayOutputStream packetArray = IOHelper.newByteArrayOutput()) {
-            try (HOutput packetOutput = new HOutput(packetArray)) {
-                packetOutput.writeUnsignedByte(version.protocol); // Protocol version
-                writeUTF16String(packetOutput, address.getHostString()); // Server address
-                packetOutput.writeInt(address.getPort()); // Server port
+            // Prepare custom payload packet
+            byte[] customPayloadPacket;
+            try (ByteArrayOutputStream packetArray = IOHelper.newByteArrayOutput()) {
+                try (HOutput packetOutput = new HOutput(packetArray)) {
+                    packetOutput.writeUnsignedByte(version.protocol); // Protocol version
+                    writeUTF16String(packetOutput, address.getHostString()); // Server address
+                    packetOutput.writeInt(address.getPort()); // Server port
+                }
+                customPayloadPacket = packetArray.toByteArray();
             }
-            customPayloadPacket = packetArray.toByteArray();
-        }
 
-        // Write custom payload packet
-        output.writeShort((short) customPayloadPacket.length);
-        output.stream.write(customPayloadPacket);
+            // Write custom payload packet
+            output.writeShort((short) customPayloadPacket.length);
+            output.stream.write(customPayloadPacket);
+        }
         output.flush();
 
         // Raed kick (response) packet

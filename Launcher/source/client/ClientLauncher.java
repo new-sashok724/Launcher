@@ -288,7 +288,7 @@ public final class ClientLauncher {
 
         // Add client args
         Collection<String> args = new LinkedList<>();
-        if (profile.getVersion().compareTo(Version.MC152) > 0) {
+        if (profile.getVersion().compareTo(Version.MC164) >= 0) {
             addClientArgs(args, profile, params);
         } else {
             addClientLegacyArgs(args, profile, params);

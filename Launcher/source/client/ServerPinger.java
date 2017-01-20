@@ -145,11 +145,15 @@ public final class ServerPinger {
         output.writeVarInt(0x0); // Status packet ID
         output.flush();
 
-        // Read outer status response packet ID
         // ab is a dirty fix for some servers (noticed KCauldron 1.7.10)
+        int ab = 0;
+        while (ab <= 0) {
+            ab = IOHelper.verifyLength(input.readVarInt(), PACKET_LENGTH);
+        }
+
+        // Read outer status response packet ID
         String response;
-        int ab = IOHelper.verifyLength(input.readVarInt(), PACKET_LENGTH);
-        byte[] statusPacket = input.readByteArray(ab == 0x0 ? PACKET_LENGTH : -ab);
+        byte[] statusPacket = input.readByteArray(-ab);
         try (HInput packetInput = new HInput(statusPacket)) {
             int statusPacketID = packetInput.readVarInt();
             if (statusPacketID != 0x0) {

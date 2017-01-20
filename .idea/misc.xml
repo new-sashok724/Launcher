@@ -9,6 +9,18 @@
       <item index="0" class="java.lang.String" itemvalue="launcher.LauncherAPI" />
     </list>
   </component>
+  <component name="ProjectPlainTextFileTypeManager">
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/config.cfg" />
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/profile1.10.2.cfg" />
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/profile1.11.cfg" />
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/profile1.4.7.cfg" />
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/profile1.5.2.cfg" />
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/profile1.6.4.cfg" />
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/profile1.7.10.cfg" />
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/profile1.7.2.cfg" />
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/profile1.8.9.cfg" />
+    <file url="file://$PROJECT_DIR$/LaunchServer/resources/launchserver/defaults/profile1.9.4.cfg" />
+  </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build" />
   </component>

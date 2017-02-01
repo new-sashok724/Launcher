@@ -12,7 +12,6 @@ import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -30,7 +29,9 @@ public final class DirWatcher implements Runnable, AutoCloseable {
     private static final boolean FILE_TREE_SUPPORTED = JVMHelper.OS_TYPE == OS.MUSTDIE;
 
     // Constants
-    private static final Modifier[] MODIFIERS = { SensitivityWatchEventModifier.HIGH };
+    private static final Modifier[] MODIFIERS = {
+        SensitivityWatchEventModifier.HIGH
+    };
     private static final Modifier[] FILE_TREE_MODIFIERS = {
         ExtendedWatchEventModifier.FILE_TREE, SensitivityWatchEventModifier.HIGH
     };
@@ -81,10 +82,12 @@ public final class DirWatcher implements Runnable, AutoCloseable {
 
     private void processKey(WatchKey key) throws IOException {
         Path watchDir = (Path) key.watchable();
-        Collection<WatchEvent<?>> events = key.pollEvents();
-        for (WatchEvent<?> event : events) {
+        for (WatchEvent<?> event : key.pollEvents()) {
             Kind<?> kind = event.kind();
             if (kind.equals(StandardWatchEventKinds.OVERFLOW)) {
+                if (Boolean.getBoolean("launcher.dirwatcher.ignoreOverflows")) {
+                    continue; // Sometimes it's better to ignore than interrupt fair playing
+                }
                 throw new IOException("Overflow");
             }
 

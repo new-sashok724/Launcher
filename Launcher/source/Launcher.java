@@ -78,7 +78,7 @@ public final class Launcher {
     private static final AtomicReference<Config> CONFIG = new AtomicReference<>();
 
     // Version info
-    @LauncherAPI public static final String VERSION = "15.3";
+    @LauncherAPI public static final String VERSION = "15.3.1";
     @LauncherAPI public static final String BUILD = readBuildNumber();
     @LauncherAPI public static final int PROTOCOL_MAGIC = 0x724724_16;
 
@@ -195,7 +195,7 @@ public final class Launcher {
         try {
             Class.forName("javafx.application.Application");
             bindings.put("JSApplicationClass", JSApplication.class);
-        } catch (ClassNotFoundException e) {
+        } catch (ClassNotFoundException ignored) {
             LogHelper.warning("JavaFX API isn't available");
         }
     }
@@ -264,7 +264,8 @@ public final class Launcher {
     }
 
     public static final class Config extends StreamObject {
-        private static final String ADDRESS_OVERRIDE = System.getProperty("launcher.addressOverride", null);
+        @LauncherAPI public static final String ADDRESS_OVERRIDE_PROPERTY = "launcher.addressOverride";
+        @LauncherAPI public static final String ADDRESS_OVERRIDE = System.getProperty(ADDRESS_OVERRIDE_PROPERTY, null);
 
         // Instance
         @LauncherAPI public final InetSocketAddress address;

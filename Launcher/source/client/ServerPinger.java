@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import com.eclipsesource.json.Json;
@@ -32,23 +33,45 @@ public final class ServerPinger {
 
     // Cache
     private final Object cacheLock = new Object();
-    private Result cache;
-    private Instant cacheTime;
+    private Result cache = null;
+    private Exception cacheException = null;
+    private Instant cacheTime = null;
 
     @LauncherAPI
     public ServerPinger(InetSocketAddress address, Version version) {
-        this.address = address;
-        this.version = version;
+        this.address = Objects.requireNonNull(address, "address");
+        this.version = Objects.requireNonNull(version, "version");
     }
 
     @LauncherAPI
     public Result ping() throws IOException {
         Instant now = Instant.now();
         synchronized (cacheLock) {
-            if (cache == null || cacheTime == null || Duration.between(now, cacheTime).getSeconds() >= 30) {
-                cache = doPing();
+            // Update ping cache
+            if (cacheTime == null || Duration.between(now, cacheTime).toMillis() >= IOHelper.SOCKET_TIMEOUT) {
                 cacheTime = now;
+                try {
+                    cache = doPing();
+                    cacheException = null;
+                } catch (IOException | IllegalArgumentException /* Protocol error */ e) {
+                    cache = null;
+                    cacheException = e;
+                }
             }
+
+            // Verify is result available
+            if (cache == null) {
+                if (cacheException instanceof IOException) {
+                    throw (IOException) cacheException;
+                }
+                if (cacheException instanceof IllegalArgumentException) {
+                    throw (IllegalArgumentException) cacheException;
+                }
+                cacheException = new IOException("Unavailable");
+                throw (IOException) cacheException;
+            }
+
+            // We're done
             return cache;
         }
     }
@@ -185,9 +208,6 @@ public final class ServerPinger {
     }
 
     public static final class Result {
-        private static final Pattern CODES_PATTERN = Pattern.compile("§[0-9a-fkmnor]", Pattern.CASE_INSENSITIVE);
-
-        // Instance
         @LauncherAPI public final int onlinePlayers;
         @LauncherAPI public final int maxPlayers;
         @LauncherAPI public final String raw;

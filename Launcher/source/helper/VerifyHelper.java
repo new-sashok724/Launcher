@@ -1,6 +1,7 @@
 package launcher.helper;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.DoublePredicate;
 import java.util.function.IntPredicate;
 import java.util.function.LongPredicate;
@@ -22,7 +23,7 @@ public final class VerifyHelper {
 
     @LauncherAPI
     public static <K, V> V getMapValue(Map<K, V> map, K key, String error) {
-        return verify(map.get(key), v -> v != null, error);
+        return verify(map.get(key), Objects::nonNull, error);
     }
 
     @LauncherAPI
@@ -41,7 +42,7 @@ public final class VerifyHelper {
     }
 
     public static <K, V> void putIfAbsent(Map<K, V> map, K key, V value, String error) {
-        verify(map.putIfAbsent(key, value), o -> o == null, error);
+        verify(map.putIfAbsent(key, value), Objects::isNull, error);
     }
 
     @LauncherAPI

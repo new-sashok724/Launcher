@@ -12,6 +12,7 @@ import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
+import launcher.serialize.config.entry.BooleanConfigEntry;
 import launcher.serialize.config.entry.ConfigEntry.Type;
 import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.ListConfigEntry;
@@ -38,6 +39,7 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
     private final ListConfigEntry update;
     private final ListConfigEntry updateExclusions;
     private final ListConfigEntry updateVerify;
+    private final BooleanConfigEntry updateFastCheck;
 
     // Client launcher
     private final StringConfigEntry mainClass;
@@ -63,6 +65,7 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
         update = block.getEntry("update", ListConfigEntry.class);
         updateVerify = block.getEntry("updateVerify", ListConfigEntry.class);
         updateExclusions = block.getEntry("updateExclusions", ListConfigEntry.class);
+        updateFastCheck = block.getEntry("updateFastCheck", BooleanConfigEntry.class);
 
         // Client launcher
         mainClass = block.getEntry("mainClass", StringConfigEntry.class);
@@ -189,7 +192,7 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
 
     @LauncherAPI
     public enum Version {
-        MC147("1.4.7", 51),
+        //MC147("1.4.7", 51),
         MC152("1.5.2", 61),
         MC164("1.6.4", 78),
         MC172("1.7.2", 4),
@@ -197,7 +200,7 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
         MC189("1.8.9", 47),
         MC194("1.9.4", 110),
         MC1102("1.10.2", 210),
-        MC111("1.11", 315);
+        MC111("1.11.2", 316);
         private static final Map<String, Version> VERSIONS;
         public final String name;
         public final int protocol;

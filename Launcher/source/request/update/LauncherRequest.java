@@ -61,9 +61,15 @@ public final class LauncherRequest extends Request<Result> {
             SecurityHelper.verifySign(binary, sign, publicKey);
 
             // Prepare process builder to start new instance (java -jar works for Launch4J's EXE too)
-            ProcessBuilder builder = new ProcessBuilder(IOHelper.resolveJavaBin(null).toString(),
-                ClientLauncher.jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())),
-                "-jar", BINARY_PATH.toString());
+            List<String> args = new ArrayList<>(8);
+            args.add(IOHelper.resolveJavaBin(null).toString());
+            if (LogHelper.isDebugEnabled()) {
+                args.add(ClientLauncher.jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())));
+            }
+            if (Config.ADDRESS_OVERRIDE != null) {
+                args.add(ClientLauncher.jvmProperty(Config.ADDRESS_OVERRIDE_PROPERTY, Config.ADDRESS_OVERRIDE));
+            }
+            ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()]));
             builder.inheritIO();
 
             // Rewrite and start new instance

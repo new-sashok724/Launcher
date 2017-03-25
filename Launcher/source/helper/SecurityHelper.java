@@ -457,17 +457,33 @@ public final class SecurityHelper {
 
     @LauncherAPI
     public enum DigestAlgorithm {
-        PLAIN("plain"), MD5("MD5"), SHA1("SHA-1"), SHA224("SHA-224"), SHA256("SHA-256"), SHA512("SHA-512");
+        PLAIN("plain", -1), MD5("MD5", 128), SHA1("SHA-1", 160), SHA224("SHA-224", 224), SHA256("SHA-256", 256), SHA512("SHA-512", 512);
         private static final Map<String, DigestAlgorithm> ALGORITHMS;
-        public final String name;
 
-        DigestAlgorithm(String name) {
+        // Instance
+        public final String name;
+        public final int bits;
+        public final int bytes;
+
+        DigestAlgorithm(String name, int bits) {
             this.name = name;
+            this.bits = bits;
+
+            // Convert to bytes
+            bytes = bits / Byte.SIZE;
+            assert bits % Byte.SIZE == 0;
         }
 
         @Override
         public String toString() {
             return name;
+        }
+
+        public byte[] verify(byte[] digest) {
+            if (digest.length != bytes) {
+                throw new IllegalArgumentException("Invalid digest length: " + digest.length);
+            }
+            return digest;
         }
 
         public static DigestAlgorithm byName(String name) {

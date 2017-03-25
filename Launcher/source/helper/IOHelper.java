@@ -47,6 +47,8 @@ import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
@@ -67,7 +69,7 @@ public final class IOHelper {
         Integer.parseUnsignedInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
         VerifyHelper.POSITIVE, "launcher.httpTimeout can't be <= 0");
     @LauncherAPI public static final int BUFFER_SIZE = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(65536))),
+        Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(4096))),
         VerifyHelper.POSITIVE, "launcher.bufferSize can't be <= 0");
 
     // Platform-dependent
@@ -81,13 +83,19 @@ public final class IOHelper {
     @LauncherAPI public static final Path HOME_DIR = Paths.get(System.getProperty("user.home"));
     @LauncherAPI public static final Path WORKING_DIR = Paths.get(System.getProperty("user.dir"));
 
-    // File options
-    private static final LinkOption[] LINK_OPTIONS = {};
+    // Open options - as arrays
     private static final OpenOption[] READ_OPTIONS = { StandardOpenOption.READ };
-    private static final CopyOption[] COPY_OPTIONS = { StandardCopyOption.REPLACE_EXISTING };
-    private static final OpenOption[] APPEND_OPTIONS = { StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND };
     private static final OpenOption[] WRITE_OPTIONS = { StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING };
+    private static final OpenOption[] APPEND_OPTIONS = { StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND };
+
+    // Other options
+    private static final LinkOption[] LINK_OPTIONS = {};
+    private static final CopyOption[] COPY_OPTIONS = { StandardCopyOption.REPLACE_EXISTING };
     private static final Set<FileVisitOption> WALK_OPTIONS = Collections.singleton(FileVisitOption.FOLLOW_LINKS);
+
+    // Other constants
+    private static final Pattern CROSS_SEPARATOR_PATTERN = Pattern.compile(CROSS_SEPARATOR, Pattern.LITERAL);
+    private static final Pattern PLATFORM_SEPARATOR_PATTERN = Pattern.compile(PLATFORM_SEPARATOR, Pattern.LITERAL);
 
     private IOHelper() {
     }
@@ -239,7 +247,7 @@ public final class IOHelper {
     }
 
     @LauncherAPI
-    public static InputStream newInput(URL url) throws IOException {
+    public static URLConnection newConnection(URL url) throws IOException {
         URLConnection connection = url.openConnection();
         if (connection instanceof HttpURLConnection) {
             connection.setReadTimeout(HTTP_TIMEOUT);
@@ -248,7 +256,12 @@ public final class IOHelper {
         }
         connection.setDoInput(true);
         connection.setDoOutput(false);
-        return connection.getInputStream();
+        return connection;
+    }
+
+    @LauncherAPI
+    public static InputStream newInput(URL url) throws IOException {
+        return newConnection(url).getInputStream();
     }
 
     @LauncherAPI
@@ -279,7 +292,9 @@ public final class IOHelper {
 
     @LauncherAPI
     public static BufferedReader newReader(URL url) throws IOException {
-        return newReader(newInput(url));
+        URLConnection connection = newConnection(url);
+        String charset = connection.getContentEncoding();
+        return newReader(connection.getInputStream(), charset == null ? UNICODE_CHARSET : Charset.forName(charset));
     }
 
     @LauncherAPI
@@ -490,12 +505,12 @@ public final class IOHelper {
 
     @LauncherAPI
     public static Path toPath(String path) {
-        return Paths.get(path.replace(CROSS_SEPARATOR, PLATFORM_SEPARATOR));
+        return Paths.get(CROSS_SEPARATOR_PATTERN.matcher(path).replaceAll(Matcher.quoteReplacement(PLATFORM_SEPARATOR)));
     }
 
     @LauncherAPI
     public static String toString(Path path) {
-        return path.toString().replace(PLATFORM_SEPARATOR, CROSS_SEPARATOR);
+        return PLATFORM_SEPARATOR_PATTERN.matcher(path.toString()).replaceAll(Matcher.quoteReplacement(CROSS_SEPARATOR));
     }
 
     @LauncherAPI

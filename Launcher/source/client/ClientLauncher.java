@@ -28,6 +28,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
 import launcher.Launcher;
+import launcher.Launcher.Config;
 import launcher.LauncherAPI;
 import launcher.client.ClientProfile.Version;
 import launcher.hasher.DirWatcher;
@@ -109,9 +110,13 @@ public final class ClientLauncher {
         args.add(javaBin.toString());
         args.add(MAGICAL_INTEL_OPTION);
         if (params.ram > 0 && params.ram <= JVMHelper.RAM) {
+            args.add("-Xms" + params.ram + 'M');
             args.add("-Xmx" + params.ram + 'M');
         }
         args.add(jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())));
+        if (Config.ADDRESS_OVERRIDE != null) {
+            args.add(jvmProperty(Config.ADDRESS_OVERRIDE_PROPERTY, Config.ADDRESS_OVERRIDE));
+        }
         if (JVMHelper.OS_TYPE == OS.MUSTDIE && JVMHelper.OS_VERSION.startsWith("10.")) {
             LogHelper.debug("MustDie 10 fix is applied");
             args.add(jvmProperty("os.name", "Windows 10"));
@@ -120,9 +125,11 @@ public final class ClientLauncher {
 
         // Add classpath and main class
         Collections.addAll(args, profile.object.getJvmArgs());
-        Collections.addAll(args, "-classpath", IOHelper.getCodeSource(ClientLauncher.class).toString(),
-            ClientLauncher.class.getName());
+        Collections.addAll(args, "-classpath", IOHelper.getCodeSource(ClientLauncher.class).toString(), ClientLauncher.class.getName());
         args.add(paramsFile.toString()); // Add params file path to args
+
+        // Print commandline debug message
+        LogHelper.debug("Commandline: " + args);
 
         // Build client process
         LogHelper.debug("Launching client instance");
@@ -294,6 +301,7 @@ public final class ClientLauncher {
             addClientLegacyArgs(args, profile, params);
         }
         Collections.addAll(args, profile.getClientArgs());
+        LogHelper.debug("Args: " + args);
 
         // Add client classpath
         URL[] classPath = resolveClassPath(params.clientDir, profile.getClassPath());
@@ -333,6 +341,7 @@ public final class ClientLauncher {
         // Client paths
         @LauncherAPI public final Path assetDir;
         @LauncherAPI public final Path clientDir;
+
         // Client params
         @LauncherAPI public final PlayerProfile pp;
         @LauncherAPI public final String accessToken;

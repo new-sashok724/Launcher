@@ -107,8 +107,7 @@ public final class DirWatcher implements Runnable, AutoCloseable {
             }
 
             // Forbidden modification!
-            throw new SecurityException(String.format("Forbidden modification (%s, %d times): '%s'",
-                kind, event.count(), path));
+            throw new SecurityException(String.format("Forbidden modification (%s, %d times): '%s'", kind, event.count(), path));
         }
         key.reset();
     }

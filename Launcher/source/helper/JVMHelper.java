@@ -2,6 +2,7 @@ package launcher.helper;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,9 +15,14 @@ import launcher.LauncherAPI;
 import sun.misc.URLClassPath;
 
 public final class JVMHelper {
+    // MXBeans exports
+    @LauncherAPI public static final RuntimeMXBean RUNTIME_MXBEAN = ManagementFactory.getRuntimeMXBean();
+    @LauncherAPI public static final OperatingSystemMXBean OPERATING_SYSTEM_MXBEAN =
+        (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+
     // System properties
-    @LauncherAPI public static final OS OS_TYPE = OS.byName(System.getProperty("os.name"));
-    @LauncherAPI public static final String OS_VERSION = System.getProperty("os.version");
+    @LauncherAPI public static final OS OS_TYPE = OS.byName(OPERATING_SYSTEM_MXBEAN.getName());
+    @LauncherAPI public static final String OS_VERSION = OPERATING_SYSTEM_MXBEAN.getVersion();
     @LauncherAPI public static final int OS_BITS = getCorrectOSArch();
     @LauncherAPI public static final int JVM_BITS = Integer.parseInt(System.getProperty("sun.arch.data.model"));
     @LauncherAPI public static final int RAM = getRAMAmount();
@@ -66,6 +72,7 @@ public final class JVMHelper {
 
     @LauncherAPI
     public static void halt0(int status) {
+        LogHelper.debug("Trying to halt JVM");
         try {
             getMethod(Class.forName("java.lang.Shutdown"), "halt0", int.class).invoke(null, status);
         } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
@@ -124,7 +131,7 @@ public final class JVMHelper {
     }
 
     private static int getRAMAmount() {
-        int physicalRam = (int) (((OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean()).getTotalPhysicalMemorySize() >> 20);
+        int physicalRam = (int) (OPERATING_SYSTEM_MXBEAN.getTotalPhysicalMemorySize() >> 20);
         return Math.min(physicalRam, OS_BITS == 32 ? 1536 : 4096); // Limit 32-bit OS to 1536 MiB, and 64-bit OS to 4096 MiB (because it's enough)
     }
 

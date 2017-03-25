@@ -1,6 +1,8 @@
 package launcher.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Objects;
 import java.util.UUID;
@@ -62,6 +64,9 @@ public final class PlayerProfile extends StreamObject {
     }
 
     public static final class Texture extends StreamObject {
+        private static final DigestAlgorithm DIGEST_ALGO = DigestAlgorithm.SHA256;
+
+        // Instance
         @LauncherAPI public final String url;
         @LauncherAPI public final byte[] digest;
 
@@ -74,19 +79,30 @@ public final class PlayerProfile extends StreamObject {
         @LauncherAPI
         public Texture(String url) throws IOException {
             this.url = IOHelper.verifyURL(url);
-            digest = SecurityHelper.digest(DigestAlgorithm.SHA256, new URL(url));
+
+            // Fetch texture
+            byte[] texture;
+            try (InputStream input = IOHelper.newInput(new URL(url))) {
+                texture = IOHelper.read(input);
+            }
+            try (ByteArrayInputStream input = new ByteArrayInputStream(texture)) {
+                IOHelper.readTexture(input); // Verify texture
+            }
+
+            // Get digest of texture
+            digest = SecurityHelper.digest(DIGEST_ALGO, new URL(url));
         }
 
         @LauncherAPI
         public Texture(HInput input) throws IOException {
             url = IOHelper.verifyURL(input.readASCII(2048));
-            digest = input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH);
+            digest = input.readByteArray(-DIGEST_ALGO.bytes);
         }
 
         @Override
         public void write(HOutput output) throws IOException {
             output.writeASCII(url, 2048);
-            output.writeByteArray(digest, SecurityHelper.CRYPTO_MAX_LENGTH);
+            output.writeByteArray(digest, -DIGEST_ALGO.bytes);
         }
     }
 }

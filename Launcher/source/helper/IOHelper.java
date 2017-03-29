@@ -221,8 +221,8 @@ public final class IOHelper {
     }
 
     @LauncherAPI
-    public static boolean isValidTextureBounds(int width, int height) {
-        return width % 64 == 0 && height * 2 == width && width <= 1024;
+    public static boolean isValidTextureBounds(int width, int height, boolean cloak) {
+        return width % 64 == 0 && height << 1 == width && width <= 1024 || cloak && width % 22 == 0 && height % 17 == 0 && width / 22 == height / 17;
     }
 
     @LauncherAPI
@@ -407,7 +407,7 @@ public final class IOHelper {
     }
 
     @LauncherAPI
-    public static BufferedImage readTexture(Object input) throws IOException {
+    public static BufferedImage readTexture(Object input, boolean cloak) throws IOException {
         ImageReader reader = ImageIO.getImageReadersByMIMEType("image/png").next();
         try {
             reader.setInput(ImageIO.createImageInputStream(input), false, false);
@@ -415,7 +415,7 @@ public final class IOHelper {
             // Verify texture bounds
             int width = reader.getWidth(0);
             int height = reader.getHeight(0);
-            if (!isValidTextureBounds(width, height)) {
+            if (!isValidTextureBounds(width, height, cloak)) {
                 throw new IOException(String.format("Invalid texture bounds: %dx%d", width, height));
             }
 
@@ -593,8 +593,8 @@ public final class IOHelper {
     }
 
     @LauncherAPI
-    public static BufferedImage verifyTexture(BufferedImage skin) {
-        return VerifyHelper.verify(skin, i -> isValidTextureBounds(i.getWidth(), i.getHeight()),
+    public static BufferedImage verifyTexture(BufferedImage skin, boolean cloak) {
+        return VerifyHelper.verify(skin, i -> isValidTextureBounds(i.getWidth(), i.getHeight(), cloak),
             String.format("Invalid texture bounds: %dx%d", skin.getWidth(), skin.getHeight()));
     }
 

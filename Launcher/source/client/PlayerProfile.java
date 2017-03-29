@@ -77,7 +77,7 @@ public final class PlayerProfile extends StreamObject {
         }
 
         @LauncherAPI
-        public Texture(String url) throws IOException {
+        public Texture(String url, boolean cloak) throws IOException {
             this.url = IOHelper.verifyURL(url);
 
             // Fetch texture
@@ -86,7 +86,7 @@ public final class PlayerProfile extends StreamObject {
                 texture = IOHelper.read(input);
             }
             try (ByteArrayInputStream input = new ByteArrayInputStream(texture)) {
-                IOHelper.readTexture(input); // Verify texture
+                IOHelper.readTexture(input, cloak); // Verify texture
             }
 
             // Get digest of texture

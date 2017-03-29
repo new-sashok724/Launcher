@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import launcher.client.ClientLauncher;
-import launcher.client.PlayerProfile;
 import launcher.client.PlayerProfile.Texture;
 import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
@@ -37,19 +36,19 @@ public final class RequestTextureProvider extends TextureProvider {
 
     @Override
     public Texture getCloakTexture(UUID uuid, String username) throws IOException {
-        return getTexture(getTextureURL(cloakURL, uuid, username));
+        return getTexture(getTextureURL(cloakURL, uuid, username), true);
     }
 
     @Override
     public Texture getSkinTexture(UUID uuid, String username) throws IOException {
-        return getTexture(getTextureURL(skinURL, uuid, username));
+        return getTexture(getTextureURL(skinURL, uuid, username), false);
     }
 
-    private static Texture getTexture(String url) throws IOException {
+    private static Texture getTexture(String url, boolean cloak) throws IOException {
         LogHelper.debug("Getting texture: '%s'", url);
         try {
-            return new Texture(url);
-        } catch (FileNotFoundException e) {
+            return new Texture(url, cloak);
+        } catch (FileNotFoundException ignored) {
             LogHelper.subDebug("Texture not found :(");
             return null; // Simply not found
         }

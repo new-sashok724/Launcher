@@ -12,7 +12,6 @@ import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.BooleanConfigEntry;
 import launcher.serialize.config.entry.ConfigEntry.Type;
 import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.ListConfigEntry;
@@ -39,7 +38,7 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
     private final ListConfigEntry update;
     private final ListConfigEntry updateExclusions;
     private final ListConfigEntry updateVerify;
-    private final BooleanConfigEntry updateFastCheck;
+    //private final BooleanConfigEntry updateFastCheck;
 
     // Client launcher
     private final StringConfigEntry mainClass;
@@ -65,7 +64,7 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
         update = block.getEntry("update", ListConfigEntry.class);
         updateVerify = block.getEntry("updateVerify", ListConfigEntry.class);
         updateExclusions = block.getEntry("updateExclusions", ListConfigEntry.class);
-        updateFastCheck = block.getEntry("updateFastCheck", BooleanConfigEntry.class);
+        //updateFastCheck = block.getEntry("updateFastCheck", BooleanConfigEntry.class);
 
         // Client launcher
         mainClass = block.getEntry("mainClass", StringConfigEntry.class);

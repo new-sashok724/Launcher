@@ -71,7 +71,7 @@ var update = {
     }
 };
 
-function offlineUpdateRequest(dirName, dir, matcher) {
+function offlineUpdateRequest(dirName, dir, matcher, digest) {
     return function() {
         var hdir = settings.lastHDirs.get(dirName);
         if (hdir === null) {
@@ -80,7 +80,7 @@ function offlineUpdateRequest(dirName, dir, matcher) {
         }
 
         // Verify dir with matcher using ClientLauncher's API
-        ClientLauncher.verifyHDir(dir, hdir.object, matcher);
+        ClientLauncher.verifyHDir(dir, hdir.object, matcher, digest);
         return hdir;
     };
 }
@@ -89,7 +89,7 @@ function offlineUpdateRequest(dirName, dir, matcher) {
 function makeUpdateRequest(dirName, dir, matcher, digest, callback) {
     var request = settings.offline ? { setStateCallback: function(stateCallback) { /* Ignored */ } } :
         new UpdateRequest(dirName, dir, matcher, digest);
-    var task = settings.offline ? newTask(offlineUpdateRequest(dirName, dir, matcher)) :
+    var task = settings.offline ? newTask(offlineUpdateRequest(dirName, dir, matcher, digest)) :
         newRequestTask(request);
 
     // Set task properties and start

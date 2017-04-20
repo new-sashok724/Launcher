@@ -1,24 +1,24 @@
-#!/bin/sh
-set -e
+@ECHO OFF
 
-# Increase build number
-echo -n $(($(cat buildnumber | cut -d ',' -f 1)+1)), $(date +'%d.%m.%Y') > buildnumber
-
-# Build Launcher.jar
-echo 'Packing Launcher.jar binary'
-zip -9 Launcher.jar buildnumber
+REM Build Launcher.jar
+echo Building Launcher.jar...
+jar -uf Launcher.jar buildnumber
+java -jar build/proguard.jar @Launcher.pro
+del Launcher.jar
+ren Launcher-obf.jar Launcher.jar
 pack200 -E9 -Htrue -mlatest -Uerror -r Launcher.jar
+java -jar build/stringer.jar -configFile Launcher.stringer Launcher.jar Launcher.jar
 jarsigner -keystore build/sashok724.jks -storepass PSP1004 -sigfile LAUNCHER Launcher.jar sashok724
 pack200 Launcher.pack.gz Launcher.jar
 
-# Build LauncherAuthlib.jar
-echo 'Packing LauncherAuthlib.jar binary'
+REM Build LauncherAuthlib.jar
+echo Building LauncherAuthlib.jar...
 pack200 -E9 -Htrue -mlatest -Uerror -r LauncherAuthlib.jar
 jarsigner -keystore build/sashok724.jks -storepass PSP1004 -sigfile LAUNCHER LauncherAuthlib.jar sashok724
 
-# Build LaunchServer.jar
-echo 'Packing LaunchServer.jar binary'
-zip -9 LaunchServer.jar Launcher.pack.gz buildnumber
+REM Build LaunchServer.jar
+echo Building LaunchServer.jar...
+jar -uf LaunchServer.jar Launcher.pack.gz buildnumber
 pack200 -E9 -Htrue -mlatest -Uerror -r LaunchServer.jar
 jarsigner -keystore build/sashok724.jks -storepass PSP1004 -sigfile LAUNCHER LaunchServer.jar sashok724
-rm Launcher.pack.gz
+del Launcher.pack.gz

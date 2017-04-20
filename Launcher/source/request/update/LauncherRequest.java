@@ -69,6 +69,8 @@ public final class LauncherRequest extends Request<Result> {
             if (Config.ADDRESS_OVERRIDE != null) {
                 args.add(ClientLauncher.jvmProperty(Config.ADDRESS_OVERRIDE_PROPERTY, Config.ADDRESS_OVERRIDE));
             }
+            args.add("-jar");
+            args.add(BINARY_PATH.toString());
             ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()]));
             builder.inheritIO();
 

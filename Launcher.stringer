@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<stringer-v3>
+    <optimize>true</optimize>
+    <signMode>none</signMode>
+    <proguardMapFile>build/dictionary.pro</proguardMapFile>
+    <protectionElement>
+        <paths>
+            <path>glob:launcher/**</path>
+        </paths>
+        <stringEncryption />
+        <hideAccess />
+        <integrityControl>
+            <checkBytecode>true</checkBytecode>
+            <checkJar>false</checkJar>
+            <sealJar>false</sealJar>
+        </integrityControl>
+    </protectionElement>
+</stringer-v3>

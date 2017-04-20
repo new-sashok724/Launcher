@@ -1,7 +1,10 @@
-diff --git a/bootstrap/pom.xml b/bootstrap/pom.xml
-index 5c42c6f..2f5ac13 100644
---- a/bootstrap/pom.xml
-+++ b/bootstrap/pom.xml
+Index: bootstrap/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- bootstrap/pom.xml	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
++++ bootstrap/pom.xml	(revision )
 @@ -57,7 +57,8 @@
                  <configuration>
                      <archive>
@@ -12,88 +15,14 @@ index 5c42c6f..2f5ac13 100644
                              <Implementation-Version>${describe}</Implementation-Version>
                              <Specification-Version>${maven.build.timestamp}</Specification-Version>
                          </manifestEntries>
-diff --git a/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java b/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
-index b7cb81e..6be2273 100644
---- a/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
-+++ b/bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
-@@ -5,9 +5,9 @@ public class Bootstrap
- 
-     public static void main(String[] args) throws Exception
-     {
--        if ( Float.parseFloat( System.getProperty( "java.class.version" ) ) < 51.0 )
-+        if ( Float.parseFloat( System.getProperty( "java.class.version" ) ) < 52.0 )
-         {
--            System.err.println( "*** ERROR *** BungeeCord requires Java 7 or above to function! Please download and install it!" );
-+            System.err.println( "*** ERROR *** BungeeCord requires Java 8 or above to function! Please download and install it!" );
-             System.out.println( "You can check your Java version with the command: java -version" );
-             return;
-         }
-diff --git a/pom.xml b/pom.xml
-index 7f9564c..1d04d57 100644
---- a/pom.xml
-+++ b/pom.xml
-@@ -67,8 +67,8 @@
-     <properties>
-         <build.number>unknown</build.number>
-         <netty.version>4.1.6.Final</netty.version>
--        <maven.compiler.source>1.7</maven.compiler.source>
--        <maven.compiler.target>1.7</maven.compiler.target>
-+        <maven.compiler.source>1.8</maven.compiler.source>
-+        <maven.compiler.target>1.8</maven.compiler.target>
-         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-     </properties>
- 
-@@ -97,6 +97,13 @@
-             <version>1.14.8</version>
-             <scope>provided</scope>
-         </dependency>
-+        <dependency>
-+            <groupId>launcher</groupId>
-+            <artifactId>clientside</artifactId>
-+            <version>12.0+</version>
-+            <scope>system</scope>
-+            <systemPath>/full/path/to/Launcher.jar</systemPath>
-+        </dependency>
-     </dependencies>
- 
-     <build>
-@@ -117,31 +124,6 @@
-                     </execution>
-                 </executions>
-             </plugin>
--            <plugin>
--                <groupId>org.codehaus.mojo</groupId>
--                <artifactId>animal-sniffer-maven-plugin</artifactId>
--                <version>1.13</version>
--                <executions>
--                    <execution>
--                        <phase>process-classes</phase>
--                        <goals>
--                            <goal>check</goal>
--                        </goals>
--                    </execution>
--                </executions>
--                <configuration>
--                    <ignores>
--                        <ignore>java.lang.ClassLoader</ignore>
--                        <ignore>java.lang.Throwable</ignore>
--                        <ignore>java.util.Locale</ignore>
--                    </ignores>
--                    <signature>
--                        <groupId>org.codehaus.mojo.signature</groupId>
--                        <artifactId>java16</artifactId>
--                        <version>1.1</version>
--                    </signature>
--                </configuration>
--            </plugin>
-             <!-- OSS Parent 9 uses 2.7, 2.10+ is broken anyway -->
-             <plugin>
-                 <groupId>org.apache.maven.plugins</groupId>
-diff --git a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-index d87b03c..08efeb4 100644
---- a/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-+++ b/proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
-@@ -63,6 +63,9 @@ import net.md_5.bungee.protocol.packet.StatusRequest;
+Index: proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
++++ proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision )
+@@ -63,6 +63,9 @@
  import net.md_5.bungee.protocol.packet.StatusResponse;
  import net.md_5.bungee.util.BoundedArrayList;
  
@@ -103,7 +32,7 @@ index d87b03c..08efeb4 100644
  @RequiredArgsConstructor
  public class InitialHandler extends PacketHandler implements PendingConnection
  {
-@@ -262,7 +265,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -261,7 +264,7 @@
          this.handshake = handshake;
          ch.setVersion( handshake.getProtocolVersion() );
  
@@ -112,12 +41,12 @@ index d87b03c..08efeb4 100644
          // with Bungee's IP forwarding, so we detect it, and remove it from the host string, for now.
          // We know FML appends \00FML\00. However, we need to also consider that other systems might
          // add their own data to the end of the string. So, we just take everything from the \0 character
-@@ -403,35 +406,25 @@ public class InitialHandler extends PacketHandler implements PendingConnection
+@@ -402,35 +405,26 @@
          {
              sha.update( bit );
          }
 -        String encodedHash = URLEncoder.encode( new BigInteger( sha.digest() ).toString( 16 ), "UTF-8" );
--
+ 
 -        String authURL = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash;
 -
 -        Callback<String> handler = new Callback<String>()
@@ -135,7 +64,7 @@ index d87b03c..08efeb4 100644
 -                        finish();
 -                        return;
 -                    }
--                    disconnect( "Not authenticated with Minecraft.net" );
+-                    disconnect( bungee.getTranslation( "offline_mode_player" ) );
 -                } else
 -                {
 -                    disconnect( bungee.getTranslation( "mojang_fail" ) );
@@ -165,11 +94,33 @@ index d87b03c..08efeb4 100644
      }
  
      private void finish()
-diff --git a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
-index 9311ef7..98bba42 100644
---- a/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
-+++ b/proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
-@@ -3,6 +3,17 @@ package net.md_5.bungee.connection;
+Index: bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
++++ bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision )
+@@ -5,9 +5,9 @@
+ 
+     public static void main(String[] args) throws Exception
+     {
+-        if ( Float.parseFloat( System.getProperty( "java.class.version" ) ) < 51.0 )
++        if ( Float.parseFloat( System.getProperty( "java.class.version" ) ) < 52.0 )
+         {
+-            System.err.println( "*** ERROR *** BungeeCord requires Java 7 or above to function! Please download and install it!" );
++            System.err.println( "*** ERROR *** BungeeCord requires Java 8 or above to function! Please download and install it!" );
+             System.out.println( "You can check your Java version with the command: java -version" );
+             return;
+         }
+Index: proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
++++ proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision )
+@@ -3,6 +3,17 @@
  import lombok.AllArgsConstructor;
  import lombok.Data;
  
@@ -187,7 +138,7 @@ index 9311ef7..98bba42 100644
  @Data
  @AllArgsConstructor
  public class LoginResult
-@@ -11,6 +22,20 @@ public class LoginResult
+@@ -11,6 +22,20 @@
      private String id;
      private Property[] properties;
  
@@ -208,3 +159,67 @@ index 9311ef7..98bba42 100644
      @Data
      @AllArgsConstructor
      public static class Property
+Index: pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pom.xml	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
++++ pom.xml	(revision )
+@@ -67,8 +67,8 @@
+     <properties>
+         <build.number>unknown</build.number>
+         <netty.version>4.1.9.Final</netty.version>
+-        <maven.compiler.source>1.7</maven.compiler.source>
+-        <maven.compiler.target>1.7</maven.compiler.target>
++        <maven.compiler.source>1.8</maven.compiler.source>
++        <maven.compiler.target>1.8</maven.compiler.target>
+         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+     </properties>
+ 
+@@ -97,6 +97,13 @@
+             <version>1.16.12</version>
+             <scope>provided</scope>
+         </dependency>
++        <dependency>
++            <groupId>launcher</groupId>
++            <artifactId>clientside</artifactId>
++            <version>12.0+</version>
++            <scope>system</scope>
++            <systemPath>/full/path/to/Launcher.jar</systemPath>
++        </dependency>
+     </dependencies>
+ 
+     <build>
+@@ -116,31 +123,6 @@
+                         </goals>
+                     </execution>
+                 </executions>
+-            </plugin>
+-            <plugin>
+-                <groupId>org.codehaus.mojo</groupId>
+-                <artifactId>animal-sniffer-maven-plugin</artifactId>
+-                <version>1.13</version>
+-                <executions>
+-                    <execution>
+-                        <phase>process-classes</phase>
+-                        <goals>
+-                            <goal>check</goal>
+-                        </goals>
+-                    </execution>
+-                </executions>
+-                <configuration>
+-                    <ignores>
+-                        <ignore>java.lang.ClassLoader</ignore>
+-                        <ignore>java.lang.Throwable</ignore>
+-                        <ignore>java.util.Locale</ignore>
+-                    </ignores>
+-                    <signature>
+-                        <groupId>org.codehaus.mojo.signature</groupId>
+-                        <artifactId>java16</artifactId>
+-                        <version>1.1</version>
+-                    </signature>
+-                </configuration>
+             </plugin>
+             <!-- OSS Parent 9 uses 2.7, 2.10+ is broken anyway -->
+             <plugin>

@@ -28,8 +28,8 @@ public final class HashedDir extends HashedEntry {
     }
 
     @LauncherAPI
-    public HashedDir(Path dir, FileNameMatcher matcher, boolean allowSymlinks) throws IOException {
-        IOHelper.walk(dir, new HashFileVisitor(dir, matcher, allowSymlinks), true);
+    public HashedDir(Path dir, FileNameMatcher matcher, boolean allowSymlinks, boolean digest) throws IOException {
+        IOHelper.walk(dir, new HashFileVisitor(dir, matcher, allowSymlinks, digest), true);
     }
 
     @LauncherAPI
@@ -175,16 +175,18 @@ public final class HashedDir extends HashedEntry {
         private final Path dir;
         private final FileNameMatcher matcher;
         private final boolean allowSymlinks;
+        private final boolean digest;
 
         // State
         private HashedDir current = HashedDir.this;
         private final Deque<String> path = new LinkedList<>();
         private final Deque<HashedDir> stack = new LinkedList<>();
 
-        private HashFileVisitor(Path dir, FileNameMatcher matcher, boolean allowSymlinks) {
+        private HashFileVisitor(Path dir, FileNameMatcher matcher, boolean allowSymlinks, boolean digest) {
             this.dir = dir;
             this.matcher = matcher;
             this.allowSymlinks = allowSymlinks;
+            this.digest =  digest;
         }
 
         @Override
@@ -234,8 +236,8 @@ public final class HashedDir extends HashedEntry {
 
             // Add file (may be unhashed, if exclusion)
             path.add(IOHelper.getFileName(file));
-            boolean hash = matcher == null || matcher.shouldUpdate(path);
-            current.map.put(path.removeLast(), new HashedFile(file, attrs.size(), hash));
+            boolean doDigest = digest && (matcher == null || matcher.shouldUpdate(path));
+            current.map.put(path.removeLast(), new HashedFile(file, attrs.size(), doDigest));
             return super.visitFile(file, attrs);
         }
     }

@@ -13,7 +13,7 @@ import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 
 public final class HashedFile extends HashedEntry {
-    private static final byte[] DUMMY_HASH = new byte[0];
+    public static final DigestAlgorithm DIGEST_ALGO = DigestAlgorithm.MD5;
 
     // Instance
     @LauncherAPI public final long size;
@@ -22,17 +22,17 @@ public final class HashedFile extends HashedEntry {
     @LauncherAPI
     public HashedFile(long size, byte[] digest) {
         this.size = VerifyHelper.verifyLong(size, VerifyHelper.L_NOT_NEGATIVE, "Illegal size: " + size);
-        this.digest = Arrays.copyOf(digest, digest.length);
+        this.digest = DIGEST_ALGO.verify(digest).clone();
     }
 
     @LauncherAPI
-    public HashedFile(Path file, long size, boolean hash) throws IOException {
-        this(size, hash ? SecurityHelper.digest(DigestAlgorithm.MD5, file) : DUMMY_HASH);
+    public HashedFile(Path file, long size, boolean digest) throws IOException {
+        this(size, digest ? SecurityHelper.digest(DIGEST_ALGO, file) : null);
     }
 
     @LauncherAPI
     public HashedFile(HInput input) throws IOException {
-        this(input.readVarLong(), input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH));
+        this(input.readVarLong(), input.readBoolean() ? input.readByteArray(-DIGEST_ALGO.bytes) : null);
     }
 
     @Override
@@ -48,21 +48,33 @@ public final class HashedFile extends HashedEntry {
     @Override
     public void write(HOutput output) throws IOException {
         output.writeVarLong(size);
-        output.writeByteArray(digest, SecurityHelper.CRYPTO_MAX_LENGTH);
+        output.writeBoolean(digest != null);
+        if (digest != null) {
+            output.writeByteArray(digest, -DIGEST_ALGO.bytes);
+        }
     }
 
     @LauncherAPI
     public boolean isSame(HashedFile o) {
-        return size == o.size && Arrays.equals(digest, o.digest);
+        return size == o.size && (digest == null || o.digest == null || Arrays.equals(digest, o.digest));
     }
 
     @LauncherAPI
-    public boolean isSame(Path file) throws IOException {
-        return isSame(new HashedFile(file, IOHelper.readAttributes(file).size(), true));
+    public boolean isSame(Path file, boolean digest) throws IOException {
+        if (size != IOHelper.readAttributes(file).size()) {
+            return false;
+        }
+        if (!digest || this.digest == null) {
+            return true;
+        }
+
+        // Create digest
+        byte[] actualDigest = SecurityHelper.digest(DIGEST_ALGO, file);
+        return Arrays.equals(this.digest, actualDigest);
     }
 
     @LauncherAPI
     public boolean isSameDigest(byte[] digest) {
-        return Arrays.equals(this.digest, digest);
+        return this.digest == null || digest == null || Arrays.equals(this.digest, digest);
     }
 }

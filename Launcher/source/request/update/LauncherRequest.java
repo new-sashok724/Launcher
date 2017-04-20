@@ -3,7 +3,6 @@ package launcher.request.update;
 import java.nio.file.Path;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -99,13 +98,13 @@ public final class LauncherRequest extends Request<Result> {
         private final byte[] sign;
 
         private Result(byte[] sign, List<SignedObjectHolder<ClientProfile>> profiles) {
-            this.sign = Arrays.copyOf(sign, sign.length);
+            this.sign = sign.clone();
             this.profiles = Collections.unmodifiableList(profiles);
         }
 
         @LauncherAPI
         public byte[] getSign() {
-            return Arrays.copyOf(sign, sign.length);
+            return sign.clone();
         }
     }
 }

@@ -40,6 +40,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
     private final String dirName;
     private final Path dir;
     private final FileNameMatcher matcher;
+    private final boolean digest;
     private volatile Callback stateCallback;
 
     // State
@@ -49,16 +50,17 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
     private Instant startTime;
 
     @LauncherAPI
-    public UpdateRequest(Config config, String dirName, Path dir, FileNameMatcher matcher) {
+    public UpdateRequest(Config config, String dirName, Path dir, FileNameMatcher matcher, boolean digest) {
         super(config);
         this.dirName = IOHelper.verifyFileName(dirName);
         this.dir = Objects.requireNonNull(dir, "dir");
         this.matcher = matcher;
+        this.digest = digest;
     }
 
     @LauncherAPI
-    public UpdateRequest(String dirName, Path dir, FileNameMatcher matcher) {
-        this(null, dirName, dir, matcher);
+    public UpdateRequest(String dirName, Path dir, FileNameMatcher matcher, boolean digest) {
+        this(null, dirName, dir, matcher, digest);
     }
 
     @Override
@@ -69,7 +71,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
     @Override
     public SignedObjectHolder<HashedDir> request() throws Exception {
         Files.createDirectories(dir);
-        localDir = new HashedDir(dir, matcher, false);
+        localDir = new HashedDir(dir, matcher, false, digest);
 
         // Start request
         return super.request();

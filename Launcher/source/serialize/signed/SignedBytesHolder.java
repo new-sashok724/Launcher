@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
 
 import launcher.LauncherAPI;
 import launcher.helper.SecurityHelper;
@@ -24,13 +23,13 @@ public class SignedBytesHolder extends StreamObject {
     @LauncherAPI
     public SignedBytesHolder(byte[] bytes, byte[] sign, RSAPublicKey publicKey) throws SignatureException {
         SecurityHelper.verifySign(bytes, sign, publicKey);
-        this.bytes = Arrays.copyOf(bytes, bytes.length);
-        this.sign = Arrays.copyOf(sign, sign.length);
+        this.bytes = bytes.clone();
+        this.sign = sign.clone();
     }
 
     @LauncherAPI
     public SignedBytesHolder(byte[] bytes, RSAPrivateKey privateKey) {
-        this.bytes = Arrays.copyOf(bytes, bytes.length);
+        this.bytes = bytes.clone();
         sign = SecurityHelper.sign(bytes, privateKey);
     }
 
@@ -42,11 +41,11 @@ public class SignedBytesHolder extends StreamObject {
 
     @LauncherAPI
     public final byte[] getBytes() {
-        return Arrays.copyOf(bytes, bytes.length);
+        return bytes.clone();
     }
 
     @LauncherAPI
     public final byte[] getSign() {
-        return Arrays.copyOf(sign, sign.length);
+        return sign.clone();
     }
 }

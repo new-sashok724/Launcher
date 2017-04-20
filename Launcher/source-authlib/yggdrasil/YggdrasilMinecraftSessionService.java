@@ -24,6 +24,8 @@ import launcher.request.auth.JoinServerRequest;
 import launcher.request.uuid.ProfileByUUIDRequest;
 
 public final class YggdrasilMinecraftSessionService extends BaseMinecraftSessionService {
+    public static final boolean NO_TEXTURES = Boolean.parseBoolean("launcher.authlib.noTextures");
+
     public YggdrasilMinecraftSessionService(AuthenticationService service) {
         super(service);
         LogHelper.debug("Patched MinecraftSessionService created");
@@ -64,22 +66,25 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
         LogHelper.debug("getTextures, Username: '%s'", profile.getName());
         Map<Type, MinecraftProfileTexture> textures = new EnumMap<>(Type.class);
 
-        // Add skin URL to textures map
-        Iterator<Property> skinURL = profile.getProperties().get(ClientLauncher.SKIN_URL_PROPERTY).iterator();
-        Iterator<Property> skinHash = profile.getProperties().get(ClientLauncher.SKIN_DIGEST_PROPERTY).iterator();
-        if (skinURL.hasNext() && skinHash.hasNext()) {
-            String urlValue = skinURL.next().getValue();
-            String hashValue = skinHash.next().getValue();
-            textures.put(Type.SKIN, new MinecraftProfileTexture(urlValue, hashValue));
-        }
+        // Add textures
+        if (!NO_TEXTURES) {
+            // Add skin URL to textures map
+            Iterator<Property> skinURL = profile.getProperties().get(ClientLauncher.SKIN_URL_PROPERTY).iterator();
+            Iterator<Property> skinHash = profile.getProperties().get(ClientLauncher.SKIN_DIGEST_PROPERTY).iterator();
+            if (skinURL.hasNext() && skinHash.hasNext()) {
+                String urlValue = skinURL.next().getValue();
+                String hashValue = skinHash.next().getValue();
+                textures.put(Type.SKIN, new MinecraftProfileTexture(urlValue, hashValue));
+            }
 
-        // Add cloak URL to textures map
-        Iterator<Property> cloakURL = profile.getProperties().get(ClientLauncher.CLOAK_URL_PROPERTY).iterator();
-        Iterator<Property> cloakHash = profile.getProperties().get(ClientLauncher.CLOAK_DIGEST_PROPERTY).iterator();
-        if (cloakURL.hasNext() && cloakHash.hasNext()) {
-            String urlValue = cloakURL.next().getValue();
-            String hashValue = cloakHash.next().getValue();
-            textures.put(Type.CAPE, new MinecraftProfileTexture(urlValue, hashValue));
+            // Add cloak URL to textures map
+            Iterator<Property> cloakURL = profile.getProperties().get(ClientLauncher.CLOAK_URL_PROPERTY).iterator();
+            Iterator<Property> cloakHash = profile.getProperties().get(ClientLauncher.CLOAK_DIGEST_PROPERTY).iterator();
+            if (cloakURL.hasNext() && cloakHash.hasNext()) {
+                String urlValue = cloakURL.next().getValue();
+                String hashValue = cloakHash.next().getValue();
+                textures.put(Type.CAPE, new MinecraftProfileTexture(urlValue, hashValue));
+            }
         }
 
         // Return filled textures
@@ -134,14 +139,22 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
     }
 
     public static void fillTextureProperties(GameProfile profile, PlayerProfile pp) {
+        LogHelper.debug("fillTextureProperties, Username: '%s'", profile.getName());
+        if (NO_TEXTURES) {
+            return;
+        }
+
+        // Fill textures map
         PropertyMap properties = profile.getProperties();
         if (pp.skin != null) {
             properties.put(ClientLauncher.SKIN_URL_PROPERTY, new Property(ClientLauncher.SKIN_URL_PROPERTY, pp.skin.url, ""));
             properties.put(ClientLauncher.SKIN_DIGEST_PROPERTY, new Property(ClientLauncher.SKIN_DIGEST_PROPERTY, SecurityHelper.toHex(pp.skin.digest), ""));
+            LogHelper.debug("fillTextureProperties, Has skin texture for username '%s'", profile.getName());
         }
         if (pp.cloak != null) {
             properties.put(ClientLauncher.CLOAK_URL_PROPERTY, new Property(ClientLauncher.CLOAK_URL_PROPERTY, pp.cloak.url, ""));
             properties.put(ClientLauncher.CLOAK_DIGEST_PROPERTY, new Property(ClientLauncher.CLOAK_DIGEST_PROPERTY, SecurityHelper.toHex(pp.cloak.digest), ""));
+            LogHelper.debug("fillTextureProperties, Has cloak texture for username '%s'", profile.getName());
         }
     }
 

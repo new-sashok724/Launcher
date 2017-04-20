@@ -44,12 +44,14 @@ public final class DirWatcher implements Runnable, AutoCloseable {
     private final HashedDir hdir;
     private final FileNameMatcher matcher;
     private final WatchService service;
+    private final boolean digest;
 
     @LauncherAPI
-    public DirWatcher(Path dir, HashedDir hdir, FileNameMatcher matcher) throws IOException {
+    public DirWatcher(Path dir, HashedDir hdir, FileNameMatcher matcher, boolean digest) throws IOException {
         this.dir = Objects.requireNonNull(dir, "dir");
         this.hdir = Objects.requireNonNull(hdir, "hdir");
         this.matcher = matcher;
+        this.digest = digest;
         service = dir.getFileSystem().newWatchService();
 
         // Use FILE_TREE if supported
@@ -101,7 +103,7 @@ public final class DirWatcher implements Runnable, AutoCloseable {
             // Verify is REALLY modified (not just attributes)
             if (kind.equals(StandardWatchEventKinds.ENTRY_MODIFY)) {
                 HashedEntry entry = hdir.resolve(stringPath);
-                if (entry != null && (entry.getType() != Type.FILE || ((HashedFile) entry).isSame(path))) {
+                if (entry != null && (entry.getType() != Type.FILE || ((HashedFile) entry).isSame(path, digest))) {
                     continue; // Modified attributes, not need to worry :D
                 }
             }

@@ -13,7 +13,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.interfaces.RSAPublicKey;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -185,16 +184,17 @@ public final class ClientLauncher {
         }
 
         // Start client with WatchService monitoring
+        boolean digest = !profile.object.isUpdateFastCheck();
         LogHelper.debug("Starting JVM and client WatchService");
         FileNameMatcher assetMatcher = profile.object.getAssetUpdateMatcher();
         FileNameMatcher clientMatcher = profile.object.getClientUpdateMatcher();
-        try (DirWatcher jvmWatcher = new DirWatcher(IOHelper.JVM_DIR, jvmHDir.object, null); // JVM Watcher
-            DirWatcher assetWatcher = new DirWatcher(params.assetDir, assetHDir.object, assetMatcher);
-            DirWatcher clientWatcher = new DirWatcher(params.clientDir, clientHDir.object, clientMatcher)) {
+        try (DirWatcher jvmWatcher = new DirWatcher(IOHelper.JVM_DIR, jvmHDir.object, null, digest); // JVM Watcher
+            DirWatcher assetWatcher = new DirWatcher(params.assetDir, assetHDir.object, assetMatcher, digest);
+            DirWatcher clientWatcher = new DirWatcher(params.clientDir, clientHDir.object, clientMatcher, digest)) {
             // Verify current state of all dirs
-            verifyHDir(IOHelper.JVM_DIR, jvmHDir.object, null);
-            verifyHDir(params.assetDir, assetHDir.object, assetMatcher);
-            verifyHDir(params.clientDir, clientHDir.object, clientMatcher);
+            verifyHDir(IOHelper.JVM_DIR, jvmHDir.object, null, digest);
+            verifyHDir(params.assetDir, assetHDir.object, assetMatcher, digest);
+            verifyHDir(params.clientDir, clientHDir.object, clientMatcher, digest);
 
             // Start WatchService, and only then client
             CommonHelper.newThread("JVM Directory Watcher", true, jvmWatcher).start();
@@ -210,13 +210,13 @@ public final class ClientLauncher {
     }
 
     @LauncherAPI
-    public static void verifyHDir(Path dir, HashedDir hdir, FileNameMatcher matcher) throws IOException {
+    public static void verifyHDir(Path dir, HashedDir hdir, FileNameMatcher matcher, boolean digest) throws IOException {
         if (matcher != null) {
             matcher = matcher.verifyOnly();
         }
 
         // Hash directory and compare (ignore update-only matcher entries, it will break offline-mode)
-        HashedDir currentHDir = new HashedDir(dir, matcher, false);
+        HashedDir currentHDir = new HashedDir(dir, matcher, false, digest);
         if (!hdir.diff(currentHDir, matcher).isSame()) {
             throw new SecurityException(String.format("Forbidden modification: '%s'", IOHelper.getFileName(dir)));
         }
@@ -355,7 +355,7 @@ public final class ClientLauncher {
         @LauncherAPI
         public Params(byte[] launcherSign, Path assetDir, Path clientDir, PlayerProfile pp, String accessToken,
             boolean autoEnter, boolean fullScreen, int ram, int width, int height) {
-            this.launcherSign = Arrays.copyOf(launcherSign, launcherSign.length);
+            this.launcherSign = launcherSign.clone();
 
             // Client paths
             this.assetDir = assetDir;

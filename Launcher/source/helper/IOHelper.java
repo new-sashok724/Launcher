@@ -499,8 +499,8 @@ public final class IOHelper {
         socket.setSoTimeout(SOCKET_TIMEOUT);
         socket.setTrafficClass(0b11100);
         // Allow OS to adjust buffer sizes
-        //		socket.setSendBufferSize(0x100000);
-        //		socket.setReceiveBufferSize(0x100000);
+        // socket.setSendBufferSize(0x100000);
+        // socket.setReceiveBufferSize(0x100000);
         socket.setPerformancePreferences(1, 0, 2);
     }
 

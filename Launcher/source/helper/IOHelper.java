@@ -222,7 +222,8 @@ public final class IOHelper {
 
     @LauncherAPI
     public static boolean isValidTextureBounds(int width, int height, boolean cloak) {
-        return width % 64 == 0 && height << 1 == width && width <= 1024 || cloak && width % 22 == 0 && height % 17 == 0 && width / 22 == height / 17;
+        return width % 64 == 0 && (height << 1 == width || !cloak && height == width) && width <= 1024 ||
+            cloak && width % 22 == 0 && height % 17 == 0 && width / 22 == height / 17;
     }
 
     @LauncherAPI

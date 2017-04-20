@@ -16,7 +16,7 @@ public final class VerifyHelper {
     @LauncherAPI public static final LongPredicate L_POSITIVE = l -> l > 0;
     @LauncherAPI public static final LongPredicate L_NOT_NEGATIVE = l -> l >= 0;
     @LauncherAPI public static final Predicate<String> NOT_EMPTY = s -> !s.isEmpty();
-    @LauncherAPI public static final Pattern USERNAME_PATTERN = Pattern.compile("[a-zA-Z0-9-_\\.]{1,16}");
+    @LauncherAPI public static final Pattern USERNAME_PATTERN = Pattern.compile("[a-zA-Zа-яА-Я0-9_.\\-]{1,16}");
 
     private VerifyHelper() {
     }

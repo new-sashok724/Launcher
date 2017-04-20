@@ -41,6 +41,7 @@ public final class VerifyHelper {
         return USERNAME_PATTERN.matcher(username).matches();
     }
 
+    @LauncherAPI
     public static <K, V> void putIfAbsent(Map<K, V> map, K key, V value, String error) {
         verify(map.putIfAbsent(key, value), Objects::isNull, error);
     }

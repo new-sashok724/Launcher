@@ -180,7 +180,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
         updateState(filePath, 0L, hFile.size);
 
         // Start file update
-        MessageDigest digest = SecurityHelper.newDigest(DigestAlgorithm.MD5);
+        MessageDigest digest = this.digest ? SecurityHelper.newDigest(DigestAlgorithm.MD5) : null;
         try (OutputStream fileOutput = IOHelper.newOutput(file)) {
             long downloaded = 0L;
 
@@ -194,8 +194,10 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
                 }
 
                 // Update file
-                digest.update(bytes, 0, length);
                 fileOutput.write(bytes, 0, length);
+                if (digest != null) {
+                    digest.update(bytes, 0, length);
+                }
 
                 // Update state
                 downloaded += length;
@@ -205,9 +207,11 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
         }
 
         // Verify digest
-        byte[] digestBytes = digest.digest();
-        if (!hFile.isSameDigest(digestBytes)) {
-            throw new SecurityException(String.format("File digest mismatch: '%s'", filePath));
+        if (digest != null) {
+            byte[] digestBytes = digest.digest();
+            if (!hFile.isSameDigest(digestBytes)) {
+                throw new SecurityException(String.format("File digest mismatch: '%s'", filePath));
+            }
         }
     }
 

@@ -2,10 +2,10 @@
 
 /* Label */
 #overlay > #description {
-	-fx-font-size: 12pt;
-	-fx-wrap-text: true;
+    -fx-font-size: 12pt;
+    -fx-wrap-text: true;
 }
 
 #overlay > #description.error {
-	-fx-text-fill: red;
+    -fx-text-fill: red;
 }

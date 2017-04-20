@@ -3,9 +3,9 @@
 
 /* Common styles */
 * {
-	-fx-font-family: "Open Sans", sans-serif;
+    -fx-font-family: "Open Sans", sans-serif;
 }
 
 Button, CheckBox, ComboBox {
-	-fx-cursor: hand;
+    -fx-cursor: hand;
 }

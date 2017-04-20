@@ -65,30 +65,30 @@ var VerifyHelper = VerifyHelperClass.static;
 // Helper JS class API imports
 var JSApplication = null;
 if (typeof JSApplicationClass !== 'undefined') {
-	JSApplication = JSApplicationClass.static;
+    JSApplication = JSApplicationClass.static;
 }
 
 // API wrapper
 function tryWithResources(closeable, f) {
-	try {
-		f(closeable);
-	} finally {
-		IOHelper.close(closeable);
-	}
+    try {
+        f(closeable);
+    } finally {
+        IOHelper.close(closeable);
+    }
 }
 
 function newTask(r) {
-	return new javafx.concurrent.Task() { call: r };
+    return new javafx.concurrent.Task() { call: r };
 }
 
 function newRequestTask(request) {
-	return newTask(function() request.request());
+    return newTask(function() request.request());
 }
 
 function startTask(task) {
-	CommonHelper.newThread("FX Task Thread", true, task).start();
+    CommonHelper.newThread("FX Task Thread", true, task).start();
 }
 
 function openURL(url) {
-	app.getHostServices().showDocument(url.toURI());
+    app.getHostServices().showDocument(url.toURI());
 }

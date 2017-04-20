@@ -1,17 +1,17 @@
 * {
-	-fx-font-family: 'Open Sans', sans-serif;
+    -fx-font-family: 'Open Sans', sans-serif;
 }
 
 #cellBox {
-	-fx-alignment: center-left;
-	-fx-padding: 0 5px 0 0;
+    -fx-alignment: center-left;
+    -fx-padding: 0 5px 0 0;
 }
 
 #cellBox > #profileTitle {
-	-fx-text-fill: black;
+    -fx-text-fill: black;
 }
 
 #cellBox > #serverStatus {
-	-fx-text-fill: black;
-	-fx-font-size: 9px;
+    -fx-text-fill: black;
+    -fx-font-size: 9px;
 }

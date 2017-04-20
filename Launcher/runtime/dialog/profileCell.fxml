@@ -7,18 +7,18 @@
 <?import javafx.scene.shape.Circle?>
 
 <HBox xmlns:fx="http://javafx.com/fxml/1" fx:id="cellBox">
-	<stylesheets>
-		<URL value="@profileCell.css" />
-	</stylesheets>
+    <stylesheets>
+        <URL value="@profileCell.css" />
+    </stylesheets>
 
-	<!-- Left side -->
-	<Label fx:id="profileTitle">
-		<graphic><Circle radius="3.0" /></graphic>
-	</Label>
+    <!-- Left side -->
+    <Label fx:id="profileTitle">
+        <graphic><Circle radius="3.0" /></graphic>
+    </Label>
 
-	<!-- Separator -->
-	<Pane HBox.hgrow="ALWAYS" />
+    <!-- Separator -->
+    <Pane HBox.hgrow="ALWAYS" />
 
-	<!-- Right side -->
-	<Label fx:id="serverStatus" />
+    <!-- Right side -->
+    <Label fx:id="serverStatus" />
 </HBox>

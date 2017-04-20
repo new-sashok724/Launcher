@@ -2,28 +2,28 @@
 
 /* Labels */
 #overlay > #settingsTitle {
-	-fx-font-size: 14pt;
-	-fx-alignment: baseline-center;
+    -fx-font-size: 14pt;
+    -fx-alignment: baseline-center;
 }
 
 #overlay #ramLabel,
 #overlay #dirLabel {
-	-fx-font-weight: bold;
+    -fx-font-weight: bold;
 }
 
 /* RAM slider */
 #overlay > #ramSlider > .track {
-	-fx-background-color: #D8E0E3;
-	-fx-background-insets: none;
-	-fx-background-radius: 2px;
-	-fx-padding: 2px;
+    -fx-background-color: #D8E0E3;
+    -fx-background-insets: none;
+    -fx-background-radius: 2px;
+    -fx-padding: 2px;
 }
 
 #overlay > #ramSlider > .thumb {
-	-fx-background-color: #3498DB;
-	-fx-background-insets: none;
-	-fx-background-radius: 5px;
-	-fx-padding: 5px;
+    -fx-background-color: #3498DB;
+    -fx-background-insets: none;
+    -fx-background-radius: 5px;
+    -fx-padding: 5px;
 }
 
 #overlay > #ramSlider:hover > .thumb {
@@ -36,15 +36,15 @@
 
 /* Dir options */
 #overlay > #deleteDir {
-	-fx-background-color: #DB2828;
-	-fx-text-fill: white;
+    -fx-background-color: #DB2828;
+    -fx-text-fill: white;
 }
 
 #overlay > #deleteDir:hover,
 #overlay > #deleteDir:focused {
-	-fx-background-color: #CA1010;
+    -fx-background-color: #CA1010;
 }
 
 #overlay > #deleteDir:pressed {
-	-fx-background-color: #B21E1E;
+    -fx-background-color: #B21E1E;
 }

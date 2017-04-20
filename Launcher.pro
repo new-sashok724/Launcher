@@ -1,5 +1,7 @@
 -injars 'Launcher.jar'
 -outjars 'Launcher-obf.jar'
+-libraryjars 'build/libraries/obf'
+-libraryjars 'build/libraries/guava-17.0.jar'
 -libraryjars 'build/libraries/jansi-1.11.jar'
 -libraryjars '<java.home>/lib/rt.jar'
 -libraryjars '<java.home>/lib/jce.jar'
@@ -24,9 +26,9 @@
 -renamesourcefileattribute SourceFile
 -adaptresourcefilecontents META-INF/MANIFEST.MF
 
--keeppackagenames com.eclipsesource.json.**
+-keeppackagenames com.eclipsesource.json.**,com.mojang.**
 
--keep class com.eclipsesource.json.** {
+-keep class com.eclipsesource.json.**,com.mojang.** {
     <fields>;
     <methods>;
 }

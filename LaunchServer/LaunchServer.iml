@@ -9,7 +9,7 @@
       <excludeFolder url="file://$MODULE_DIR$/runtime" />
     </content>
     <orderEntry type="inheritedJdk" />
-    <orderEntry type="module-library">
+    <orderEntry type="module-library" scope="PROVIDED">
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../build/libraries/launch4j/launch4j.jar!/" />
@@ -18,9 +18,9 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="jline-2.12.1" level="project" />
-    <orderEntry type="library" name="mysql-5.1.36" level="project" />
-    <orderEntry type="library" name="hikaricp-2.4.0" level="project" />
+    <orderEntry type="library" exported="" scope="PROVIDED" name="jline-2.12.1" level="project" />
+    <orderEntry type="library" exported="" scope="PROVIDED" name="mysql-5.1.36" level="project" />
+    <orderEntry type="library" exported="" scope="PROVIDED" name="hikaricp-2.4.0" level="project" />
     <orderEntry type="module" module-name="Launcher" exported="" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

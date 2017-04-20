@@ -2,17 +2,22 @@
 <stringer-v3>
     <optimize>true</optimize>
     <signMode>none</signMode>
-    <proguardMapFile>build/dictionary.pro</proguardMapFile>
-    <protectionElement>
-        <paths>
-            <path>glob:launcher/**</path>
-        </paths>
-        <stringEncryption />
-        <hideAccess />
-        <integrityControl>
-            <checkBytecode>true</checkBytecode>
-            <checkJar>false</checkJar>
-            <sealJar>false</sealJar>
-        </integrityControl>
-    </protectionElement>
+    <proguardMapFile>build/mapping.pro</proguardMapFile>
+    <protectionElements>
+        <protectionElement>
+            <stringEncryption>
+                <mode>filter</mode>
+                <checkCaller>true</checkCaller>
+            </stringEncryption>
+            <hideAccess>
+                <mode>filter</mode>
+            </hideAccess>
+            <integrityControl>
+                <mode>filter</mode>
+                <checkBytecode>true</checkBytecode>
+                <checkJar>false</checkJar>
+                <sealJar>false</sealJar>
+            </integrityControl>
+        </protectionElement>
+    </protectionElements>
 </stringer-v3>

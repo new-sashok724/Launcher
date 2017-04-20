@@ -3,3 +3,10 @@ Main-Class: launcher.Launcher
 
 Name: launcher/
 Sealed: true
+
+Name: com/mojang/authlib/
+Sealed: true
+
+Name: com/mojang/util/
+Sealed: true
+

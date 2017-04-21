@@ -80,7 +80,7 @@ public final class ResponseThread implements Runnable {
         // Verify magic number
         int magicNumber = input.readInt();
         if (magicNumber != Launcher.PROTOCOL_MAGIC) {
-            if (magicNumber != 0x724724_00 + 16) { // 15.3- launcher protocol
+            if (magicNumber != Launcher.PROTOCOL_MAGIC - 1) { // Previous launcher protocol
                 output.writeBoolean(false);
                 throw new IOException(String.format("#%d Protocol magic mismatch", id));
             }

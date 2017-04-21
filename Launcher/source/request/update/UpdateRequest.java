@@ -2,6 +2,7 @@ package launcher.request.update;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -116,7 +117,8 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
             output.flush();
 
             // Perform actions
-            HInput fileInput = compress ? new HInput(new InflaterInputStream(input.stream, IOHelper.newInflater(), IOHelper.BUFFER_SIZE)) : input;
+            // noinspection IOResourceOpenedButNotSafelyClosed
+            InputStream fileInput = compress ? new InflaterInputStream(input.stream, IOHelper.newInflater(), IOHelper.BUFFER_SIZE) : input.stream;
             for (int i = 0; i < length; i++) {
                 Action action = actionsSlice[i];
                 switch (action.type) {
@@ -126,7 +128,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
                         break;
                     case GET:
                         Path targetFile = currentDir.resolve(action.name);
-                        if (fileInput.readUnsignedByte() != 0xFF) {
+                        if (fileInput.read() != 0xFF) {
                             throw new IOException("Serverside cached size mismath for file " + action.name);
                         }
                         downloadFile(targetFile, (HashedFile) action.entry, fileInput);
@@ -180,7 +182,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
         }
     }
 
-    private void downloadFile(Path file, HashedFile hFile, HInput input) throws IOException {
+    private void downloadFile(Path file, HashedFile hFile, InputStream input) throws IOException {
         String filePath = IOHelper.toString(dir.relativize(file));
         updateState(filePath, 0L, hFile.size);
 
@@ -193,7 +195,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
             byte[] bytes = IOHelper.newBuffer();
             while (downloaded < hFile.size) {
                 int remaining = (int) Math.min(hFile.size - downloaded, bytes.length);
-                int length = input.stream.read(bytes, 0, remaining);
+                int length = input.read(bytes, 0, remaining);
                 if (length < 0) {
                     throw new EOFException(String.format("%d bytes remaining", hFile.size - downloaded));
                 }

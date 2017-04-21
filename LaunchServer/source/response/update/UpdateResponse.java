@@ -2,6 +2,7 @@ package launchserver.response.update;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Deque;
@@ -47,7 +48,8 @@ public final class UpdateResponse extends Response {
         dirStack.add(hdir.object);
 
         // Perform update
-        HOutput fileOutput = server.config.compress ? new HOutput(new DeflaterOutputStream(output.stream, IOHelper.newDeflater(), IOHelper.BUFFER_SIZE, true)) : output;
+        // noinspection IOResourceOpenedButNotSafelyClosed
+        OutputStream fileOutput = server.config.compress ? new DeflaterOutputStream(output.stream, IOHelper.newDeflater(), IOHelper.BUFFER_SIZE, true) : output.stream;
         Action[] actionsSlice = new Action[UpdateRequest.MAX_QUEUE_SIZE];
         loop:
         while (true) {
@@ -86,13 +88,13 @@ public final class UpdateResponse extends Response {
                         // Resolve and write file
                         Path file = dir.resolve(action.name);
                         if (Files.size(file) != hFile.size()) {
-                            fileOutput.writeUnsignedByte(0x0);
+                            fileOutput.write(0x0);
                             fileOutput.flush();
                             throw new IOException("Unknown hashed file: " + action.name);
                         }
-                        fileOutput.writeUnsignedByte(0xFF);
+                        fileOutput.write(0xFF);
                         try (InputStream fileInput = IOHelper.newInput(file)) {
-                            IOHelper.transfer(fileInput, fileOutput.stream);
+                            IOHelper.transfer(fileInput, fileOutput);
                         }
                         break;
                     case CD_BACK:

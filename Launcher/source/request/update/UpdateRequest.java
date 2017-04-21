@@ -82,8 +82,6 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 
     @Override
     protected SignedObjectHolder<HashedDir> requestDo(HInput input, HOutput output) throws IOException, SignatureException {
-        compress = input.readBoolean();
-
         // Write update dir name
         output.writeString(dirName, 255);
         output.flush();
@@ -93,11 +91,15 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
         SignedObjectHolder<HashedDir> remoteHDirHolder = new SignedObjectHolder<>(input, config.publicKey, HashedDir::new);
         Diff diff = remoteHDirHolder.object.diff(localDir, matcher);
         totalSize = diff.mismatch.size();
+        compress = input.readBoolean();
 
         // Build actions queue
         Queue<Action> queue = new LinkedList<>();
         fillActionsQueue(queue, diff.mismatch);
         queue.add(Action.FINISH);
+
+        // noinspection IOResourceOpenedButNotSafelyClosed
+        InputStream fileInput = compress ? new InflaterInputStream(input.stream, IOHelper.newInflater(), IOHelper.BUFFER_SIZE) : input.stream;
 
         // Download missing first
         // (otherwise it will cause mustdie indexing bug)
@@ -117,8 +119,6 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
             output.flush();
 
             // Perform actions
-            // noinspection IOResourceOpenedButNotSafelyClosed
-            InputStream fileInput = compress ? new InflaterInputStream(input.stream, IOHelper.newInflater(), IOHelper.BUFFER_SIZE) : input.stream;
             for (int i = 0; i < length; i++) {
                 Action action = actionsSlice[i];
                 switch (action.type) {

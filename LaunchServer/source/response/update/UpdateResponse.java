@@ -3,7 +3,6 @@ package launchserver.response.update;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -40,6 +39,7 @@ public final class UpdateResponse extends Response {
         // Write update hdir
         debug("Update dir: '%s'", updateDirName);
         hdir.write(output);
+        output.writeBoolean(server.config.compress);
         output.flush();
 
         // Prepare variables for actions queue
@@ -87,7 +87,7 @@ public final class UpdateResponse extends Response {
 
                         // Resolve and write file
                         Path file = dir.resolve(action.name);
-                        if (Files.size(file) != hFile.size()) {
+                        if (IOHelper.readAttributes(file).size() != hFile.size()) {
                             fileOutput.write(0x0);
                             fileOutput.flush();
                             throw new IOException("Unknown hashed file: " + action.name);
@@ -121,5 +121,8 @@ public final class UpdateResponse extends Response {
         }
 
         // So we've updated :)
+        if (fileOutput instanceof DeflaterOutputStream) {
+            ((DeflaterOutputStream) fileOutput).finish();
+        }
     }
 }

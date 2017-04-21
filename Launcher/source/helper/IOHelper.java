@@ -264,14 +264,14 @@ public final class IOHelper {
 
     @LauncherAPI
     public static Deflater newDeflater() {
-        Deflater deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
+        Deflater deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, true);
         deflater.setStrategy(Deflater.DEFAULT_STRATEGY);
         return deflater;
     }
 
     @LauncherAPI
     public static Inflater newInflater() {
-        return new Inflater(false);
+        return new Inflater(true);
     }
 
     @LauncherAPI

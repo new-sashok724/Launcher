@@ -96,7 +96,7 @@ public final class ResponseThread implements Runnable {
 
         // Read request type
         Type type = Type.read(input);
-        if (legacy) {
+        if (legacy && type != Type.LAUNCHER) {
             output.writeBoolean(false);
             throw new IOException(String.format("#%d Not LAUNCHER request on legacy protocol", id));
         }

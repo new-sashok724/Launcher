@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.zip.InflaterInputStream;
 
 import launcher.Launcher.Config;
 import launcher.LauncherAPI;
@@ -44,6 +45,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
     private volatile Callback stateCallback;
 
     // State
+    private boolean compress;
     private HashedDir localDir;
     private long totalDownloaded;
     private long totalSize;
@@ -79,6 +81,8 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
 
     @Override
     protected SignedObjectHolder<HashedDir> requestDo(HInput input, HOutput output) throws IOException, SignatureException {
+        compress = input.readBoolean();
+
         // Write update dir name
         output.writeString(dirName, 255);
         output.flush();
@@ -112,6 +116,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
             output.flush();
 
             // Perform actions
+            HInput fileInput = compress ? new HInput(new InflaterInputStream(input.stream, IOHelper.newInflater(), IOHelper.BUFFER_SIZE)) : input;
             for (int i = 0; i < length; i++) {
                 Action action = actionsSlice[i];
                 switch (action.type) {
@@ -121,10 +126,10 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
                         break;
                     case GET:
                         Path targetFile = currentDir.resolve(action.name);
-                        if (!input.readBoolean()) {
+                        if (fileInput.readUnsignedByte() != 0xFF) {
                             throw new IOException("Serverside cached size mismath for file " + action.name);
                         }
-                        downloadFile(targetFile, (HashedFile) action.entry, input);
+                        downloadFile(targetFile, (HashedFile) action.entry, fileInput);
                         break;
                     case CD_BACK:
                         currentDir = currentDir.getParent();

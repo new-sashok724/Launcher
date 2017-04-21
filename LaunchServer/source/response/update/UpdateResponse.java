@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.zip.DeflaterOutputStream;
 
 import launcher.hasher.HashedDir;
 import launcher.hasher.HashedEntry;
@@ -46,6 +47,7 @@ public final class UpdateResponse extends Response {
         dirStack.add(hdir.object);
 
         // Perform update
+        HOutput fileOutput = server.config.compress ? new HOutput(new DeflaterOutputStream(output.stream, IOHelper.newDeflater(), IOHelper.BUFFER_SIZE, true)) : output;
         Action[] actionsSlice = new Action[UpdateRequest.MAX_QUEUE_SIZE];
         loop:
         while (true) {
@@ -84,13 +86,13 @@ public final class UpdateResponse extends Response {
                         // Resolve and write file
                         Path file = dir.resolve(action.name);
                         if (Files.size(file) != hFile.size()) {
-                            output.writeBoolean(false);
-                            output.flush();
+                            fileOutput.writeUnsignedByte(0x0);
+                            fileOutput.flush();
                             throw new IOException("Unknown hashed file: " + action.name);
                         }
-                        output.writeBoolean(true);
+                        fileOutput.writeUnsignedByte(0xFF);
                         try (InputStream fileInput = IOHelper.newInput(file)) {
-                            IOHelper.transfer(fileInput, output.stream);
+                            IOHelper.transfer(fileInput, fileOutput.stream);
                         }
                         break;
                     case CD_BACK:
@@ -113,7 +115,7 @@ public final class UpdateResponse extends Response {
             }
 
             // Flush all actions
-            output.flush();
+            fileOutput.flush();
         }
 
         // So we've updated :)

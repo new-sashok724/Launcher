@@ -416,12 +416,15 @@ public final class LaunchServer implements Runnable {
 
     public static final class Config extends ConfigObject {
         @LauncherAPI public final int port;
+
         // Handlers & Providers
         @LauncherAPI public final AuthHandler authHandler;
         @LauncherAPI public final AuthProvider authProvider;
         @LauncherAPI public final TextureProvider textureProvider;
-        // EXE binary building
+
+        // Misc options
         @LauncherAPI public final boolean launch4J;
+        @LauncherAPI public final boolean compress;
         private final StringConfigEntry address;
         private final String bindAddress;
 
@@ -441,8 +444,9 @@ public final class LaunchServer implements Runnable {
             textureProvider = TextureProvider.newProvider(block.getEntryValue("textureProvider", StringConfigEntry.class),
                 block.getEntry("textureProviderConfig", BlockConfigEntry.class));
 
-            // Set launch4J config
+            // Set misc config
             launch4J = block.getEntryValue("launch4J", BooleanConfigEntry.class);
+            compress = block.getEntryValue("compress", BooleanConfigEntry.class);
         }
 
         @LauncherAPI

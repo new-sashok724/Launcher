@@ -78,9 +78,9 @@ public final class Launcher {
     private static final AtomicReference<Config> CONFIG = new AtomicReference<>();
 
     // Version info
-    @LauncherAPI public static final String VERSION = "15.3.1";
+    @LauncherAPI public static final String VERSION = "15.4";
     @LauncherAPI public static final String BUILD = readBuildNumber();
-    @LauncherAPI public static final int PROTOCOL_MAGIC = 0x724724_16;
+    @LauncherAPI public static final int PROTOCOL_MAGIC = 0x724724_00 + 17;
 
     // Constants
     @LauncherAPI public static final String RUNTIME_DIR = "runtime";

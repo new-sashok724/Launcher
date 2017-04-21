@@ -10,7 +10,6 @@ import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
-import launcher.request.Request;
 import launcher.request.Request.Type;
 import launcher.request.RequestException;
 import launcher.serialize.HInput;
@@ -42,13 +41,13 @@ public final class ResponseThread implements Runnable {
 
     @Override
     public void run() {
-        boolean cancelled = false;
-        Exception savedError = null;
         if (!server.serverSocketHandler.logConnections) {
             LogHelper.debug("Connection #%d from %s", id, IOHelper.getIP(socket.getRemoteSocketAddress()));
         }
 
         // Process connection
+        boolean cancelled = false;
+        Exception savedError = null;
         try (HInput input = new HInput(socket.getInputStream());
             HOutput output = new HOutput(socket.getOutputStream())) {
             Type type = readHandshake(input, output);
@@ -76,11 +75,16 @@ public final class ResponseThread implements Runnable {
     }
 
     private Type readHandshake(HInput input, HOutput output) throws IOException {
+        boolean legacy = false;
+
         // Verify magic number
         int magicNumber = input.readInt();
         if (magicNumber != Launcher.PROTOCOL_MAGIC) {
-            output.writeBoolean(false);
-            throw new IOException(String.format("#%d Protocol magic mismatch", id));
+            if (magicNumber != 0x724724_00 + 16) { // 15.3- launcher protocol
+                output.writeBoolean(false);
+                throw new IOException(String.format("#%d Protocol magic mismatch", id));
+            }
+            legacy = true;
         }
 
         // Verify key modulus
@@ -92,6 +96,10 @@ public final class ResponseThread implements Runnable {
 
         // Read request type
         Type type = Type.read(input);
+        if (legacy) {
+            output.writeBoolean(false);
+            throw new IOException(String.format("#%d Not LAUNCHER request on legacy protocol", id));
+        }
         if (!server.serverSocketHandler.onHandshake(id, type)) {
             output.writeBoolean(false);
             return null;

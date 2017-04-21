@@ -49,6 +49,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
@@ -258,6 +260,18 @@ public final class IOHelper {
         connection.setDoInput(true);
         connection.setDoOutput(false);
         return connection;
+    }
+
+    @LauncherAPI
+    public static Deflater newDeflater() {
+        Deflater deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, false);
+        deflater.setStrategy(Deflater.DEFAULT_STRATEGY);
+        return deflater;
+    }
+
+    @LauncherAPI
+    public static Inflater newInflater() {
+        return new Inflater(false);
     }
 
     @LauncherAPI

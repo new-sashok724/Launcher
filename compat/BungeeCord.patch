@@ -22,16 +22,20 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 ===================================================================
 --- proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
 +++ proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision )
-@@ -63,6 +63,9 @@
- import net.md_5.bungee.protocol.packet.StatusResponse;
- import net.md_5.bungee.util.BoundedArrayList;
- 
-+import launcher.client.PlayerProfile;
-+import launcher.request.auth.CheckServerRequest;
+@@ -8,10 +8,13 @@
+ import java.net.URLEncoder;
+ import java.security.MessageDigest;
+ import java.util.List;
++import java.util.Map;
+ import java.util.UUID;
+ import java.util.concurrent.TimeUnit;
+ import java.util.logging.Level;
+ import javax.crypto.SecretKey;
 +
- @RequiredArgsConstructor
- public class InitialHandler extends PacketHandler implements PendingConnection
- {
++import com.mojang.authlib.yggdrasil.LegacyBridge;
+ import lombok.Getter;
+ import lombok.RequiredArgsConstructor;
+ import net.md_5.bungee.BungeeCord;
 @@ -261,7 +264,7 @@
          this.handshake = handshake;
          ch.setVersion( handshake.getProtocolVersion() );
@@ -73,8 +77,8 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 +        final String serverID = new BigInteger(sha.digest()).toString(16);
 +        ch.getHandle().eventLoop().execute(() -> {
 +            try {
-+                PlayerProfile pp = new CheckServerRequest(username, serverID).request();
-+                if(pp == null) { // Invalid username or serverID
++                Map<String, String> properties = LegacyBridge.checkServerWithProperties(username, serverID);
++                if(properties == null) { // Invalid username or serverID
 +                    disconnect("Bad Login (Serverside)");
 +                    return;
                  }
@@ -83,8 +87,8 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
  
 -        HttpClient.get( authURL, ch.getHandle().eventLoop(), handler );
 +                // Successful login
-+                loginProfile = new LoginResult(pp);
-+                uniqueId = pp.uuid;
++                uniqueId = UUID.fromString(properties.remove("uuid"));
++                loginProfile = new LoginResult(properties);
 +                finish();
 +            } catch(Exception e) {
 +                disconnect("Authentication failed");
@@ -120,40 +124,28 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 ===================================================================
 --- proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
 +++ proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision )
-@@ -3,6 +3,17 @@
+@@ -1,5 +1,8 @@
+ package net.md_5.bungee.connection;
+ 
++import java.util.Map;
++import java.util.Map.Entry;
++
  import lombok.AllArgsConstructor;
  import lombok.Data;
  
-+import java.net.URL;
-+import java.io.IOException;
-+import java.io.FileNotFoundException;
-+import java.net.UnknownHostException;
-+import java.util.List;
-+import java.util.ArrayList;
-+import launcher.client.PlayerProfile;
-+import launcher.client.ClientLauncher;
-+import launcher.helper.LogHelper;
-+import launcher.helper.SecurityHelper;
-+
- @Data
- @AllArgsConstructor
- public class LoginResult
-@@ -11,6 +22,20 @@
+@@ -11,6 +14,17 @@
      private String id;
      private Property[] properties;
  
-+    public LoginResult(PlayerProfile pp) {
-+        id = ClientLauncher.toHash(pp.uuid);
-+        List<Property> properitesList = new ArrayList<>(4);
-+        if(pp.skin != null) {
-+            properitesList.add(new Property(ClientLauncher.SKIN_URL_PROPERTY, pp.skin.url, ""));
-+            properitesList.add(new Property(ClientLauncher.SKIN_DIGEST_PROPERTY, SecurityHelper.toHex(pp.skin.digest), ""));
++    public LoginResult(Map<String, String> propertiesMap) {
++        id = propertiesMap.remove("uuid-hash");
++        properties = new Property[propertiesMap.size()];
++
++        int i = 0;
++        for (Entry<String, String> entry : propertiesMap.entrySet()) {
++            properties[i] = new Property(entry.getKey(), entry.getValue(), "");
++            i++;
 +        }
-+        if(pp.cloak != null) {
-+            properitesList.add(new Property(ClientLauncher.CLOAK_URL_PROPERTY, pp.cloak.url, ""));
-+            properitesList.add(new Property(ClientLauncher.CLOAK_DIGEST_PROPERTY, SecurityHelper.toHex(pp.cloak.digest), ""));
-+        }
-+        properties = properitesList.toArray(new Property[properitesList.size()]);
 +    }
 +
      @Data
@@ -184,7 +176,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 +        <dependency>
 +            <groupId>launcher</groupId>
 +            <artifactId>clientside</artifactId>
-+            <version>12.0+</version>
++            <version>13.4+</version>
 +            <scope>system</scope>
 +            <systemPath>/full/path/to/Launcher.jar</systemPath>
 +        </dependency>

@@ -22,7 +22,7 @@
 -classobfuscationdictionary 'build/dictionary.pro'
 -overloadaggressively
 -repackageclasses 'launcher'
--keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable,*Annotation*
 -renamesourcefileattribute SourceFile
 -adaptresourcefilecontents META-INF/MANIFEST.MF
 

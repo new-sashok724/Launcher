@@ -8,15 +8,27 @@
             <stringEncryption>
                 <mode>filter</mode>
                 <checkCaller>true</checkCaller>
+				<filters>
+					<filter>glob:launcher/**</filter>
+					<filter>glob:com/mojang/authlib/**</filter>
+				</filters>
             </stringEncryption>
             <hideAccess>
                 <mode>filter</mode>
+				<filters>
+					<filter>glob:launcher/**</filter>
+					<filter>glob:com/mojang/authlib/**</filter>
+				</filters>
             </hideAccess>
             <integrityControl>
                 <mode>filter</mode>
                 <checkBytecode>true</checkBytecode>
                 <checkJar>false</checkJar>
                 <sealJar>false</sealJar>
+				<filters>
+					<filter>glob:launcher/**</filter>
+					<filter>glob:com/mojang/authlib/**</filter>
+				</filters>
             </integrityControl>
         </protectionElement>
     </protectionElements>

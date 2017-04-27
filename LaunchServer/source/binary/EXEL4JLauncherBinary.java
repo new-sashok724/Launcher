@@ -62,7 +62,7 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
 
         // Set boolean options
         config.setPriorityIndex(0);
-        config.setHeaderType(Config.JNI_GUI_HEADER_32);
+        config.setHeaderType(Config.GUI_HEADER);
         config.setStayAlive(false);
         config.setRestartOnCrash(false);
 

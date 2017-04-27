@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
@@ -13,6 +14,8 @@ import net.sf.launch4j.Log;
 import net.sf.launch4j.config.Config;
 import net.sf.launch4j.config.ConfigPersister;
 import net.sf.launch4j.config.Jre;
+import net.sf.launch4j.config.LanguageID;
+import net.sf.launch4j.config.VersionInfo;
 
 public final class EXEL4JLauncherBinary extends LauncherBinary {
     // URL constants
@@ -59,7 +62,7 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
 
         // Set boolean options
         config.setPriorityIndex(0);
-        config.setHeaderTypeIndex(0);
+        config.setHeaderType(Config.JNI_GUI_HEADER_32);
         config.setStayAlive(false);
         config.setRestartOnCrash(false);
 
@@ -69,6 +72,25 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
         jre.setRuntimeBits(Jre.RUNTIME_BITS_64_AND_32);
         jre.setJdkPreference(Jre.JDK_PREFERENCE_PREFER_JRE);
         config.setJre(jre);
+
+        // Prepare version info (product)
+        VersionInfo info =new VersionInfo();
+        info.setProductName("sashok724's Launcher v3");
+        info.setProductVersion("1.0.0.0");
+        info.setTxtProductVersion(Launcher.VERSION + ", build " + Launcher.BUILD);
+
+        // Prepare version info (file)
+        info.setFileDescription("sashok724's Launcher v3");
+        info.setFileVersion("1.0.0.0");
+        info.setTxtFileVersion(Launcher.VERSION + ", build " + Launcher.BUILD);
+        info.setOriginalFilename(EXE_BINARY_FILE.getFileName().toString());
+
+        // Prepare version info (misc)
+        info.setInternalName("Launcher");
+        info.setCopyright("© sashok724 LLC");
+        info.setTrademarks("This product is licensed under WTFPL 2.0");
+        info.setLanguage(LanguageID.ENGLISH_US);
+        config.setVersionInfo(info);
 
         // Set JAR wrapping options
         config.setDontWrapJar(false);

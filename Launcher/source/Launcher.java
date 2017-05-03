@@ -128,6 +128,7 @@ public final class Launcher {
     @LauncherAPI
     public static void addLauncherClassBindings(Map<String, Object> bindings) {
         bindings.put("LauncherClass", Launcher.class);
+        bindings.put("LauncherConfigClass", Config.class);
 
         // Set client class bindings
         bindings.put("PlayerProfileClass", PlayerProfile.class);

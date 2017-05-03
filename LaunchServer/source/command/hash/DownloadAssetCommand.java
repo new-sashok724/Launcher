@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import launcher.client.ClientProfile;
 import launcher.client.ClientProfile.Version;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
@@ -37,7 +36,7 @@ public final class DownloadAssetCommand extends Command {
         verifyArgs(args, 2);
         Version version = Version.byName(args[0]);
         String dirName = IOHelper.verifyFileName(args[1]);
-        Path assetDir = LaunchServer.UPDATES_DIR.resolve(dirName);
+        Path assetDir = server.updatesDir.resolve(dirName);
 
         // Create asset dir
         LogHelper.subInfo("Creating asset dir: '%s'", dirName);

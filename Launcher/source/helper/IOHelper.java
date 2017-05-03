@@ -56,6 +56,7 @@ import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 
+import launcher.Launcher;
 import launcher.LauncherAPI;
 
 public final class IOHelper {
@@ -177,7 +178,7 @@ public final class IOHelper {
 
     @LauncherAPI
     public static URL getResourceURL(String name) throws NoSuchFileException {
-        URL url = ClassLoader.getSystemResource(name);
+        URL url = Launcher.class.getResource(name);
         if (url == null) {
             throw new NoSuchFileException(name);
         }
@@ -256,6 +257,8 @@ public final class IOHelper {
             connection.setReadTimeout(HTTP_TIMEOUT);
             connection.setConnectTimeout(HTTP_TIMEOUT);
             connection.addRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)"); // Fix for stupid servers
+        } else {
+            connection.setUseCaches(false);
         }
         connection.setDoInput(true);
         connection.setDoOutput(false);

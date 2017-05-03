@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="minecraft" name="Minecraft">
+      <configuration>
+        <autoDetectTypes>
+          <platformType>SPIGOT</platformType>
+          <platformType>BUNGEECORD</platformType>
+        </autoDetectTypes>
+      </configuration>
+    </facet>
+  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
@@ -21,6 +31,26 @@
     <orderEntry type="library" exported="" scope="PROVIDED" name="jline-2.12.1" level="project" />
     <orderEntry type="library" exported="" scope="PROVIDED" name="mysql-5.1.36" level="project" />
     <orderEntry type="library" exported="" scope="PROVIDED" name="hikaricp-2.4.0" level="project" />
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../build/libraries/plugin/BungeeCord.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../build/libraries/plugin/Spigot.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../build/libraries/plugin/Spigot.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
     <orderEntry type="module" module-name="Launcher" exported="" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>

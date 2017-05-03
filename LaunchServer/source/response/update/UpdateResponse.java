@@ -43,7 +43,7 @@ public final class UpdateResponse extends Response {
         output.flush();
 
         // Prepare variables for actions queue
-        Path dir = LaunchServer.UPDATES_DIR.resolve(updateDirName);
+        Path dir = server.updatesDir.resolve(updateDirName);
         Deque<HashedDir> dirStack = new LinkedList<>();
         dirStack.add(hdir.object);
 

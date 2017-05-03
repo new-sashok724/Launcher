@@ -1,6 +1,7 @@
 package launchserver.auth.provider;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
@@ -32,6 +33,6 @@ public final class NullAuthProvider extends AuthProvider {
     }
 
     private AuthProvider getProvider() {
-        return VerifyHelper.verify(provider, a -> a != null, "Backend auth provider wasn't set");
+        return VerifyHelper.verify(provider, Objects::nonNull, "Backend auth provider wasn't set");
     }
 }

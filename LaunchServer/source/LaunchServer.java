@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.CRC32;
 import javax.script.Bindings;
+import javax.script.Invocable;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -72,21 +74,23 @@ import launchserver.response.ServerSocketHandler;
 import launchserver.response.ServerSocketHandler.Listener;
 import launchserver.texture.TextureProvider;
 
-public final class LaunchServer implements Runnable {
+public final class LaunchServer implements Runnable, AutoCloseable {
     // Constant paths
-    @LauncherAPI public static final Path CONFIG_FILE = IOHelper.WORKING_DIR.resolve("LaunchServer.cfg");
-    @LauncherAPI public static final Path PUBLIC_KEY_FILE = IOHelper.WORKING_DIR.resolve("public.key");
-    @LauncherAPI public static final Path PRIVATE_KEY_FILE = IOHelper.WORKING_DIR.resolve("private.key");
-    @LauncherAPI public static final Path UPDATES_DIR = IOHelper.WORKING_DIR.resolve("updates");
-    @LauncherAPI public static final Path PROFILES_DIR = IOHelper.WORKING_DIR.resolve("profiles");
+    @LauncherAPI public final Path dir;
+    @LauncherAPI public final Path configFile;
+    @LauncherAPI public final Path publicKeyFile;
+    @LauncherAPI public final Path privateKeyFile;
+    @LauncherAPI public final Path updatesDir;
+    @LauncherAPI public final Path profilesDir;
 
     // Server config
     @LauncherAPI public final Config config;
     @LauncherAPI public final RSAPublicKey publicKey;
     @LauncherAPI public final RSAPrivateKey privateKey;
+    @LauncherAPI public final boolean portable;
 
     // Launcher binary
-    @LauncherAPI public final LauncherBinary launcherBinary = new JARLauncherBinary(this);
+    @LauncherAPI public final LauncherBinary launcherBinary;
     @LauncherAPI public final LauncherBinary launcherEXEBinary;
 
     // Server
@@ -99,28 +103,41 @@ public final class LaunchServer implements Runnable {
     private volatile List<SignedObjectHolder<ClientProfile>> profilesList;
     private volatile Map<String, SignedObjectHolder<HashedDir>> updatesDirMap;
 
-    private LaunchServer() throws IOException, InvalidKeySpecException {
+    public LaunchServer(Path dir, boolean portable) throws IOException, InvalidKeySpecException {
         setScriptBindings();
+        this.portable = portable;
+
+        // Setup config locations
+        this.dir = dir;
+        configFile = dir.resolve("LaunchServer.cfg");
+        publicKeyFile = dir.resolve("public.key");
+        privateKeyFile = dir.resolve("private.key");
+        updatesDir = dir.resolve("updates");
+        profilesDir = dir.resolve("profiles");
 
         // Set command handler
         CommandHandler localCommandHandler;
-        try {
-            Class.forName("jline.Terminal");
+        if (portable) {
+            localCommandHandler = new StdCommandHandler(this, false);
+        } else {
+            try {
+                Class.forName("jline.Terminal");
 
-            // JLine2 available
-            localCommandHandler = new JLineCommandHandler(this);
-            LogHelper.info("JLine2 terminal enabled");
-        } catch (ClassNotFoundException ignored) {
-            localCommandHandler = new StdCommandHandler(this);
-            LogHelper.warning("JLine2 isn't in classpath, using std");
+                // JLine2 available
+                localCommandHandler = new JLineCommandHandler(this);
+                LogHelper.info("JLine2 terminal enabled");
+            } catch (ClassNotFoundException ignored) {
+                localCommandHandler = new StdCommandHandler(this, true);
+                LogHelper.warning("JLine2 isn't in classpath, using std");
+            }
         }
         commandHandler = localCommandHandler;
 
         // Set key pair
-        if (IOHelper.isFile(PUBLIC_KEY_FILE) && IOHelper.isFile(PRIVATE_KEY_FILE)) {
+        if (IOHelper.isFile(publicKeyFile) && IOHelper.isFile(privateKeyFile)) {
             LogHelper.info("Reading RSA keypair");
-            publicKey = SecurityHelper.toPublicRSAKey(IOHelper.read(PUBLIC_KEY_FILE));
-            privateKey = SecurityHelper.toPrivateRSAKey(IOHelper.read(PRIVATE_KEY_FILE));
+            publicKey = SecurityHelper.toPublicRSAKey(IOHelper.read(publicKeyFile));
+            privateKey = SecurityHelper.toPrivateRSAKey(IOHelper.read(privateKeyFile));
             if (!publicKey.getModulus().equals(privateKey.getModulus())) {
                 throw new IOException("Private and public key modulus mismatch");
             }
@@ -132,8 +149,8 @@ public final class LaunchServer implements Runnable {
 
             // Write key pair files
             LogHelper.info("Writing RSA keypair files");
-            IOHelper.write(PUBLIC_KEY_FILE, publicKey.getEncoded());
-            IOHelper.write(PRIVATE_KEY_FILE, privateKey.getEncoded());
+            IOHelper.write(publicKeyFile, publicKey.getEncoded());
+            IOHelper.write(privateKeyFile, privateKey.getEncoded());
         }
 
         // Print keypair fingerprints
@@ -144,29 +161,64 @@ public final class LaunchServer implements Runnable {
         // Read LaunchServer config
         generateConfigIfNotExists();
         LogHelper.info("Reading LaunchServer config file");
-        try (BufferedReader reader = IOHelper.newReader(CONFIG_FILE)) {
+        try (BufferedReader reader = IOHelper.newReader(configFile)) {
             config = new Config(TextConfigReader.read(reader, true));
         }
         config.verify();
 
         // Set launcher EXE binary
+        launcherBinary = new JARLauncherBinary(this);
         launcherEXEBinary = config.launch4J ? new EXEL4JLauncherBinary(this) : new EXELauncherBinary(this);
         syncLauncherBinaries();
 
         // Sync updates dir
-        if (!IOHelper.isDir(UPDATES_DIR)) {
-            Files.createDirectory(UPDATES_DIR);
+        if (!IOHelper.isDir(updatesDir)) {
+            Files.createDirectory(updatesDir);
         }
         syncUpdatesDir(null);
 
         // Sync profiles dir
-        if (!IOHelper.isDir(PROFILES_DIR)) {
-            Files.createDirectory(PROFILES_DIR);
+        if (!IOHelper.isDir(profilesDir)) {
+            Files.createDirectory(profilesDir);
         }
         syncProfilesDir();
 
         // Set server socket thread
         serverSocketHandler = new ServerSocketHandler(this);
+    }
+
+    @Override
+    public void close() {
+        serverSocketHandler.close();
+
+        // Close handlers & providers
+        try {
+            config.authHandler.close();
+        } catch (IOException e) {
+            LogHelper.error(e);
+        }
+        try {
+            config.authProvider.close();
+        } catch (IOException e) {
+            LogHelper.error(e);
+        }
+        try {
+            config.textureProvider.close();
+        } catch (IOException e) {
+            LogHelper.error(e);
+        }
+
+        // Notify script about closing
+        try {
+            ((Invocable) engine).invokeFunction("close");
+        } catch (NoSuchMethodException ignored) {
+            // Do nothing if method simply doesn't exist
+        } catch (Exception e) {
+            LogHelper.error(e);
+        }
+
+        // Print last message before death :(
+        LogHelper.info("LaunchServer stopped");
     }
 
     @Override
@@ -176,7 +228,7 @@ public final class LaunchServer implements Runnable {
         }
 
         // Load plugin script if exist
-        Path scriptFile = IOHelper.WORKING_DIR.resolve("plugin.js");
+        Path scriptFile = dir.resolve("plugin.js");
         if (IOHelper.isFile(scriptFile)) {
             LogHelper.info("Loading plugin.js script");
             try {
@@ -187,8 +239,10 @@ public final class LaunchServer implements Runnable {
         }
 
         // Add shutdown hook, then start LaunchServer
-        JVMHelper.RUNTIME.addShutdownHook(CommonHelper.newThread(null, false, this::shutdownHook));
-        CommonHelper.newThread("Command Thread", true, commandHandler).start();
+        if (!portable) {
+            JVMHelper.RUNTIME.addShutdownHook(CommonHelper.newThread(null, false, this::close));
+            CommonHelper.newThread("Command Thread", true, commandHandler).start();
+        }
         rebindServerSocket();
     }
 
@@ -249,10 +303,10 @@ public final class LaunchServer implements Runnable {
     public void syncProfilesDir() throws IOException {
         LogHelper.info("Syncing profiles dir");
         List<SignedObjectHolder<ClientProfile>> newProfies = new LinkedList<>();
-        IOHelper.walk(PROFILES_DIR, new ProfilesFileVisitor(newProfies), false);
+        IOHelper.walk(profilesDir, new ProfilesFileVisitor(newProfies), false);
 
         // Sort and set new profiles
-        Collections.sort(newProfies, (a, b) -> a.object.compareTo(b.object));
+        newProfies.sort(Comparator.comparing(a -> a.object));
         profilesList = Collections.unmodifiableList(newProfies);
     }
 
@@ -260,7 +314,7 @@ public final class LaunchServer implements Runnable {
     public void syncUpdatesDir(Collection<String> dirs) throws IOException {
         LogHelper.info("Syncing updates dir");
         Map<String, SignedObjectHolder<HashedDir>> newUpdatesDirMap = new HashMap<>(16);
-        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(UPDATES_DIR)) {
+        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(updatesDir)) {
             for (Path updateDir : dirStream) {
                 if (Files.isHidden(updateDir)) {
                     continue; // Skip hidden
@@ -292,7 +346,7 @@ public final class LaunchServer implements Runnable {
     }
 
     private void generateConfigIfNotExists() throws IOException {
-        if (IOHelper.isFile(CONFIG_FILE)) {
+        if (IOHelper.isFile(configFile)) {
             return;
         }
 
@@ -304,12 +358,17 @@ public final class LaunchServer implements Runnable {
         }
 
         // Set server address
-        LogHelper.println("LaunchServer address: ");
-        newConfig.setAddress(commandHandler.readLine());
+        if (portable) {
+            LogHelper.warning("Setting LaunchServer address to 'localhost'");
+            newConfig.setAddress("localhost");
+        } else {
+            LogHelper.println("LaunchServer address: ");
+            newConfig.setAddress(commandHandler.readLine());
+        }
 
         // Write LaunchServer config
         LogHelper.info("Writing LaunchServer config file");
-        try (BufferedWriter writer = IOHelper.newWriter(CONFIG_FILE)) {
+        try (BufferedWriter writer = IOHelper.newWriter(configFile)) {
             TextConfigWriter.write(newConfig.block, writer, true);
         }
     }
@@ -324,42 +383,18 @@ public final class LaunchServer implements Runnable {
         addLaunchServerClassBindings(bindings);
     }
 
-    private void shutdownHook() {
-        serverSocketHandler.close();
-
-        // Close handlers & providers
-        try {
-            config.authHandler.close();
-        } catch (IOException e) {
-            LogHelper.error(e);
-        }
-        try {
-            config.authProvider.close();
-        } catch (IOException e) {
-            LogHelper.error(e);
-        }
-        try {
-            config.textureProvider.close();
-        } catch (IOException e) {
-            LogHelper.error(e);
-        }
-
-        // Print last message before death :(
-        LogHelper.info("LaunchServer stopped");
-    }
-
     public static void main(String... args) throws Throwable {
-        JVMHelper.verifySystemProperties(LaunchServer.class);
         SecurityHelper.verifyCertificates(LaunchServer.class);
+        JVMHelper.verifySystemProperties(LaunchServer.class, true);
         LogHelper.addOutput(IOHelper.WORKING_DIR.resolve("LaunchServer.log"));
         LogHelper.printVersion("LaunchServer");
 
         // Start LaunchServer
         Instant start = Instant.now();
         try {
-            new LaunchServer().run();
-        } catch (Exception e) {
-            LogHelper.error(e);
+            new LaunchServer(IOHelper.WORKING_DIR, false).run();
+        } catch (Throwable exc) {
+            LogHelper.error(exc);
             return;
         }
         Instant end = Instant.now();

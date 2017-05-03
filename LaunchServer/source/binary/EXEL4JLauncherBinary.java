@@ -22,12 +22,13 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
     private static final String DOWNLOAD_URL = "http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html"; // Oracle JRE 8
 
     // File constants
-    private static final Path EXE_BINARY_FILE = IOHelper.WORKING_DIR.resolve(EXELauncherBinary.EXE_BINARY_FILE);
-    private static final Path FAVICON_FILE = IOHelper.WORKING_DIR.resolve("favicon.ico");
+    private final Path faviconFile;
 
     @LauncherAPI
     public EXEL4JLauncherBinary(LaunchServer server) {
-        super(server, EXE_BINARY_FILE);
+        super(server, server.dir.resolve(EXELauncherBinary.EXE_BINARY_FILE));
+        faviconFile = server.dir.resolve("favicon.ico");
+        setConfig();
     }
 
     @Override
@@ -36,7 +37,7 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
 
         // Set favicon path
         Config config = ConfigPersister.getInstance().getConfig();
-        if (IOHelper.isFile(FAVICON_FILE)) {
+        if (IOHelper.isFile(faviconFile)) {
             config.setIcon(new File("favicon.ico"));
         } else {
             config.setIcon(null);
@@ -52,7 +53,7 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
         }
     }
 
-    static {
+    private void setConfig() {
         Config config = new Config();
 
         // Set string options
@@ -74,7 +75,7 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
         config.setJre(jre);
 
         // Prepare version info (product)
-        VersionInfo info =new VersionInfo();
+        VersionInfo info = new VersionInfo();
         info.setProductName("sashok724's Launcher v3");
         info.setProductVersion("1.0.0.0");
         info.setTxtProductVersion(Launcher.VERSION + ", build " + Launcher.BUILD);
@@ -83,7 +84,7 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
         info.setFileDescription("sashok724's Launcher v3");
         info.setFileVersion("1.0.0.0");
         info.setTxtFileVersion(Launcher.VERSION + ", build " + Launcher.BUILD);
-        info.setOriginalFilename(EXE_BINARY_FILE.getFileName().toString());
+        info.setOriginalFilename(binaryFile.getFileName().toString());
 
         // Prepare version info (misc)
         info.setInternalName("Launcher");
@@ -94,8 +95,8 @@ public final class EXEL4JLauncherBinary extends LauncherBinary {
 
         // Set JAR wrapping options
         config.setDontWrapJar(false);
-        config.setJar(JARLauncherBinary.JAR_BINARY_FILE.toFile());
-        config.setOutfile(EXE_BINARY_FILE.toFile());
+        config.setJar(server.launcherBinary.binaryFile.toFile());
+        config.setOutfile(binaryFile.toFile());
 
         // Return prepared config
         ConfigPersister.getInstance().setAntConfig(config, null);

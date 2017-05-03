@@ -41,7 +41,7 @@ public final class DownloadClientCommand extends Command {
         verifyArgs(args, 2);
         Version version = Version.byName(args[0]);
         String dirName = IOHelper.verifyFileName(args[1]);
-        Path clientDir = LaunchServer.UPDATES_DIR.resolve(args[1]);
+        Path clientDir = server.updatesDir.resolve(args[1]);
 
         // Create client dir
         LogHelper.subInfo("Creating client dir: '%s'", dirName);
@@ -61,7 +61,7 @@ public final class DownloadClientCommand extends Command {
         }
         client.setTitle(dirName);
         client.block.getEntry("dir", StringConfigEntry.class).setValue(dirName);
-        try (BufferedWriter writer = IOHelper.newWriter(IOHelper.resolveIncremental(LaunchServer.PROFILES_DIR,
+        try (BufferedWriter writer = IOHelper.newWriter(IOHelper.resolveIncremental(server.profilesDir,
             dirName, "cfg"))) {
             TextConfigWriter.write(client.block, writer, true);
         }

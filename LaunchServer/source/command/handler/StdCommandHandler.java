@@ -9,9 +9,9 @@ import launchserver.LaunchServer;
 public final class StdCommandHandler extends CommandHandler {
     private final BufferedReader reader;
 
-    public StdCommandHandler(LaunchServer server) {
+    public StdCommandHandler(LaunchServer server, boolean readCommands) {
         super(server);
-        reader = IOHelper.newReader(System.in);
+        reader = readCommands ? IOHelper.newReader(System.in) : null;
     }
 
     @Override
@@ -26,6 +26,6 @@ public final class StdCommandHandler extends CommandHandler {
 
     @Override
     public String readLine() throws IOException {
-        return reader.readLine();
+        return reader == null ? null : reader.readLine();
     }
 }

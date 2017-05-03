@@ -92,15 +92,30 @@ public abstract class CommandHandler implements Runnable {
 
     @LauncherAPI
     public final void eval(String line, boolean bell) {
+        LogHelper.info("Command '%s'", line);
+
+        // Parse line to tokens
+        String[] args;
+        try {
+            args = parse(line);
+        } catch (Exception e) {
+            LogHelper.error(e);
+            return;
+        }
+
+        // Evaluate command
+        eval(args, bell);
+    }
+
+    @LauncherAPI
+    public final void eval(String[] args, boolean bell) {
+        if (args.length == 0) {
+            return;
+        }
+
+        // Measure start time and invoke command
         Instant startTime = Instant.now();
         try {
-            String[] args = parse(line);
-            if (args.length == 0) {
-                return;
-            }
-
-            // Invoke command
-            LogHelper.info("Command '%s'", line);
             lookup(args[0]).invoke(Arrays.copyOfRange(args, 1, args.length));
         } catch (Exception e) {
             LogHelper.error(e);
@@ -145,10 +160,10 @@ public abstract class CommandHandler implements Runnable {
 
         // Read line char by char
         Collection<String> result = new LinkedList<>();
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < line.length() + 1; i++) {
+        StringBuilder builder = new StringBuilder(100);
+        for (int i = 0; i <= line.length(); i++) {
             boolean end = i >= line.length();
-            char ch = end ? 0 : line.charAt(i);
+            char ch = end ? '\0' : line.charAt(i);
 
             // Maybe we should read next argument?
             if (end || !quoted && Character.isWhitespace(ch)) {
@@ -174,6 +189,9 @@ public abstract class CommandHandler implements Runnable {
                     wasQuoted = true;
                     break;
                 case '\\': // All escapes, including spaces etc
+                    if (i + 1 >= line.length()) {
+                        throw new CommandException("Escape character is not specified");
+                    }
                     char next = line.charAt(i + 1);
                     builder.append(next);
                     i++;

@@ -14,7 +14,7 @@ public final class EXELauncherBinary extends LauncherBinary {
 
     @LauncherAPI
     public EXELauncherBinary(LaunchServer server) {
-        super(server, IOHelper.WORKING_DIR.resolve(EXE_BINARY_FILE));
+        super(server, server.dir.resolve(EXE_BINARY_FILE));
     }
 
     @Override

@@ -239,8 +239,8 @@ public final class Launcher {
     }
 
     public static void main(String... args) throws Throwable {
-        JVMHelper.verifySystemProperties(Launcher.class);
         SecurityHelper.verifyCertificates(Launcher.class);
+        JVMHelper.verifySystemProperties(Launcher.class, true);
         LogHelper.printVersion("Launcher");
 
         // Start Launcher

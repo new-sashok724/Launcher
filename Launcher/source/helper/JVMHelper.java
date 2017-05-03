@@ -86,12 +86,12 @@ public final class JVMHelper {
     }
 
     @LauncherAPI
-    public static void verifySystemProperties(Class<?> mainClass) {
+    public static void verifySystemProperties(Class<?> mainClass, boolean requireSystem) {
         Locale.setDefault(Locale.US);
 
         // Verify class loader
         LogHelper.debug("Verifying class loader");
-        if (!mainClass.getClassLoader().equals(LOADER)) {
+        if (requireSystem && !mainClass.getClassLoader().equals(LOADER)) {
             throw new SecurityException("ClassLoader should be system");
         }
 

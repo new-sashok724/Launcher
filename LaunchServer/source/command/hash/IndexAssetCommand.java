@@ -46,8 +46,8 @@ public final class IndexAssetCommand extends Command {
         String inputAssetDirName = IOHelper.verifyFileName(args[0]);
         String indexFileName = IOHelper.verifyFileName(args[1]);
         String outputAssetDirName = IOHelper.verifyFileName(args[2]);
-        Path inputAssetDir = LaunchServer.UPDATES_DIR.resolve(inputAssetDirName);
-        Path outputAssetDir = LaunchServer.UPDATES_DIR.resolve(outputAssetDirName);
+        Path inputAssetDir = server.updatesDir.resolve(inputAssetDirName);
+        Path outputAssetDir = server.updatesDir.resolve(outputAssetDirName);
         if (outputAssetDir.equals(inputAssetDir)) {
             throw new CommandException("Unindexed and indexed asset dirs can't be same");
         }

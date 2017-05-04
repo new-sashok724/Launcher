@@ -46,7 +46,6 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
     private volatile Callback stateCallback;
 
     // State
-    private boolean compress;
     private HashedDir localDir;
     private long totalDownloaded;
     private long totalSize;
@@ -91,7 +90,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
         SignedObjectHolder<HashedDir> remoteHDirHolder = new SignedObjectHolder<>(input, config.publicKey, HashedDir::new);
         Diff diff = remoteHDirHolder.object.diff(localDir, matcher);
         totalSize = diff.mismatch.size();
-        compress = input.readBoolean();
+        boolean compress = input.readBoolean();
 
         // Build actions queue
         Queue<Action> queue = new LinkedList<>();

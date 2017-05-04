@@ -17,7 +17,6 @@ import launchserver.auth.MySQLSourceConfig;
 
 public final class MySQLAuthHandler extends CachedAuthHandler {
     private final MySQLSourceConfig mySQLHolder;
-    private final String table;
     private final String uuidColumn;
     private final String usernameColumn;
     private final String accessTokenColumn;
@@ -34,7 +33,7 @@ public final class MySQLAuthHandler extends CachedAuthHandler {
         mySQLHolder = new MySQLSourceConfig("authHandlerPool", block);
 
         // Read query params
-        table = VerifyHelper.verifyIDName(
+        String table = VerifyHelper.verifyIDName(
             block.getEntryValue("table", StringConfigEntry.class));
         uuidColumn = VerifyHelper.verifyIDName(
             block.getEntryValue("uuidColumn", StringConfigEntry.class));

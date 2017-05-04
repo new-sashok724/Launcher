@@ -28,9 +28,9 @@ public final class BinaryFileAuthHandler extends FileAuthHandler {
     }
 
     @Override
-    protected void writeAuthFile() throws IOException {
+    protected void writeAuthFileTmp() throws IOException {
         Set<Map.Entry<UUID, Entry>> entrySet = entrySet();
-        try (HOutput output = new HOutput(IOHelper.newOutput(file))) {
+        try (HOutput output = new HOutput(IOHelper.newOutput(fileTmp))) {
             output.writeLength(entrySet.size(), 0);
             for (Map.Entry<UUID, Entry> entry : entrySet) {
                 output.writeUUID(entry.getKey());

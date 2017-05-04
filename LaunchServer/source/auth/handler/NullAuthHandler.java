@@ -1,6 +1,7 @@
 package launchserver.auth.handler;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 import launcher.LauncherAPI;
@@ -53,6 +54,6 @@ public final class NullAuthHandler extends AuthHandler {
     }
 
     private AuthHandler getHandler() {
-        return VerifyHelper.verify(handler, a -> a != null, "Backend auth handler wasn't set");
+        return VerifyHelper.verify(handler, Objects::nonNull, "Backend auth handler wasn't set");
     }
 }

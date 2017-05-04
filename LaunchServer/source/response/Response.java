@@ -37,6 +37,7 @@ public abstract class Response {
     }
 
     @LauncherAPI
+    @SuppressWarnings("MethodMayBeStatic") // Intentionally not static
     protected final void writeNoError(HOutput output) throws IOException {
         output.writeString("", 0);
     }

@@ -17,7 +17,6 @@ import launcher.LauncherAPI;
 import launcher.helper.CommonHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
-import launcher.request.Request;
 import launcher.request.Request.Type;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
@@ -27,10 +26,12 @@ import launchserver.response.Response.Factory;
 public final class ServerSocketHandler implements Runnable, AutoCloseable {
     private static final ThreadFactory THREAD_FACTORY = r -> CommonHelper.newThread("Network Thread", true, r);
     @LauncherAPI public volatile boolean logConnections = Boolean.getBoolean("launcher.logConnections");
+
     // Instance
     private final LaunchServer server;
     private final AtomicReference<ServerSocket> serverSocket = new AtomicReference<>();
     private final ExecutorService threadPool = Executors.newCachedThreadPool(THREAD_FACTORY);
+
     // API
     private final Map<String, Factory> customResponses = new ConcurrentHashMap<>(2);
     private final AtomicLong idCounter = new AtomicLong(0L);

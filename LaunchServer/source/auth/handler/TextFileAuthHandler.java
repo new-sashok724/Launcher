@@ -50,7 +50,7 @@ public final class TextFileAuthHandler extends FileAuthHandler {
     }
 
     @Override
-    protected void writeAuthFile() throws IOException {
+    protected void writeAuthFileTmp() throws IOException {
         boolean next = false;
 
         // Write auth blocks to map
@@ -85,7 +85,7 @@ public final class TextFileAuthHandler extends FileAuthHandler {
         }
 
         // Write auth handler file
-        try (BufferedWriter writer = IOHelper.newWriter(file)) {
+        try (BufferedWriter writer = IOHelper.newWriter(fileTmp)) {
             BlockConfigEntry authFile = new BlockConfigEntry(map, true, 1);
             authFile.setComment(0, "\n");
             TextConfigWriter.write(authFile, writer, true);

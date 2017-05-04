@@ -1,10 +1,10 @@
 package launchserver.texture;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 import launcher.LauncherAPI;
-import launcher.client.PlayerProfile;
 import launcher.client.PlayerProfile.Texture;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
@@ -40,6 +40,6 @@ public final class NullTextureProvider extends TextureProvider {
     }
 
     private TextureProvider getProvider() {
-        return VerifyHelper.verify(provider, a -> a != null, "Backend texture provider wasn't set");
+        return VerifyHelper.verify(provider, Objects::nonNull, "Backend texture provider wasn't set");
     }
 }

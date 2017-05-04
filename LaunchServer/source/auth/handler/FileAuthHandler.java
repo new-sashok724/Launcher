@@ -27,6 +27,7 @@ import launcher.serialize.stream.StreamObject;
 
 public abstract class FileAuthHandler extends AuthHandler {
     @LauncherAPI public final Path file;
+    @LauncherAPI public final Path fileTmp;
     @LauncherAPI public final boolean offlineUUIDs;
 
     // Instance
@@ -34,13 +35,14 @@ public abstract class FileAuthHandler extends AuthHandler {
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     // Storage
-    private final Map<UUID, Entry> entryMap = new HashMap<>();
-    private final Map<String, UUID> usernamesMap = new HashMap<>();
+    private final Map<UUID, Entry> entryMap = new HashMap<>(256);
+    private final Map<String, UUID> usernamesMap = new HashMap<>(256);
 
     @LauncherAPI
     protected FileAuthHandler(BlockConfigEntry block) {
         super(block);
         file = IOHelper.toPath(block.getEntryValue("file", StringConfigEntry.class));
+        fileTmp = IOHelper.toPath(block.getEntryValue("file", StringConfigEntry.class) + ".tmp");
         offlineUUIDs = block.getEntryValue("offlineUUIDs", BooleanConfigEntry.class);
 
         // Read auth handler file
@@ -98,7 +100,8 @@ public abstract class FileAuthHandler extends AuthHandler {
         lock.readLock().lock();
         try {
             LogHelper.info("Writing auth handler file (%d entries)", entryMap.size());
-            writeAuthFile();
+            writeAuthFileTmp();
+            IOHelper.move(fileTmp, file);
         } finally {
             lock.readLock().unlock();
         }
@@ -140,7 +143,7 @@ public abstract class FileAuthHandler extends AuthHandler {
     protected abstract void readAuthFile() throws IOException;
 
     @LauncherAPI
-    protected abstract void writeAuthFile() throws IOException;
+    protected abstract void writeAuthFileTmp() throws IOException;
 
     @LauncherAPI
     protected final void addAuth(UUID uuid, Entry entry) {

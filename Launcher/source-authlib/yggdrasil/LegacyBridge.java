@@ -69,8 +69,7 @@ public final class LegacyBridge {
         }
 
         // Join server
-        LogHelper.debug("LegacyBridge.joinServer, Username: '%s', Access token: %s, Server ID: %s",
-            username, accessToken, serverID);
+        LogHelper.debug("LegacyBridge.joinServer, Username: '%s', Access token: %s, Server ID: %s", username, accessToken, serverID);
         try {
             return new JoinServerRequest(username, accessToken, serverID).request() ? "OK" : "Bad Login (Clientside)";
         } catch (Exception e) {

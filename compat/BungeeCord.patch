@@ -3,7 +3,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- bootstrap/pom.xml	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
+--- bootstrap/pom.xml	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
 +++ bootstrap/pom.xml	(revision )
 @@ -57,7 +57,8 @@
                  <configuration>
@@ -20,14 +20,24 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
+--- proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
 +++ proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision )
-@@ -8,10 +8,13 @@
+@@ -2,6 +2,7 @@
+ 
+ import com.google.common.base.Charsets;
+ import com.google.common.base.Preconditions;
++import com.google.common.util.concurrent.ThreadFactoryBuilder;
+ import com.google.gson.Gson;
+ import java.math.BigInteger;
+ import java.net.InetAddress;
+@@ -9,10 +10,15 @@
  import java.net.URLEncoder;
  import java.security.MessageDigest;
  import java.util.List;
 +import java.util.Map;
  import java.util.UUID;
++import java.util.concurrent.ExecutorService;
++import java.util.concurrent.Executors;
  import java.util.concurrent.TimeUnit;
  import java.util.logging.Level;
  import javax.crypto.SecretKey;
@@ -36,7 +46,16 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
  import lombok.Getter;
  import lombok.RequiredArgsConstructor;
  import net.md_5.bungee.BungeeCord;
-@@ -261,7 +264,7 @@
+@@ -103,6 +109,8 @@
+     private boolean legacy;
+     @Getter
+     private String extraDataInHandshake = "";
++    private ExecutorService loginExecutor = Executors.newCachedThreadPool(new ThreadFactoryBuilder().
++        setNameFormat("Login Thread #%1$d").setDaemon(true).build());
+ 
+     @Override
+     public boolean shouldHandle(PacketWrapper packet) throws Exception
+@@ -263,7 +271,7 @@
          this.handshake = handshake;
          ch.setVersion( handshake.getProtocolVersion() );
  
@@ -45,14 +64,15 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
          // with Bungee's IP forwarding, so we detect it, and remove it from the host string, for now.
          // We know FML appends \00FML\00. However, we need to also consider that other systems might
          // add their own data to the end of the string. So, we just take everything from the \0 character
-@@ -402,35 +405,26 @@
+@@ -404,37 +412,27 @@
          {
              sha.update( bit );
          }
 -        String encodedHash = URLEncoder.encode( new BigInteger( sha.digest() ).toString( 16 ), "UTF-8" );
  
--        String authURL = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash;
--
+-        String preventProxy = ( ( BungeeCord.getInstance().config.isPreventProxyConnections() ) ? "&ip=" + URLEncoder.encode( getAddress().getAddress().getHostAddress(), "UTF-8" ) : "" );
+-        String authURL = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash + preventProxy;
+ 
 -        Callback<String> handler = new Callback<String>()
 -        {
 -            @Override
@@ -61,9 +81,10 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 -                if ( error == null )
 -                {
 -                    LoginResult obj = BungeeCord.getInstance().gson.fromJson( result, LoginResult.class );
--                    if ( obj != null )
+-                    if ( obj != null && obj.getId() != null )
 -                    {
 -                        loginProfile = obj;
+-                        name = obj.getName();
 -                        uniqueId = Util.getUUID( obj.getId() );
 -                        finish();
 -                        return;
@@ -75,7 +96,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 -                    bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with minecraft.net", error );
 +        final String username = InitialHandler.this.getName();
 +        final String serverID = new BigInteger(sha.digest()).toString(16);
-+        ch.getHandle().eventLoop().execute(() -> {
++        loginExecutor.submit(() -> {
 +            try {
 +                Map<String, String> properties = LegacyBridge.checkServerWithProperties(username, serverID);
 +                if(properties == null) { // Invalid username or serverID
@@ -103,7 +124,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
+--- bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
 +++ bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision )
 @@ -5,9 +5,9 @@
  
@@ -122,7 +143,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
+--- proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
 +++ proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision )
 @@ -1,5 +1,8 @@
  package net.md_5.bungee.connection;
@@ -133,8 +154,8 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
  import lombok.AllArgsConstructor;
  import lombok.Data;
  
-@@ -11,6 +14,17 @@
-     private String id;
+@@ -12,6 +15,17 @@
+     private String name;
      private Property[] properties;
  
 +    public LoginResult(Map<String, String> propertiesMap) {
@@ -156,7 +177,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- pom.xml	(revision 53cc3242e1d2786c34b2e138d233c4eeca8e3b1d)
+--- pom.xml	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
 +++ pom.xml	(revision )
 @@ -67,8 +67,8 @@
      <properties>
@@ -176,7 +197,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 +        <dependency>
 +            <groupId>launcher</groupId>
 +            <artifactId>clientside</artifactId>
-+            <version>13.4+</version>
++            <version>15.4+</version>
 +            <scope>system</scope>
 +            <systemPath>/full/path/to/Launcher.jar</systemPath>
 +        </dependency>

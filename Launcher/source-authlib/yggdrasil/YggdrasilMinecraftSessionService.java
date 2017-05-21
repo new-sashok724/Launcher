@@ -1,11 +1,15 @@
 package com.mojang.authlib.yggdrasil;
 
 import java.net.InetAddress;
+import java.util.Base64;
 import java.util.EnumMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
+import com.eclipsesource.json.Json;
+import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
+import com.google.common.collect.Iterables;
 import com.mojang.authlib.AuthenticationService;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
@@ -17,6 +21,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import launcher.client.ClientLauncher;
 import launcher.client.PlayerProfile;
+import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.auth.CheckServerRequest;
@@ -69,21 +74,25 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
         // Add textures
         if (!NO_TEXTURES) {
             // Add skin URL to textures map
-            Iterator<Property> skinURL = profile.getProperties().get(ClientLauncher.SKIN_URL_PROPERTY).iterator();
-            Iterator<Property> skinHash = profile.getProperties().get(ClientLauncher.SKIN_DIGEST_PROPERTY).iterator();
-            if (skinURL.hasNext() && skinHash.hasNext()) {
-                String urlValue = skinURL.next().getValue();
-                String hashValue = skinHash.next().getValue();
-                textures.put(Type.SKIN, new MinecraftProfileTexture(urlValue, hashValue));
+            Property skinURL = Iterables.getFirst(profile.getProperties().get(ClientLauncher.SKIN_URL_PROPERTY), null);
+            Property skinDigest = Iterables.getFirst(profile.getProperties().get(ClientLauncher.SKIN_DIGEST_PROPERTY), null);
+            if (skinURL != null && skinDigest != null) {
+                textures.put(Type.SKIN, new MinecraftProfileTexture(skinURL.getValue(), skinDigest.getValue()));
             }
 
             // Add cloak URL to textures map
-            Iterator<Property> cloakURL = profile.getProperties().get(ClientLauncher.CLOAK_URL_PROPERTY).iterator();
-            Iterator<Property> cloakHash = profile.getProperties().get(ClientLauncher.CLOAK_DIGEST_PROPERTY).iterator();
-            if (cloakURL.hasNext() && cloakHash.hasNext()) {
-                String urlValue = cloakURL.next().getValue();
-                String hashValue = cloakHash.next().getValue();
-                textures.put(Type.CAPE, new MinecraftProfileTexture(urlValue, hashValue));
+            Property cloakURL = Iterables.getFirst(profile.getProperties().get(ClientLauncher.CLOAK_URL_PROPERTY), null);
+            Property cloakDigest = Iterables.getFirst(profile.getProperties().get(ClientLauncher.CLOAK_DIGEST_PROPERTY), null);
+            if (cloakURL != null && cloakDigest != null) {
+                textures.put(Type.CAPE, new MinecraftProfileTexture(cloakURL.getValue(), cloakDigest.getValue()));
+            }
+
+            // Try to find missing textures in textures payload (now always true because launcher is not passing elytra skins)
+            if (textures.size() != MinecraftProfileTexture.PROFILE_TEXTURE_COUNT) {
+                Property texturesMojang = Iterables.getFirst(profile.getProperties().get("textures"), null);
+                if (texturesMojang != null) {
+                    getTexturesMojang(textures, texturesMojang.getValue(), profile.getName());
+                }
             }
         }
 
@@ -162,5 +171,34 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
         GameProfile profile = new GameProfile(pp.uuid, pp.username);
         fillTextureProperties(profile, pp);
         return profile;
+    }
+
+    private static void getTexturesMojang(Map<Type, MinecraftProfileTexture> textures, String texturesBase64, String username) {
+        // Decode textures payload
+        JsonObject texturesJSON;
+        try {
+            byte[] decoded = Base64.getDecoder().decode(texturesBase64);
+            texturesJSON = Json.parse(new String(decoded, IOHelper.UNICODE_CHARSET)).asObject().
+                get("textures").asObject();
+        } catch (Exception ignored) {
+            LogHelper.error("Could not decode textures payload, username: '%s'", username);
+            return;
+        }
+
+        // Fetch textures from textures JSON
+        for (Type type : MinecraftProfileTexture.PROFILE_TEXTURE_TYPES) {
+            if (textures.containsKey(type)) {
+                continue; // Overriden by launcher
+            }
+
+            // Get texture from JSON
+            JsonValue textureJSON = texturesJSON.get(type.name());
+            if (textureJSON != null && textureJSON.isObject()) {
+                JsonValue urlValue = textureJSON.asObject().get("url");
+                if (urlValue.isString()) {
+                    textures.put(type, new MinecraftProfileTexture(urlValue.asString()));
+                }
+            }
+        }
     }
 }

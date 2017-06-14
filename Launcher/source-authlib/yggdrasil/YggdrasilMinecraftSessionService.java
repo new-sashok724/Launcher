@@ -178,8 +178,7 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
         JsonObject texturesJSON;
         try {
             byte[] decoded = Base64.getDecoder().decode(texturesBase64);
-            texturesJSON = Json.parse(new String(decoded, IOHelper.UNICODE_CHARSET)).asObject().
-                get("textures").asObject();
+            texturesJSON = Json.parse(new String(decoded, IOHelper.UNICODE_CHARSET)).asObject().get("textures").asObject();
         } catch (Exception ignored) {
             LogHelper.error("Could not decode textures payload, username: '%s'", username);
             return;

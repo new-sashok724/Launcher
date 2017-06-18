@@ -115,7 +115,7 @@ public abstract class CachedAuthHandler extends AuthHandler {
         return entry;
     }
 
-    public final class Entry {
+    public static final class Entry {
         @LauncherAPI public final UUID uuid;
         private String username;
         private String accessToken;

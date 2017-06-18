@@ -221,7 +221,7 @@ public final class UpdateRequest extends Request<SignedObjectHolder<HashedDir>> 
         }
     }
 
-    private void fillActionsQueue(Queue<Action> queue, HashedDir mismatch) {
+    private static void fillActionsQueue(Queue<Action> queue, HashedDir mismatch) {
         for (Entry<String, HashedEntry> mapEntry : mismatch.map().entrySet()) {
             String name = mapEntry.getKey();
             HashedEntry entry = mapEntry.getValue();

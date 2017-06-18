@@ -40,8 +40,8 @@ public final class LegacyBridge {
             properties.put(ClientLauncher.SKIN_DIGEST_PROPERTY, SecurityHelper.toHex(pp.skin.digest));
         }
         if (pp.cloak != null) {
-            properties.put(ClientLauncher.SKIN_URL_PROPERTY, pp.cloak.url);
-            properties.put(ClientLauncher.SKIN_DIGEST_PROPERTY, SecurityHelper.toHex(pp.cloak.digest));
+            properties.put(ClientLauncher.CLOAK_URL_PROPERTY, pp.cloak.url);
+            properties.put(ClientLauncher.CLOAK_DIGEST_PROPERTY, SecurityHelper.toHex(pp.cloak.digest));
         }
 
         // We're done

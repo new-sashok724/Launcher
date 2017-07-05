@@ -312,6 +312,7 @@ public final class ClientLauncher {
         // Resolve main class and method
         Class<?> mainClass = Class.forName(profile.getMainClass());
         Method mainMethod = mainClass.getDeclaredMethod("main", String[].class);
+        mainMethod.setAccessible(true);
 
         // Invoke main method with exception wrapping
         LAUNCHED.set(true);

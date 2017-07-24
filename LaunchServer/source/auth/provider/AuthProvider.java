@@ -1,15 +1,15 @@
 package launchserver.auth.provider;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launchserver.auth.AuthException;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AuthProvider extends ConfigObject implements AutoCloseable {
     private static final Map<String, Adapter<AuthProvider>> AUTH_PROVIDERS = new ConcurrentHashMap<>(8);
@@ -53,5 +53,6 @@ public abstract class AuthProvider extends ConfigObject implements AutoCloseable
         registerProvider("mysql", MySQLAuthProvider::new);
         registerProvider("file", FileAuthProvider::new);
         registerProvider("request", RequestAuthProvider::new);
+        registerProvider("postgresql", PostgreSQLAuthProvider::new);
     }
 }

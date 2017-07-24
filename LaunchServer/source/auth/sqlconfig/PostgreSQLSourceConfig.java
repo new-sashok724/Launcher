@@ -17,11 +17,11 @@ import java.sql.SQLException;
 public final class PostgreSQLSourceConfig extends ConfigObject implements AutoCloseable, SQLSourceConfig {
     @LauncherAPI
     public static final int TIMEOUT = VerifyHelper.verifyInt(
-            Integer.parseUnsignedInt(System.getProperty("launcher.mysql.idleTimeout", Integer.toString(5000))),
-            VerifyHelper.POSITIVE, "launcher.mysql.idleTimeout can't be <= 5000");
+            Integer.parseUnsignedInt(System.getProperty("launcher.postgresql.idleTimeout", Integer.toString(5000))),
+            VerifyHelper.POSITIVE, "launcher.postgresql.idleTimeout can't be <= 5000");
     private static final int MAX_POOL_SIZE = VerifyHelper.verifyInt(
-            Integer.parseUnsignedInt(System.getProperty("launcher.mysql.maxPoolSize", Integer.toString(3))),
-            VerifyHelper.POSITIVE, "launcher.mysql.maxPoolSize can't be <= 0");
+            Integer.parseUnsignedInt(System.getProperty("launcher.postgresql.maxPoolSize", Integer.toString(3))),
+            VerifyHelper.POSITIVE, "launcher.postgresql.maxPoolSize can't be <= 0");
 
     // Instance
     private final String poolName;
@@ -42,14 +42,14 @@ public final class PostgreSQLSourceConfig extends ConfigObject implements AutoCl
         super(block);
         this.poolName = poolName;
         address = VerifyHelper.verify(block.getEntryValue("address", StringConfigEntry.class),
-                VerifyHelper.NOT_EMPTY, "MySQL address can't be empty");
+                VerifyHelper.NOT_EMPTY, "PostgreSQL address can't be empty");
         port = VerifyHelper.verifyInt(block.getEntryValue("port", IntegerConfigEntry.class),
                 VerifyHelper.range(0, 65535), "Illegal MySQL port");
         username = VerifyHelper.verify(block.getEntryValue("username", StringConfigEntry.class),
-                VerifyHelper.NOT_EMPTY, "MySQL username can't be empty");
+                VerifyHelper.NOT_EMPTY, "PostgreSQL username can't be empty");
         password = block.getEntryValue("password", StringConfigEntry.class);
         database = VerifyHelper.verify(block.getEntryValue("database", StringConfigEntry.class),
-                VerifyHelper.NOT_EMPTY, "MySQL database can't be empty");
+                VerifyHelper.NOT_EMPTY, "PostgreSQL database can't be empty");
 
         // Password shouldn't be verified
     }

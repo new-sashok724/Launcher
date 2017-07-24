@@ -5,28 +5,28 @@ import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.BooleanConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
-import launchserver.auth.sqlconfig.MySQLSourceConfig;
+import launchserver.auth.sqlconfig.PostgreSQLSourceConfig;
 
 import java.io.IOException;
 import java.sql.*;
 import java.util.UUID;
 
-public class MySQLAuthHandler extends CachedAuthHandler {
-    private final MySQLSourceConfig mySQLHolder;
+public final class PostgreSQLAuthHandler extends CachedAuthHandler {
+    private final PostgreSQLSourceConfig postgreSQLHolder;
     private final String uuidColumn;
     private final String usernameColumn;
     private final String accessTokenColumn;
     private final String serverIDColumn;
 
-    // Prepared SQL queries
+
     private final String queryByUUIDSQL;
     private final String queryByUsernameSQL;
     private final String updateAuthSQL;
     private final String updateServerIDSQL;
 
-    MySQLAuthHandler(BlockConfigEntry block) {
+    PostgreSQLAuthHandler(BlockConfigEntry block) {
         super(block);
-        mySQLHolder = new MySQLSourceConfig("authHandlerPool", block);
+        postgreSQLHolder = new PostgreSQLSourceConfig("authHandlerPool", block);
 
         // Read query params
         String table = VerifyHelper.verifyIDName(
@@ -55,7 +55,7 @@ public class MySQLAuthHandler extends CachedAuthHandler {
             LogHelper.info("Fetching all AuthHandler entries");
             String query = String.format("SELECT %s, %s, %s, %s FROM %s",
                     uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table);
-            try (Connection c = mySQLHolder.getConnection(); Statement statement = c.createStatement();
+            try (Connection c = postgreSQLHolder.getConnection(); Statement statement = c.createStatement();
                  ResultSet set = statement.executeQuery(query)) {
                 for (Entry entry = constructEntry(set); entry != null; entry = constructEntry(set)) {
                     addEntry(entry);
@@ -68,7 +68,12 @@ public class MySQLAuthHandler extends CachedAuthHandler {
 
     @Override
     public void close() {
-        mySQLHolder.close();
+        postgreSQLHolder.close();
+    }
+
+    private Entry constructEntry(ResultSet set) throws SQLException {
+        return set.next() ? new Entry(UUID.fromString(set.getString(uuidColumn)),
+                set.getString(usernameColumn), set.getString(accessTokenColumn), set.getString(serverIDColumn)) : null;
     }
 
     @Override
@@ -83,13 +88,14 @@ public class MySQLAuthHandler extends CachedAuthHandler {
 
     @Override
     protected boolean updateAuth(UUID uuid, String username, String accessToken) throws IOException {
-        try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(updateAuthSQL)) {
+        try (Connection c = postgreSQLHolder.getConnection();
+             PreparedStatement s = c.prepareStatement(updateAuthSQL)) {
             s.setString(1, username); // Username case
             s.setString(2, accessToken);
             s.setString(3, uuid.toString());
 
             // Execute update
-            s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
+            s.setQueryTimeout(PostgreSQLSourceConfig.TIMEOUT);
             return s.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new IOException(e);
@@ -98,29 +104,26 @@ public class MySQLAuthHandler extends CachedAuthHandler {
 
     @Override
     protected boolean updateServerID(UUID uuid, String serverID) throws IOException {
-        try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(updateServerIDSQL)) {
+        try (Connection c = postgreSQLHolder.getConnection();
+             PreparedStatement s = c.prepareStatement(updateServerIDSQL)) {
             s.setString(1, serverID);
             s.setString(2, uuid.toString());
 
             // Execute update
-            s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
+            s.setQueryTimeout(PostgreSQLSourceConfig.TIMEOUT);
             return s.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new IOException(e);
         }
     }
 
-    private Entry constructEntry(ResultSet set) throws SQLException {
-        return set.next() ? new Entry(UUID.fromString(set.getString(uuidColumn)), set.getString(usernameColumn),
-                set.getString(accessTokenColumn), set.getString(serverIDColumn)) : null;
-    }
-
     private Entry query(String sql, String value) throws IOException {
-        try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(sql)) {
+        try (Connection c = postgreSQLHolder.getConnection();
+             PreparedStatement s = c.prepareStatement(sql)) {
             s.setString(1, value);
 
             // Execute query
-            s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
+            s.setQueryTimeout(PostgreSQLSourceConfig.TIMEOUT);
             try (ResultSet set = s.executeQuery()) {
                 return constructEntry(set);
             }
@@ -129,3 +132,4 @@ public class MySQLAuthHandler extends CachedAuthHandler {
         }
     }
 }
+

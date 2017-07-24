@@ -1,8 +1,4 @@
-package launchserver.auth;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
+package launchserver.auth.sqlconfig;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import com.zaxxer.hikari.HikariDataSource;
@@ -14,7 +10,11 @@ import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 
-public final class MySQLSourceConfig extends ConfigObject implements AutoCloseable {
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+public final class MySQLSourceConfig extends ConfigObject implements AutoCloseable, SQLSourceConfig {
     @LauncherAPI public static final int TIMEOUT = VerifyHelper.verifyInt(
         Integer.parseUnsignedInt(System.getProperty("launcher.mysql.idleTimeout", Integer.toString(5000))),
         VerifyHelper.POSITIVE, "launcher.mysql.idleTimeout can't be <= 5000");

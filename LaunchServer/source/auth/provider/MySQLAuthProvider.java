@@ -1,24 +1,24 @@
 package launchserver.auth.provider;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import launcher.helper.CommonHelper;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.ListConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 import launchserver.auth.AuthException;
-import launchserver.auth.MySQLSourceConfig;
+import launchserver.auth.sqlconfig.MySQLSourceConfig;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public final class MySQLAuthProvider extends AuthProvider {
     private final MySQLSourceConfig mySQLHolder;
     private final String query;
     private final String[] queryParams;
 
-    public MySQLAuthProvider(BlockConfigEntry block) {
+    MySQLAuthProvider(BlockConfigEntry block) {
         super(block);
         mySQLHolder = new MySQLSourceConfig("authProviderPool", block);
 

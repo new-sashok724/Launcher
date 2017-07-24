@@ -1,50 +1,10 @@
 package launchserver;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.URL;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.security.KeyPair;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.security.spec.InvalidKeySpecException;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.CRC32;
-import javax.script.Bindings;
-import javax.script.Invocable;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
-
 import launcher.Launcher;
 import launcher.LauncherAPI;
 import launcher.client.ClientProfile;
 import launcher.hasher.HashedDir;
-import launcher.helper.CommonHelper;
-import launcher.helper.IOHelper;
-import launcher.helper.JVMHelper;
-import launcher.helper.LogHelper;
-import launcher.helper.SecurityHelper;
-import launcher.helper.VerifyHelper;
+import launcher.helper.*;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.TextConfigReader;
 import launcher.serialize.config.TextConfigWriter;
@@ -54,11 +14,11 @@ import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 import launcher.serialize.signed.SignedObjectHolder;
 import launchserver.auth.AuthException;
-import launchserver.auth.MySQLSourceConfig;
 import launchserver.auth.handler.AuthHandler;
 import launchserver.auth.handler.CachedAuthHandler;
 import launchserver.auth.handler.FileAuthHandler;
 import launchserver.auth.provider.AuthProvider;
+import launchserver.auth.sqlconfig.MySQLSourceConfig;
 import launchserver.binary.EXEL4JLauncherBinary;
 import launchserver.binary.EXELauncherBinary;
 import launchserver.binary.JARLauncherBinary;
@@ -74,28 +34,62 @@ import launchserver.response.ServerSocketHandler;
 import launchserver.response.ServerSocketHandler.Listener;
 import launchserver.texture.TextureProvider;
 
+import javax.script.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.URL;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.security.KeyPair;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.CRC32;
+
 public final class LaunchServer implements Runnable, AutoCloseable {
     // Constant paths
-    @LauncherAPI public final Path dir;
-    @LauncherAPI public final Path configFile;
-    @LauncherAPI public final Path publicKeyFile;
-    @LauncherAPI public final Path privateKeyFile;
-    @LauncherAPI public final Path updatesDir;
-    @LauncherAPI public final Path profilesDir;
+    @LauncherAPI
+    public final Path dir;
+    @LauncherAPI
+    public final Path configFile;
+    @LauncherAPI
+    public final Path publicKeyFile;
+    @LauncherAPI
+    public final Path privateKeyFile;
+    @LauncherAPI
+    public final Path updatesDir;
+    @LauncherAPI
+    public final Path profilesDir;
 
     // Server config
-    @LauncherAPI public final Config config;
-    @LauncherAPI public final RSAPublicKey publicKey;
-    @LauncherAPI public final RSAPrivateKey privateKey;
-    @LauncherAPI public final boolean portable;
+    @LauncherAPI
+    public final Config config;
+    @LauncherAPI
+    public final RSAPublicKey publicKey;
+    @LauncherAPI
+    public final RSAPrivateKey privateKey;
+    @LauncherAPI
+    public final boolean portable;
 
     // Launcher binary
-    @LauncherAPI public final LauncherBinary launcherBinary;
-    @LauncherAPI public final LauncherBinary launcherEXEBinary;
+    @LauncherAPI
+    public final LauncherBinary launcherBinary;
+    @LauncherAPI
+    public final LauncherBinary launcherEXEBinary;
 
     // Server
-    @LauncherAPI public final CommandHandler commandHandler;
-    @LauncherAPI public final ServerSocketHandler serverSocketHandler;
+    @LauncherAPI
+    public final CommandHandler commandHandler;
+    @LauncherAPI
+    public final ServerSocketHandler serverSocketHandler;
     private final AtomicBoolean started = new AtomicBoolean(false);
     private final ScriptEngine engine = CommonHelper.newScriptEngine();
 
@@ -450,16 +444,22 @@ public final class LaunchServer implements Runnable, AutoCloseable {
     }
 
     public static final class Config extends ConfigObject {
-        @LauncherAPI public final int port;
+        @LauncherAPI
+        public final int port;
 
         // Handlers & Providers
-        @LauncherAPI public final AuthHandler authHandler;
-        @LauncherAPI public final AuthProvider authProvider;
-        @LauncherAPI public final TextureProvider textureProvider;
+        @LauncherAPI
+        public final AuthHandler authHandler;
+        @LauncherAPI
+        public final AuthProvider authProvider;
+        @LauncherAPI
+        public final TextureProvider textureProvider;
 
         // Misc options
-        @LauncherAPI public final boolean launch4J;
-        @LauncherAPI public final boolean compress;
+        @LauncherAPI
+        public final boolean launch4J;
+        @LauncherAPI
+        public final boolean compress;
         private final StringConfigEntry address;
         private final String bindAddress;
 
@@ -467,17 +467,17 @@ public final class LaunchServer implements Runnable, AutoCloseable {
             super(block);
             address = block.getEntry("address", StringConfigEntry.class);
             port = VerifyHelper.verifyInt(block.getEntryValue("port", IntegerConfigEntry.class),
-                VerifyHelper.range(0, 65535), "Illegal LaunchServer port");
+                    VerifyHelper.range(0, 65535), "Illegal LaunchServer port");
             bindAddress = block.hasEntry("bindAddress") ?
-                block.getEntryValue("bindAddress", StringConfigEntry.class) : getAddress();
+                    block.getEntryValue("bindAddress", StringConfigEntry.class) : getAddress();
 
             // Set handlers & providers
             authHandler = AuthHandler.newHandler(block.getEntryValue("authHandler", StringConfigEntry.class),
-                block.getEntry("authHandlerConfig", BlockConfigEntry.class));
+                    block.getEntry("authHandlerConfig", BlockConfigEntry.class));
             authProvider = AuthProvider.newProvider(block.getEntryValue("authProvider", StringConfigEntry.class),
-                block.getEntry("authProviderConfig", BlockConfigEntry.class));
+                    block.getEntry("authProviderConfig", BlockConfigEntry.class));
             textureProvider = TextureProvider.newProvider(block.getEntryValue("textureProvider", StringConfigEntry.class),
-                block.getEntry("textureProviderConfig", BlockConfigEntry.class));
+                    block.getEntry("textureProviderConfig", BlockConfigEntry.class));
 
             // Set misc config
             launch4J = block.getEntryValue("launch4J", BooleanConfigEntry.class);

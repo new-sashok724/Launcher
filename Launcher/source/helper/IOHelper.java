@@ -1,49 +1,17 @@
 package launcher.helper;
 
+import launcher.Launcher;
+import launcher.LauncherAPI;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.EOFException;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.SocketException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
+import java.io.*;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.CopyOption;
-import java.nio.file.DirectoryStream;
+import java.nio.file.*;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.FileVisitOption;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.LinkOption;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.OpenOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.Set;
@@ -53,47 +21,54 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-
-import launcher.Launcher;
-import launcher.LauncherAPI;
 
 public final class IOHelper {
     // Charset
-    @LauncherAPI public static final Charset UNICODE_CHARSET = StandardCharsets.UTF_8;
-    @LauncherAPI public static final Charset ASCII_CHARSET = StandardCharsets.US_ASCII;
+    @LauncherAPI
+    public static final Charset UNICODE_CHARSET = StandardCharsets.UTF_8;
+    @LauncherAPI
+    public static final Charset ASCII_CHARSET = StandardCharsets.US_ASCII;
 
     // Constants
-    @LauncherAPI public static final int SOCKET_TIMEOUT = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.socketTimeout", Integer.toString(30000))),
-        VerifyHelper.POSITIVE, "launcher.socketTimeout can't be <= 0");
-    @LauncherAPI public static final int HTTP_TIMEOUT = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
-        VerifyHelper.POSITIVE, "launcher.httpTimeout can't be <= 0");
-    @LauncherAPI public static final int BUFFER_SIZE = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(4096))),
-        VerifyHelper.POSITIVE, "launcher.bufferSize can't be <= 0");
+    @LauncherAPI
+    public static final int SOCKET_TIMEOUT = VerifyHelper.verifyInt(
+            Integer.parseUnsignedInt(System.getProperty("launcher.socketTimeout", Integer.toString(30000))),
+            VerifyHelper.POSITIVE, "launcher.socketTimeout can't be <= 0");
+    @LauncherAPI
+    public static final int HTTP_TIMEOUT = VerifyHelper.verifyInt(
+            Integer.parseUnsignedInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
+            VerifyHelper.POSITIVE, "launcher.httpTimeout can't be <= 0");
+    @LauncherAPI
+    public static final int BUFFER_SIZE = VerifyHelper.verifyInt(
+            Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(4096))),
+            VerifyHelper.POSITIVE, "launcher.bufferSize can't be <= 0");
 
     // Platform-dependent
-    @LauncherAPI public static final String CROSS_SEPARATOR = "/";
-    @LauncherAPI public static final FileSystem FS = FileSystems.getDefault();
-    @LauncherAPI public static final String PLATFORM_SEPARATOR = FS.getSeparator();
-    @LauncherAPI public static final boolean POSIX = FS.supportedFileAttributeViews().contains("posix");
+    @LauncherAPI
+    public static final String CROSS_SEPARATOR = "/";
+    @LauncherAPI
+    public static final FileSystem FS = FileSystems.getDefault();
+    @LauncherAPI
+    public static final String PLATFORM_SEPARATOR = FS.getSeparator();
+    @LauncherAPI
+    public static final boolean POSIX = FS.supportedFileAttributeViews().contains("posix");
 
     // Paths
-    @LauncherAPI public static final Path JVM_DIR = Paths.get(System.getProperty("java.home"));
-    @LauncherAPI public static final Path HOME_DIR = Paths.get(System.getProperty("user.home"));
-    @LauncherAPI public static final Path WORKING_DIR = Paths.get(System.getProperty("user.dir"));
+    @LauncherAPI
+    public static final Path JVM_DIR = Paths.get(System.getProperty("java.home"));
+    @LauncherAPI
+    public static final Path HOME_DIR = Paths.get(System.getProperty("user.home"));
+    @LauncherAPI
+    public static final Path WORKING_DIR = Paths.get(System.getProperty("user.dir"));
 
     // Open options - as arrays
-    private static final OpenOption[] READ_OPTIONS = { StandardOpenOption.READ };
-    private static final OpenOption[] WRITE_OPTIONS = { StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING };
-    private static final OpenOption[] APPEND_OPTIONS = { StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND };
+    private static final OpenOption[] READ_OPTIONS = {StandardOpenOption.READ};
+    private static final OpenOption[] WRITE_OPTIONS = {StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING};
+    private static final OpenOption[] APPEND_OPTIONS = {StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND};
 
     // Other options
     private static final LinkOption[] LINK_OPTIONS = {};
-    private static final CopyOption[] COPY_OPTIONS = { StandardCopyOption.REPLACE_EXISTING };
+    private static final CopyOption[] COPY_OPTIONS = {StandardCopyOption.REPLACE_EXISTING};
     private static final Set<FileVisitOption> WALK_OPTIONS = Collections.singleton(FileVisitOption.FOLLOW_LINKS);
 
     // Other constants
@@ -210,7 +185,7 @@ public final class IOHelper {
     @LauncherAPI
     public static boolean isValidFileName(String fileName) {
         return !fileName.equals(".") && !fileName.equals("..") &&
-            fileName.chars().noneMatch(ch -> ch == '/' || ch == '\\') && isValidPath(fileName);
+                fileName.chars().noneMatch(ch -> ch == '/' || ch == '\\') && isValidPath(fileName);
     }
 
     @LauncherAPI
@@ -226,7 +201,7 @@ public final class IOHelper {
     @LauncherAPI
     public static boolean isValidTextureBounds(int width, int height, boolean cloak) {
         return width % 64 == 0 && (height << 1 == width || !cloak && height == width) && width <= 1024 ||
-            cloak && width % 22 == 0 && height % 17 == 0 && width / 22 == height / 17;
+                cloak && width % 22 == 0 && height % 17 == 0 && width / 22 == height / 17;
     }
 
     @LauncherAPI
@@ -613,7 +588,7 @@ public final class IOHelper {
     @LauncherAPI
     public static BufferedImage verifyTexture(BufferedImage skin, boolean cloak) {
         return VerifyHelper.verify(skin, i -> isValidTextureBounds(i.getWidth(), i.getHeight(), cloak),
-            String.format("Invalid texture bounds: %dx%d", skin.getWidth(), skin.getHeight()));
+                String.format("Invalid texture bounds: %dx%d", skin.getWidth(), skin.getHeight()));
     }
 
     @LauncherAPI
@@ -622,6 +597,15 @@ public final class IOHelper {
             new URL(url).toURI();
             return url;
         } catch (MalformedURLException | URISyntaxException e) {
+            throw new IllegalArgumentException("Invalid URL", e);
+        }
+    }
+
+    @LauncherAPI
+    public static URL convertToURL(String url) {
+        try {
+            return new URL(url);
+        } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid URL", e);
         }
     }

@@ -75,6 +75,8 @@ public final class PostgreSQLSourceConfig extends ConfigObject implements AutoCl
 
             // Try using HikariCP
             source = postgresqlSource;
+
+            //noinspection Duplicates
             try {
                 Class.forName("com.zaxxer.hikari.HikariDataSource");
                 hikari = true; // Used for shutdown. Not instanceof because of possible classpath error

@@ -89,6 +89,8 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
 
             // Try using HikariCP
             source = mysqlSource;
+
+            //noinspection Duplicates
             try {
                 Class.forName("com.zaxxer.hikari.HikariDataSource");
                 hikari = true; // Used for shutdown. Not instanceof because of possible classpath error

@@ -1,12 +1,5 @@
 package launcher.client;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Objects;
-import java.util.UUID;
-
 import launcher.LauncherAPI;
 import launcher.helper.IOHelper;
 import launcher.helper.SecurityHelper;
@@ -15,6 +8,13 @@ import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.HOutput;
 import launcher.serialize.stream.StreamObject;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Objects;
+import java.util.UUID;
 
 public final class PlayerProfile extends StreamObject {
     @LauncherAPI public final UUID uuid;

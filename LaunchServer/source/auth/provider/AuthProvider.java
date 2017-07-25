@@ -54,5 +54,6 @@ public abstract class AuthProvider extends ConfigObject implements AutoCloseable
         registerProvider("file", FileAuthProvider::new);
         registerProvider("request", RequestAuthProvider::new);
         registerProvider("postgresql", PostgreSQLAuthProvider::new);
+        registerProvider("json", JsonAuthProvider::new);
     }
 }

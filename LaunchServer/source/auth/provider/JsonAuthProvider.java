@@ -4,6 +4,7 @@ import com.eclipsesource.json.Json;
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import launcher.helper.IOHelper;
+import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 
@@ -27,10 +28,14 @@ public final class JsonAuthProvider extends AuthProvider {
     JsonAuthProvider(BlockConfigEntry block) {
         super(block);
         String configUrl = block.getEntryValue("url", StringConfigEntry.class);
-        userKeyName = block.getEntryValue("userKeyName", StringConfigEntry.class);
-        passKeyName = block.getEntryValue("passKeyName", StringConfigEntry.class);
-        responseUserKeyName = block.getEntryValue("responseUserKeyName", StringConfigEntry.class);
-        responseErrorKeyName = block.getEntryValue("responseErrorKeyName", StringConfigEntry.class);
+        userKeyName = VerifyHelper.verify(block.getEntryValue("userKeyName", StringConfigEntry.class),
+                VerifyHelper.NOT_EMPTY, "Username key name can't be empty");
+        passKeyName = VerifyHelper.verify(block.getEntryValue("passKeyName", StringConfigEntry.class),
+                VerifyHelper.NOT_EMPTY, "Password key name can't be empty");
+        responseUserKeyName = VerifyHelper.verify(block.getEntryValue("responseUserKeyName", StringConfigEntry.class),
+                VerifyHelper.NOT_EMPTY, "Response username key can't be empty");
+        responseErrorKeyName = VerifyHelper.verify(block.getEntryValue("responseErrorKeyName", StringConfigEntry.class),
+                VerifyHelper.NOT_EMPTY, "Response error key can't be empty");
         url = IOHelper.convertToURL(configUrl);
     }
 

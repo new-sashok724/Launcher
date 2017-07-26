@@ -44,7 +44,7 @@ public final class PostgreSQLSourceConfig extends ConfigObject implements AutoCl
         address = VerifyHelper.verify(block.getEntryValue("address", StringConfigEntry.class),
                 VerifyHelper.NOT_EMPTY, "PostgreSQL address can't be empty");
         port = VerifyHelper.verifyInt(block.getEntryValue("port", IntegerConfigEntry.class),
-                VerifyHelper.range(0, 65535), "Illegal MySQL port");
+                VerifyHelper.range(0, 65535), "Illegal PostgreSQL port");
         username = VerifyHelper.verify(block.getEntryValue("username", StringConfigEntry.class),
                 VerifyHelper.NOT_EMPTY, "PostgreSQL username can't be empty");
         password = block.getEntryValue("password", StringConfigEntry.class);

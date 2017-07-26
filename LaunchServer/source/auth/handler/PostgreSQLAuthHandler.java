@@ -6,6 +6,7 @@ import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.BooleanConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 import launchserver.auth.sqlconfig.PostgreSQLSourceConfig;
+import org.postgresql.util.PGobject;
 
 import java.io.IOException;
 import java.sql.*;
@@ -41,13 +42,13 @@ public final class PostgreSQLAuthHandler extends CachedAuthHandler {
                 block.getEntryValue("serverIDColumn", StringConfigEntry.class));
 
         // Prepare SQL queries
-        queryByUUIDSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=? LIMIT 1",
+        queryByUUIDSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=?",
                 uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table, uuidColumn);
-        queryByUsernameSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=? LIMIT 1",
+        queryByUsernameSQL = String.format("SELECT %s, %s, %s, %s FROM %s WHERE %s=?",
                 uuidColumn, usernameColumn, accessTokenColumn, serverIDColumn, table, usernameColumn);
-        updateAuthSQL = String.format("UPDATE %s SET %s=?, %s=?, %s=NULL WHERE %s=? LIMIT 1",
+        updateAuthSQL = String.format("UPDATE %s SET %s=?, %s=?, %s=NULL WHERE %s=?",
                 table, usernameColumn, accessTokenColumn, serverIDColumn, uuidColumn);
-        updateServerIDSQL = String.format("UPDATE %s SET %s=? WHERE %s=? LIMIT 1",
+        updateServerIDSQL = String.format("UPDATE %s SET %s=? WHERE %s=?",
                 table, serverIDColumn, uuidColumn);
 
         // Fetch all entries
@@ -83,7 +84,7 @@ public final class PostgreSQLAuthHandler extends CachedAuthHandler {
 
     @Override
     protected Entry fetchEntry(UUID uuid) throws IOException {
-        return query(queryByUUIDSQL, uuid.toString());
+        return query(queryByUUIDSQL, uuid);
     }
 
     @Override
@@ -92,7 +93,11 @@ public final class PostgreSQLAuthHandler extends CachedAuthHandler {
              PreparedStatement s = c.prepareStatement(updateAuthSQL)) {
             s.setString(1, username); // Username case
             s.setString(2, accessToken);
-            s.setString(3, uuid.toString());
+
+            PGobject uuidObject = new PGobject();
+            uuidObject.setType("uuid");
+            uuidObject.setValue(uuid.toString());
+            s.setObject(3, uuidObject);
 
             // Execute update
             s.setQueryTimeout(PostgreSQLSourceConfig.TIMEOUT);
@@ -107,7 +112,11 @@ public final class PostgreSQLAuthHandler extends CachedAuthHandler {
         try (Connection c = postgreSQLHolder.getConnection();
              PreparedStatement s = c.prepareStatement(updateServerIDSQL)) {
             s.setString(1, serverID);
-            s.setString(2, uuid.toString());
+
+            PGobject uuidObject = new PGobject();
+            uuidObject.setType("uuid");
+            uuidObject.setValue(uuid.toString());
+            s.setObject(2, uuidObject);
 
             // Execute update
             s.setQueryTimeout(PostgreSQLSourceConfig.TIMEOUT);
@@ -121,6 +130,25 @@ public final class PostgreSQLAuthHandler extends CachedAuthHandler {
         try (Connection c = postgreSQLHolder.getConnection();
              PreparedStatement s = c.prepareStatement(sql)) {
             s.setString(1, value);
+
+            // Execute query
+            s.setQueryTimeout(PostgreSQLSourceConfig.TIMEOUT);
+            try (ResultSet set = s.executeQuery()) {
+                return constructEntry(set);
+            }
+        } catch (SQLException e) {
+            throw new IOException(e);
+        }
+    }
+
+    private Entry query(String sql, UUID value) throws IOException {
+        try (Connection c = postgreSQLHolder.getConnection();
+             PreparedStatement s = c.prepareStatement(sql)) {
+            PGobject uuidObject = new PGobject();
+            uuidObject.setType("uuid");
+            uuidObject.setValue(value.toString());
+
+            s.setObject(1, uuidObject);
 
             // Execute query
             s.setQueryTimeout(PostgreSQLSourceConfig.TIMEOUT);

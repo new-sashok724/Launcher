@@ -57,7 +57,14 @@ public final class JsonAuthProvider extends AuthProvider {
         writer.flush();
         writer.close();
 
-        InputStreamReader reader = new InputStreamReader(connection.getInputStream(), "UTF-8");
+        InputStreamReader reader;
+        int statusCode = connection.getResponseCode();
+
+        if (200 <= statusCode && statusCode < 300) {
+            reader = new InputStreamReader(connection.getInputStream(), "UTF-8");
+        } else {
+            reader = new InputStreamReader(connection.getErrorStream(), "UTF-8");
+        }
 
         JsonValue content = Json.parse(reader);
         if (!content.isObject()) {

@@ -6,10 +6,10 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.UUID;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
 import com.google.common.collect.Iterables;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.mojang.authlib.AuthenticationService;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.exceptions.AuthenticationException;
@@ -29,6 +29,7 @@ import launcher.request.auth.JoinServerRequest;
 import launcher.request.uuid.ProfileByUUIDRequest;
 
 public final class YggdrasilMinecraftSessionService extends BaseMinecraftSessionService {
+    public static final JsonParser JSON_PARSER = new JsonParser();
     public static final boolean NO_TEXTURES = Boolean.parseBoolean("launcher.authlib.noTextures");
 
     public YggdrasilMinecraftSessionService(AuthenticationService service) {
@@ -68,7 +69,7 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
 
     @Override
     public Map<Type, MinecraftProfileTexture> getTextures(GameProfile profile, boolean requireSecure) {
-        LogHelper.debug("getTextures, Username: '%s'", profile.getName());
+        LogHelper.debug("getTextures, Username: '%s', UUID: '%s'", profile.getName(), profile.getUUID());
         Map<Type, MinecraftProfileTexture> textures = new EnumMap<>(Type.class);
 
         // Add textures
@@ -91,7 +92,7 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
             if (textures.size() != MinecraftProfileTexture.PROFILE_TEXTURE_COUNT) {
                 Property texturesMojang = Iterables.getFirst(profile.getProperties().get("textures"), null);
                 if (texturesMojang != null) {
-                    getTexturesMojang(textures, texturesMojang.getValue(), profile.getName());
+                    getTexturesMojang(textures, texturesMojang.getValue(), profile);
                 }
             }
         }
@@ -173,14 +174,14 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
         return profile;
     }
 
-    private static void getTexturesMojang(Map<Type, MinecraftProfileTexture> textures, String texturesBase64, String username) {
+    private static void getTexturesMojang(Map<Type, MinecraftProfileTexture> textures, String texturesBase64, GameProfile profile) {
         // Decode textures payload
         JsonObject texturesJSON;
         try {
             byte[] decoded = Base64.getDecoder().decode(texturesBase64);
-            texturesJSON = Json.parse(new String(decoded, IOHelper.UNICODE_CHARSET)).asObject().get("textures").asObject();
+            texturesJSON = JSON_PARSER.parse(new String(decoded, IOHelper.UNICODE_CHARSET)).getAsJsonObject().getAsJsonObject("textures");
         } catch (Exception ignored) {
-            LogHelper.error("Could not decode textures payload, username: '%s'", username);
+            LogHelper.error("Could not decode textures payload, Username: '%s', UUID: '%s'", profile.getName(), profile.getUUID());
             return;
         }
 
@@ -191,11 +192,11 @@ public final class YggdrasilMinecraftSessionService extends BaseMinecraftSession
             }
 
             // Get texture from JSON
-            JsonValue textureJSON = texturesJSON.get(type.name());
-            if (textureJSON != null && textureJSON.isObject()) {
-                JsonValue urlValue = textureJSON.asObject().get("url");
-                if (urlValue.isString()) {
-                    textures.put(type, new MinecraftProfileTexture(urlValue.asString()));
+            JsonElement textureJSON = texturesJSON.get(type.name());
+            if (textureJSON != null && textureJSON.isJsonObject()) {
+                JsonElement urlValue = textureJSON.getAsJsonObject().get("url");
+                if (urlValue.isJsonPrimitive()) {
+                    textures.put(type, new MinecraftProfileTexture(urlValue.getAsString()));
                 }
             }
         }

@@ -23,7 +23,7 @@ public abstract class AuthProvider extends ConfigObject implements AutoCloseable
     public abstract void close() throws IOException;
 
     @LauncherAPI
-    public abstract String auth(String login, String password) throws Exception;
+    public abstract String auth(String login, String password, String ip) throws Exception;
 
     @LauncherAPI
     public static String authError(String message) throws AuthException {

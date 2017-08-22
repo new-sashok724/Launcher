@@ -29,7 +29,7 @@ public final class AuthCommand extends Command {
         String password = args[1];
 
         // Authenticate
-        String username = server.config.authProvider.auth(login, password);
+        String username = server.config.authProvider.auth(login, password, "127.0.0.1");
 
         // Authenticate on server (and get UUID)
         String accessToken = SecurityHelper.randomStringToken();

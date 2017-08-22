@@ -8,7 +8,7 @@ public final class AcceptAuthProvider extends AuthProvider {
     }
 
     @Override
-    public String auth(String login, String password) {
+    public String auth(String login, String password, String ip) {
         return login; // Same as login
     }
 

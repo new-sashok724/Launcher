@@ -40,7 +40,7 @@ public final class FileAuthProvider extends DigestAuthProvider {
     }
 
     @Override
-    public String auth(String login, String password) throws IOException {
+    public String auth(String login, String password, String ip) throws IOException {
         Entry entry;
         synchronized (cacheLock) {
             updateCache();
@@ -49,6 +49,9 @@ public final class FileAuthProvider extends DigestAuthProvider {
 
         // Verify digest and return true username
         verifyDigest(entry == null ? null : entry.password, password);
+        if (entry == null || ip != null && !entry.ip.equals(ip)) {
+            authError("Authentication from this IP is not allowed");
+        }
         return entry.username;
     }
 
@@ -91,12 +94,15 @@ public final class FileAuthProvider extends DigestAuthProvider {
     private static final class Entry extends ConfigObject {
         private final String username;
         private final String password;
+        private final String ip;
 
         private Entry(BlockConfigEntry block) {
             super(block);
             username = VerifyHelper.verifyUsername(block.getEntryValue("username", StringConfigEntry.class));
             password = VerifyHelper.verify(block.getEntryValue("password", StringConfigEntry.class),
                 VerifyHelper.NOT_EMPTY, String.format("Password can't be empty: '%s'", username));
+            ip = block.hasEntry("ip") ? VerifyHelper.verify(block.getEntryValue("ip", StringConfigEntry.class),
+                VerifyHelper.NOT_EMPTY, String.format("IP can't be empty: '%s'", username)) : null;
         }
     }
 }

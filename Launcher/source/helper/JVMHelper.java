@@ -101,10 +101,6 @@ public final class JVMHelper {
             LogHelper.warning("Java and OS architecture mismatch");
             LogHelper.warning("It's recommended to download %d-bit JRE", OS_BITS);
         }
-
-        // Disable SNI extensions (fixes some sites SSL unrecognized_name)
-        LogHelper.debug("Disabling SNI extensions (SSL fix)");
-        System.setProperty("jsse.enableSNIExtension", Boolean.toString(false));
     }
 
     @SuppressWarnings("CallToSystemGetenv")

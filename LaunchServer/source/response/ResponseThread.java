@@ -125,7 +125,7 @@ public final class ResponseThread implements Runnable {
                 response = new PingResponse(server, id, input, output);
                 break;
             case AUTH:
-                response = new AuthResponse(server, id, input, output);
+                response = new AuthResponse(server, id, input, output, IOHelper.getIP(socket.getRemoteSocketAddress()));
                 break;
             case JOIN_SERVER:
                 response = new JoinServerResponse(server, id, input, output);

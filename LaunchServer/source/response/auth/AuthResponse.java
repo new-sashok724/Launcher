@@ -18,8 +18,11 @@ import launchserver.response.Response;
 import launchserver.response.profile.ProfileByUUIDResponse;
 
 public final class AuthResponse extends Response {
-    public AuthResponse(LaunchServer server, long id, HInput input, HOutput output) {
+    private final String ip;
+
+    public AuthResponse(LaunchServer server, long id, HInput input, HOutput output, String ip) {
         super(server, id, input, output);
+        this.ip = ip;
     }
 
     @Override
@@ -41,7 +44,7 @@ public final class AuthResponse extends Response {
         debug("Login: '%s', Password: '%s'", login, echo(password.length()));
         String username;
         try {
-            username = server.config.authProvider.auth(login, password);
+            username = server.config.authProvider.auth(login, password, ip);
             if (!VerifyHelper.isValidUsername(username)) {
                 AuthProvider.authError(String.format("Illegal username: '%s'", username));
                 return;

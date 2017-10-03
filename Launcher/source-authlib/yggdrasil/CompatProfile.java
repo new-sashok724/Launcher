@@ -17,17 +17,17 @@ public final class CompatProfile {
     // Instance
     public final UUID uuid;
     public final String uuidHash, username;
-    public final String skinURL, skinHash;
-    public final String cloakURL, cloakHash;
+    public final String skinURL, skinDigest;
+    public final String cloakURL, cloakDigest;
 
-    public CompatProfile(UUID uuid, String username, String skinURL, String skinHash, String cloakURL, String cloakHash) {
+    public CompatProfile(UUID uuid, String username, String skinURL, String skinDigest, String cloakURL, String cloakDigest) {
         this.uuid = uuid;
         uuidHash = ClientLauncher.toHash(uuid);
         this.username = username;
         this.skinURL = skinURL;
-        this.skinHash = skinHash;
+        this.skinDigest = skinDigest;
         this.cloakURL = cloakURL;
-        this.cloakHash = cloakHash;
+        this.cloakDigest = cloakDigest;
     }
 
     public int countProperties() {
@@ -35,13 +35,13 @@ public final class CompatProfile {
         if (skinURL != null) {
             count++;
         }
-        if (skinHash != null) {
+        if (skinDigest != null) {
             count++;
         }
         if (cloakURL != null) {
             count++;
         }
-        if (cloakHash != null) {
+        if (cloakDigest != null) {
             count++;
         }
         return count;

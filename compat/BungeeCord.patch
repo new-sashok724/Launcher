@@ -3,9 +3,9 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- bootstrap/pom.xml	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
+--- bootstrap/pom.xml	(revision ef326dba192fe532dc6509e0975266715da5ccea)
 +++ bootstrap/pom.xml	(revision )
-@@ -57,7 +57,8 @@
+@@ -50,7 +50,8 @@
                  <configuration>
                      <archive>
                          <manifestEntries>
@@ -20,7 +20,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
+--- proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision ef326dba192fe532dc6509e0975266715da5ccea)
 +++ proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision )
 @@ -2,6 +2,7 @@
  
@@ -30,11 +30,9 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
  import com.google.gson.Gson;
  import java.math.BigInteger;
  import java.net.InetAddress;
-@@ -9,10 +10,15 @@
- import java.net.URLEncoder;
+@@ -10,9 +11,14 @@
  import java.security.MessageDigest;
  import java.util.List;
-+import java.util.Map;
  import java.util.UUID;
 +import java.util.concurrent.ExecutorService;
 +import java.util.concurrent.Executors;
@@ -42,7 +40,8 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
  import java.util.logging.Level;
  import javax.crypto.SecretKey;
 +
-+import com.mojang.authlib.yggdrasil.LegacyBridge;
++import com.mojang.authlib.yggdrasil.CompatBridge;
++import com.mojang.authlib.yggdrasil.CompatProfile;
  import lombok.Getter;
  import lombok.RequiredArgsConstructor;
  import net.md_5.bungee.BungeeCord;
@@ -55,7 +54,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
  
      @Override
      public boolean shouldHandle(PacketWrapper packet) throws Exception
-@@ -263,7 +271,7 @@
+@@ -262,7 +270,7 @@
          this.handshake = handshake;
          ch.setVersion( handshake.getProtocolVersion() );
  
@@ -64,7 +63,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
          // with Bungee's IP forwarding, so we detect it, and remove it from the host string, for now.
          // We know FML appends \00FML\00. However, we need to also consider that other systems might
          // add their own data to the end of the string. So, we just take everything from the \0 character
-@@ -404,37 +412,27 @@
+@@ -403,37 +411,27 @@
          {
              sha.update( bit );
          }
@@ -98,7 +97,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 +        final String serverID = new BigInteger(sha.digest()).toString(16);
 +        loginExecutor.submit(() -> {
 +            try {
-+                Map<String, String> properties = LegacyBridge.checkServerWithProperties(username, serverID);
++                CompatProfile properties = CompatBridge.checkServer(username, serverID);
 +                if(properties == null) { // Invalid username or serverID
 +                    disconnect("Bad Login (Serverside)");
 +                    return;
@@ -108,7 +107,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
  
 -        HttpClient.get( authURL, ch.getHandle().eventLoop(), handler );
 +                // Successful login
-+                uniqueId = UUID.fromString(properties.remove("uuid"));
++                uniqueId = properties.uuid;
 +                loginProfile = new LoginResult(properties);
 +                finish();
 +            } catch(Exception e) {
@@ -124,7 +123,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
+--- bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision ef326dba192fe532dc6509e0975266715da5ccea)
 +++ bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision )
 @@ -5,9 +5,9 @@
  
@@ -143,29 +142,35 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
+--- proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision ef326dba192fe532dc6509e0975266715da5ccea)
 +++ proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision )
-@@ -1,5 +1,8 @@
+@@ -1,5 +1,6 @@
  package net.md_5.bungee.connection;
  
-+import java.util.Map;
-+import java.util.Map.Entry;
-+
++import com.mojang.authlib.yggdrasil.CompatProfile;
  import lombok.AllArgsConstructor;
  import lombok.Data;
  
-@@ -12,6 +15,17 @@
+@@ -12,6 +13,25 @@
      private String name;
      private Property[] properties;
  
-+    public LoginResult(Map<String, String> propertiesMap) {
-+        id = propertiesMap.remove("uuid-hash");
-+        properties = new Property[propertiesMap.size()];
++    public LoginResult(CompatProfile profile) {
++        id = profile.uuidHash;
++        properties = new Property[profile.countProperties()];
 +
-+        int i = 0;
-+        for (Entry<String, String> entry : propertiesMap.entrySet()) {
-+            properties[i] = new Property(entry.getKey(), entry.getValue(), "");
-+            i++;
++        int index = 0;
++        if (profile.skinURL != null) {
++            properties[index++] = new Property(CompatProfile.SKIN_URL_PROPERTY, profile.skinURL, "");
++        }
++        if (profile.skinDigest != null) {
++            properties[index++] = new Property(CompatProfile.SKIN_DIGEST_PROPERTY, profile.skinDigest, "");
++        }
++        if (profile.cloakURL != null) {
++            properties[index++] = new Property(CompatProfile.CLOAK_URL_PROPERTY, profile.cloakDigest, "");
++        }
++        if (profile.cloakDigest != null) {
++            properties[index++] = new Property(CompatProfile.CLOAK_DIGEST_PROPERTY, profile.cloakDigest, "");
 +        }
 +    }
 +
@@ -177,12 +182,12 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- pom.xml	(revision 16d261553c1a648ce38101bda19b7166d1ca5a41)
+--- pom.xml	(revision ef326dba192fe532dc6509e0975266715da5ccea)
 +++ pom.xml	(revision )
 @@ -67,8 +67,8 @@
      <properties>
          <build.number>unknown</build.number>
-         <netty.version>4.1.9.Final</netty.version>
+         <netty.version>4.1.15.Final</netty.version>
 -        <maven.compiler.source>1.7</maven.compiler.source>
 -        <maven.compiler.target>1.7</maven.compiler.target>
 +        <maven.compiler.source>1.8</maven.compiler.source>
@@ -190,49 +195,17 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
          <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
      </properties>
  
-@@ -97,6 +97,13 @@
-             <version>1.16.12</version>
+@@ -96,6 +96,13 @@
+             <artifactId>lombok</artifactId>
+             <version>1.16.16</version>
              <scope>provided</scope>
-         </dependency>
++        </dependency>
 +        <dependency>
 +            <groupId>launcher</groupId>
 +            <artifactId>clientside</artifactId>
 +            <version>15.4+</version>
 +            <scope>system</scope>
-+            <systemPath>/full/path/to/Launcher.jar</systemPath>
-+        </dependency>
++            <systemPath>C:/Users/Administrator/Files/Projects/Launcher15.2/Launcher.jar</systemPath>
+         </dependency>
      </dependencies>
  
-     <build>
-@@ -116,31 +123,6 @@
-                         </goals>
-                     </execution>
-                 </executions>
--            </plugin>
--            <plugin>
--                <groupId>org.codehaus.mojo</groupId>
--                <artifactId>animal-sniffer-maven-plugin</artifactId>
--                <version>1.13</version>
--                <executions>
--                    <execution>
--                        <phase>process-classes</phase>
--                        <goals>
--                            <goal>check</goal>
--                        </goals>
--                    </execution>
--                </executions>
--                <configuration>
--                    <ignores>
--                        <ignore>java.lang.ClassLoader</ignore>
--                        <ignore>java.lang.Throwable</ignore>
--                        <ignore>java.util.Locale</ignore>
--                    </ignores>
--                    <signature>
--                        <groupId>org.codehaus.mojo.signature</groupId>
--                        <artifactId>java16</artifactId>
--                        <version>1.1</version>
--                    </signature>
--                </configuration>
-             </plugin>
-             <!-- OSS Parent 9 uses 2.7, 2.10+ is broken anyway -->
-             <plugin>

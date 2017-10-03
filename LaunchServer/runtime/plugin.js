@@ -31,4 +31,4 @@ server.serverSocketHandler.registerCustomResponse("test", function(server, id, i
  });
  var answer = new TestCustomRequest().request();
  LogHelper.info(java.lang.Integer.toHexString(answer));
- */
+*/

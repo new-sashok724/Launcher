@@ -30,9 +30,9 @@ public final class PostgreSQLAuthProvider extends AuthProvider {
     }
 
     @Override
-    public String auth(String login, String password) throws SQLException, AuthException {
+    public String auth(String login, String password, String ip) throws SQLException, AuthException {
         try (Connection c = postgreSQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(query)) {
-            String[] replaceParams = {"login", login, "password", password};
+            String[] replaceParams = {"login", login, "password", password, "ip", ip};
             for (int i = 0; i < queryParams.length; i++) {
                 s.setString(i + 1, CommonHelper.replace(queryParams[i], replaceParams));
             }

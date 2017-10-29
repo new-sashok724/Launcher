@@ -46,7 +46,7 @@ public final class SecurityHelper {
 
     // Certificate constants
     @LauncherAPI
-    public static final String CERTIFICATE_DIGEST = "fb12ead78600f3a81898b61582cc3a3a679826069d3f742768627622c2a7d0bd";
+    public static final String CERTIFICATE_DIGEST = "6d80faa6082230da6844da6a1f56f14691d445734b8bd28f598d8ba8f9386bb5";
     @LauncherAPI
     public static final String HEX = "0123456789abcdef";
 

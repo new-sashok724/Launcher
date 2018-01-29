@@ -1,23 +1,19 @@
 package launcher.client;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
-
 import launcher.LauncherAPI;
 import launcher.hasher.FileNameMatcher;
 import launcher.helper.IOHelper;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
 import launcher.serialize.config.ConfigObject;
-import launcher.serialize.config.entry.BlockConfigEntry;
-import launcher.serialize.config.entry.BooleanConfigEntry;
+import launcher.serialize.config.entry.*;
 import launcher.serialize.config.entry.ConfigEntry.Type;
-import launcher.serialize.config.entry.IntegerConfigEntry;
-import launcher.serialize.config.entry.ListConfigEntry;
-import launcher.serialize.config.entry.StringConfigEntry;
 import launcher.serialize.stream.StreamObject;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("ComparableImplementedButEqualsNotOverridden")
 public final class ClientProfile extends ConfigObject implements Comparable<ClientProfile> {
@@ -206,7 +202,8 @@ public final class ClientProfile extends ConfigObject implements Comparable<Clie
         MC194("1.9.4", 110),
         MC1102("1.10.2", 210),
         MC1112("1.11.2", 316),
-        MC1121("1.12.1", 338);
+        MC1121("1.12.1", 338),
+        MC1122("1.12.2", 340);
         private static final Map<String, Version> VERSIONS;
         public final String name;
         public final int protocol;

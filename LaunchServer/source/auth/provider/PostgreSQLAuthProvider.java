@@ -6,39 +6,39 @@ import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.ListConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 import launchserver.auth.AuthException;
-import launchserver.auth.sqlconfig.MySQLSourceConfig;
+import launchserver.auth.sqlconfig.PostgreSQLSourceConfig;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public final class MySQLAuthProvider extends AuthProvider {
-    private final MySQLSourceConfig mySQLHolder;
+public final class PostgreSQLAuthProvider extends AuthProvider {
+    private final PostgreSQLSourceConfig postgreSQLHolder;
     private final String query;
     private final String[] queryParams;
 
-    MySQLAuthProvider(BlockConfigEntry block) {
+    PostgreSQLAuthProvider(BlockConfigEntry block) {
         super(block);
-        mySQLHolder = new MySQLSourceConfig("authProviderPool", block);
+        postgreSQLHolder = new PostgreSQLSourceConfig("authProviderPool", block);
 
         // Read query
         query = VerifyHelper.verify(block.getEntryValue("query", StringConfigEntry.class),
-            VerifyHelper.NOT_EMPTY, "MySQL query can't be empty");
+                VerifyHelper.NOT_EMPTY, "PostgreSQL query can't be empty");
         queryParams = block.getEntry("queryParams", ListConfigEntry.class).
-            stream(StringConfigEntry.class).toArray(String[]::new);
+                stream(StringConfigEntry.class).toArray(String[]::new);
     }
 
     @Override
     public String auth(String login, String password, String ip) throws SQLException, AuthException {
-        try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(query)) {
-            String[] replaceParams = { "login", login, "password", password, "ip", ip };
+        try (Connection c = postgreSQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(query)) {
+            String[] replaceParams = {"login", login, "password", password, "ip", ip};
             for (int i = 0; i < queryParams.length; i++) {
                 s.setString(i + 1, CommonHelper.replace(queryParams[i], replaceParams));
             }
 
             // Execute SQL query
-            s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
+            s.setQueryTimeout(PostgreSQLSourceConfig.TIMEOUT);
             try (ResultSet set = s.executeQuery()) {
                 return set.next() ? set.getString(1) : authError("Incorrect username or password");
             }

@@ -1,20 +1,20 @@
 package launchserver.auth.provider;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public final class RequestAuthProvider extends AuthProvider {
     private final String url;
     private final Pattern response;
 
-    public RequestAuthProvider(BlockConfigEntry block) {
+    RequestAuthProvider(BlockConfigEntry block) {
         super(block);
         url = block.getEntryValue("url", StringConfigEntry.class);
         response = Pattern.compile(block.getEntryValue("response", StringConfigEntry.class));
@@ -30,7 +30,7 @@ public final class RequestAuthProvider extends AuthProvider {
         // Match username
         Matcher matcher = response.matcher(currentResponse);
         return matcher.matches() && matcher.groupCount() >= 1 ?
-            matcher.group("username") : authError(currentResponse);
+                matcher.group("username") : authError(currentResponse);
     }
 
     @Override

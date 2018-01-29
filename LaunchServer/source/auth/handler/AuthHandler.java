@@ -1,16 +1,16 @@
 package launchserver.auth.handler;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launchserver.auth.AuthException;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AuthHandler extends ConfigObject implements AutoCloseable {
     private static final Map<String, Adapter<AuthHandler>> AUTH_HANDLERS = new ConcurrentHashMap<>(4);
@@ -65,5 +65,6 @@ public abstract class AuthHandler extends ConfigObject implements AutoCloseable 
         registerHandler("binaryFile", BinaryFileAuthHandler::new);
         registerHandler("textFile", TextFileAuthHandler::new);
         registerHandler("mysql", MySQLAuthHandler::new);
+        registerHandler("postgresql", PostgreSQLAuthHandler::new);
     }
 }

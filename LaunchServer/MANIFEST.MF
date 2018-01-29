@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Class-Path: libraries/jansi.jar libraries/jline2.jar libraries/mysql.j
  ar libraries/hikaricp/hikaricp.jar libraries/hikaricp/javassist.jar l
  ibraries/hikaricp/slf4j-api.jar libraries/hikaricp/slf4j-simple.jar l
- ibraries/launch4j/launch4j.jar
+ ibraries/launch4j/launch4j.jar libraries/postgresql.jar
 Main-Class: launchserver.LaunchServer
 
 Name: launchserver/

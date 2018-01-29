@@ -1,20 +1,15 @@
 package launcher.helper;
 
+import launcher.LauncherAPI;
+import sun.misc.Resource;
+
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Path;
-import java.security.CodeSource;
-import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.interfaces.RSAKey;
@@ -27,32 +22,37 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.jar.JarFile;
-import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-
-import launcher.LauncherAPI;
-import sun.misc.Resource;
 
 public final class SecurityHelper {
     // Algorithm constants
-    @LauncherAPI public static final String RSA_ALGO = "RSA";
-    @LauncherAPI public static final String RSA_SIGN_ALGO = "SHA256withRSA";
-    @LauncherAPI public static final String RSA_CIPHER_ALGO = "RSA/ECB/PKCS1Padding";
+    @LauncherAPI
+    public static final String RSA_ALGO = "RSA";
+    @LauncherAPI
+    public static final String RSA_SIGN_ALGO = "SHA256withRSA";
+    @LauncherAPI
+    public static final String RSA_CIPHER_ALGO = "RSA/ECB/PKCS1Padding";
 
     // Algorithm size constants
-    @LauncherAPI public static final int TOKEN_LENGTH = 16;
-    @LauncherAPI public static final int TOKEN_STRING_LENGTH = TOKEN_LENGTH << 1;
-    @LauncherAPI public static final int RSA_KEY_LENGTH_BITS = 2048;
-    @LauncherAPI public static final int RSA_KEY_LENGTH = RSA_KEY_LENGTH_BITS / Byte.SIZE;
-    @LauncherAPI public static final int CRYPTO_MAX_LENGTH = 2048;
+    @LauncherAPI
+    public static final int TOKEN_LENGTH = 16;
+    @LauncherAPI
+    public static final int TOKEN_STRING_LENGTH = TOKEN_LENGTH << 1;
+    @LauncherAPI
+    public static final int RSA_KEY_LENGTH_BITS = 2048;
+    @LauncherAPI
+    public static final int RSA_KEY_LENGTH = RSA_KEY_LENGTH_BITS / Byte.SIZE;
+    @LauncherAPI
+    public static final int CRYPTO_MAX_LENGTH = 2048;
 
     // Certificate constants
-    @LauncherAPI public static final String CERTIFICATE_DIGEST = "fca9659209c6b3b510d9d0e328f37ea0e8df11b6f897c70e4fce440501f43075";
-    @LauncherAPI public static final String HEX = "0123456789abcdef";
+    @LauncherAPI
+    public static final String CERTIFICATE_DIGEST = "6d80faa6082230da6844da6a1f56f14691d445734b8bd28f598d8ba8f9386bb5";
+    @LauncherAPI
+    public static final String HEX = "0123456789abcdef";
 
     // Random generator constants
-    private static final char[] VOWELS = { 'e', 'u', 'i', 'o', 'a' };
-    private static final char[] CONS = { 'r', 't', 'p', 's', 'd', 'f', 'g', 'h', 'k', 'l', 'c', 'v', 'b', 'n', 'm' };
+    private static final char[] VOWELS = {'e', 'u', 'i', 'o', 'a'};
+    private static final char[] CONS = {'r', 't', 'p', 's', 'd', 'f', 'g', 'h', 'k', 'l', 'c', 'v', 'b', 'n', 'm'};
 
     private SecurityHelper() {
     }

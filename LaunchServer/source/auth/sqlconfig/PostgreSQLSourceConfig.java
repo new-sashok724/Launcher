@@ -1,10 +1,5 @@
-package launchserver.auth;
+package launchserver.auth.sqlconfig;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import javax.sql.DataSource;
-
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import com.zaxxer.hikari.HikariDataSource;
 import launcher.LauncherAPI;
 import launcher.helper.LogHelper;
@@ -13,14 +8,20 @@ import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.IntegerConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
+import org.postgresql.ds.PGSimpleDataSource;
 
-public final class MySQLSourceConfig extends ConfigObject implements AutoCloseable {
-    @LauncherAPI public static final int TIMEOUT = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.mysql.idleTimeout", Integer.toString(5000))),
-        VerifyHelper.POSITIVE, "launcher.mysql.idleTimeout can't be <= 5000");
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+
+public final class PostgreSQLSourceConfig extends ConfigObject implements AutoCloseable, SQLSourceConfig {
+    @LauncherAPI
+    public static final int TIMEOUT = VerifyHelper.verifyInt(
+            Integer.parseUnsignedInt(System.getProperty("launcher.postgresql.idleTimeout", Integer.toString(5000))),
+            VerifyHelper.POSITIVE, "launcher.postgresql.idleTimeout can't be <= 5000");
     private static final int MAX_POOL_SIZE = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.mysql.maxPoolSize", Integer.toString(3))),
-        VerifyHelper.POSITIVE, "launcher.mysql.maxPoolSize can't be <= 0");
+            Integer.parseUnsignedInt(System.getProperty("launcher.postgresql.maxPoolSize", Integer.toString(3))),
+            VerifyHelper.POSITIVE, "launcher.postgresql.maxPoolSize can't be <= 0");
 
     // Instance
     private final String poolName;
@@ -37,18 +38,18 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
     private boolean hikari;
 
     @LauncherAPI
-    public MySQLSourceConfig(String poolName, BlockConfigEntry block) {
+    public PostgreSQLSourceConfig(String poolName, BlockConfigEntry block) {
         super(block);
         this.poolName = poolName;
         address = VerifyHelper.verify(block.getEntryValue("address", StringConfigEntry.class),
-            VerifyHelper.NOT_EMPTY, "MySQL address can't be empty");
+                VerifyHelper.NOT_EMPTY, "PostgreSQL address can't be empty");
         port = VerifyHelper.verifyInt(block.getEntryValue("port", IntegerConfigEntry.class),
-            VerifyHelper.range(0, 65535), "Illegal MySQL port");
+                VerifyHelper.range(0, 65535), "Illegal PostgreSQL port");
         username = VerifyHelper.verify(block.getEntryValue("username", StringConfigEntry.class),
-            VerifyHelper.NOT_EMPTY, "MySQL username can't be empty");
+                VerifyHelper.NOT_EMPTY, "PostgreSQL username can't be empty");
         password = block.getEntryValue("password", StringConfigEntry.class);
         database = VerifyHelper.verify(block.getEntryValue("database", StringConfigEntry.class),
-            VerifyHelper.NOT_EMPTY, "MySQL database can't be empty");
+                VerifyHelper.NOT_EMPTY, "PostgreSQL database can't be empty");
 
         // Password shouldn't be verified
     }
@@ -63,32 +64,19 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
     @LauncherAPI
     public synchronized Connection getConnection() throws SQLException {
         if (source == null) { // New data source
-            MysqlDataSource mysqlSource = new MysqlDataSource();
-            mysqlSource.setUseUnicode(true);
-
-            // Prep statements cache
-            mysqlSource.setPrepStmtCacheSize(250);
-            mysqlSource.setPrepStmtCacheSqlLimit(2048);
-            mysqlSource.setCachePrepStmts(true);
-            mysqlSource.setUseServerPrepStmts(true);
-
-            // General optimizations
-            mysqlSource.setCacheServerConfiguration(true);
-            mysqlSource.setUseLocalSessionState(true);
-            mysqlSource.setRewriteBatchedStatements(true);
-            mysqlSource.setMaintainTimeStats(false);
-            mysqlSource.setUseUnbufferedInput(false);
-            mysqlSource.setUseReadAheadInput(false);
+            PGSimpleDataSource postgresqlSource = new PGSimpleDataSource();
 
             // Set credentials
-            mysqlSource.setServerName(address);
-            mysqlSource.setPortNumber(port);
-            mysqlSource.setUser(username);
-            mysqlSource.setPassword(password);
-            mysqlSource.setDatabaseName(database);
+            postgresqlSource.setServerName(address);
+            postgresqlSource.setPortNumber(port);
+            postgresqlSource.setUser(username);
+            postgresqlSource.setPassword(password);
+            postgresqlSource.setDatabaseName(database);
 
             // Try using HikariCP
-            source = mysqlSource;
+            source = postgresqlSource;
+
+            //noinspection Duplicates
             try {
                 Class.forName("com.zaxxer.hikari.HikariDataSource");
                 hikari = true; // Used for shutdown. Not instanceof because of possible classpath error

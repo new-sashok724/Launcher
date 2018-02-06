@@ -138,10 +138,14 @@ function goSettings(event) {
 function verifyLauncher(e) {
     processing.resetOverlay();
     overlay.show(processing.overlay, function(event) makeLauncherRequest(function(result) {
+        if (result.binary !== null) {
+            LauncherRequest.update(Launcher.getConfig(), result);
+            return;
+        }
+
+        // Parse response
         settings.lastSign = result.sign;
         settings.lastProfiles = result.profiles;
-
-        // Init offline if set
         if (settings.offline) {
             initOffline();
         }

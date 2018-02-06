@@ -62,6 +62,7 @@ function offlineLauncherRequest() {
 
     // Return last sign and profiles
     return {
+        binary: null,
         sign: settings.lastSign,
         profiles: settings.lastProfiles
     };

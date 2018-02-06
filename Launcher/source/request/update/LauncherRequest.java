@@ -1,6 +1,8 @@
 package launcher.request.update;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.security.SignatureException;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,29 +59,8 @@ public final class LauncherRequest extends Request<Result> {
         output.flush();
         if (shouldUpdate) {
             byte[] binary = input.readByteArray(0);
-            SecurityHelper.verifySign(binary, sign, publicKey);
-
-            // Prepare process builder to start new instance (java -jar works for Launch4J's EXE too)
-            List<String> args = new ArrayList<>(8);
-            args.add(IOHelper.resolveJavaBin(null).toString());
-            if (LogHelper.isDebugEnabled()) {
-                args.add(ClientLauncher.jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())));
-            }
-            if (Config.ADDRESS_OVERRIDE != null) {
-                args.add(ClientLauncher.jvmProperty(Config.ADDRESS_OVERRIDE_PROPERTY, Config.ADDRESS_OVERRIDE));
-            }
-            args.add("-jar");
-            args.add(BINARY_PATH.toString());
-            ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()]));
-            builder.inheritIO();
-
-            // Rewrite and start new instance
-            IOHelper.write(BINARY_PATH, binary);
-            builder.start();
-
-            // Kill current instance
-            JVMHelper.RUNTIME.exit(255);
-            throw new AssertionError("Why Launcher wasn't restarted?!");
+            SecurityHelper.verifySign(binary, sign, config.publicKey);
+            return new Result(binary, sign, Collections.emptyList());
         }
 
         // Read clients profiles list
@@ -90,16 +71,49 @@ public final class LauncherRequest extends Request<Result> {
         }
 
         // Return request result
-        return new Result(sign, profiles);
+        return new Result(null, sign, profiles);
+    }
+
+    public static void update(Config config, Result result) throws SignatureException, IOException {
+        SecurityHelper.verifySign(result.binary, result.sign, config.publicKey);
+
+        // Prepare process builder to start new instance (java -jar works for Launch4J's EXE too)
+        List<String> args = new ArrayList<>(8);
+        args.add(IOHelper.resolveJavaBin(null).toString());
+        if (LogHelper.isDebugEnabled()) {
+            args.add(ClientLauncher.jvmProperty(LogHelper.DEBUG_PROPERTY, Boolean.toString(LogHelper.isDebugEnabled())));
+        }
+        if (Config.ADDRESS_OVERRIDE != null) {
+            args.add(ClientLauncher.jvmProperty(Config.ADDRESS_OVERRIDE_PROPERTY, Config.ADDRESS_OVERRIDE));
+        }
+        args.add("-jar");
+        args.add(BINARY_PATH.toString());
+        ProcessBuilder builder = new ProcessBuilder(args.toArray(new String[args.size()]));
+        builder.inheritIO();
+
+        // Rewrite and start new instance
+        IOHelper.write(BINARY_PATH, result.binary);
+        builder.start();
+
+        // Kill current instance
+        JVMHelper.RUNTIME.exit(255);
+        throw new AssertionError("Why Launcher wasn't restarted?!");
     }
 
     public static final class Result {
         @LauncherAPI public final List<SignedObjectHolder<ClientProfile>> profiles;
+        private final byte[] binary;
         private final byte[] sign;
 
-        private Result(byte[] sign, List<SignedObjectHolder<ClientProfile>> profiles) {
+        private Result(byte[] binary, byte[] sign, List<SignedObjectHolder<ClientProfile>> profiles) {
+            this.binary = binary == null ? null : binary.clone();
             this.sign = sign.clone();
             this.profiles = Collections.unmodifiableList(profiles);
+        }
+
+        @LauncherAPI
+        public byte[] getBinary() {
+            return binary == null ? null : binary.clone();
         }
 
         @LauncherAPI

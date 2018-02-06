@@ -266,6 +266,14 @@ public final class IOHelper {
     }
 
     @LauncherAPI
+    public static HttpURLConnection newConnectionPost(URL url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) newConnection(url);
+        connection.setDoOutput(true);
+        connection.setRequestMethod("POST");
+        return connection;
+    }
+
+    @LauncherAPI
     public static Deflater newDeflater() {
         Deflater deflater = new Deflater(Deflater.DEFAULT_COMPRESSION, true);
         deflater.setStrategy(Deflater.DEFAULT_STRATEGY);

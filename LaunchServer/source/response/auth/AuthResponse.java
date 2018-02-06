@@ -14,6 +14,7 @@ import launcher.serialize.HOutput;
 import launchserver.LaunchServer;
 import launchserver.auth.AuthException;
 import launchserver.auth.provider.AuthProvider;
+import launchserver.auth.provider.AuthProviderResult;
 import launchserver.response.Response;
 import launchserver.response.profile.ProfileByUUIDResponse;
 
@@ -42,11 +43,11 @@ public final class AuthResponse extends Response {
 
         // Authenticate
         debug("Login: '%s', Password: '%s'", login, echo(password.length()));
-        String username;
+        AuthProviderResult result;
         try {
-            username = server.config.authProvider.auth(login, password, ip);
-            if (!VerifyHelper.isValidUsername(username)) {
-                AuthProvider.authError(String.format("Illegal username: '%s'", username));
+            result = server.config.authProvider.auth(login, password, ip);
+            if (!VerifyHelper.isValidUsername(result.username)) {
+                AuthProvider.authError(String.format("Illegal result: '%s'", result.username));
                 return;
             }
         } catch (AuthException e) {
@@ -57,13 +58,12 @@ public final class AuthResponse extends Response {
             requestError("Internal auth provider error");
             return;
         }
-        debug("Auth: '%s' -> '%s'", login, username);
+        debug("Auth: '%s' -> '%s', '%s'", login, result.username, result.accessToken);
 
         // Authenticate on server (and get UUID)
-        String accessToken = SecurityHelper.randomStringToken();
         UUID uuid;
         try {
-            uuid = server.config.authHandler.auth(username, accessToken);
+            uuid = server.config.authHandler.auth(result);
         } catch (AuthException e) {
             requestError(e.getMessage());
             return;
@@ -75,8 +75,8 @@ public final class AuthResponse extends Response {
         writeNoError(output);
 
         // Write profile and UUID
-        ProfileByUUIDResponse.getProfile(server, uuid, username).write(output);
-        output.writeASCII(accessToken, -SecurityHelper.TOKEN_STRING_LENGTH);
+        ProfileByUUIDResponse.getProfile(server, uuid, result.username).write(output);
+        output.writeASCII(result.accessToken, -SecurityHelper.TOKEN_STRING_LENGTH);
     }
 
     private static String echo(int length) {

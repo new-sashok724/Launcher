@@ -15,7 +15,7 @@ public final class NullAuthProvider extends AuthProvider {
     }
 
     @Override
-    public String auth(String login, String password, String ip) throws Exception {
+    public AuthProviderResult auth(String login, String password, String ip) throws Exception {
         return getProvider().auth(login, password, ip);
     }
 

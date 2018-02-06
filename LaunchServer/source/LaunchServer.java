@@ -351,8 +351,8 @@ public final class LaunchServer implements Runnable, AutoCloseable {
         }
 
         // Create new config
-        Config newConfig;
         LogHelper.info("Creating LaunchServer config");
+        Config newConfig;
         try (BufferedReader reader = IOHelper.newReader(IOHelper.getResourceURL("launchserver/defaults/config.cfg"))) {
             newConfig = new Config(TextConfigReader.read(reader, false));
         }

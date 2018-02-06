@@ -7,6 +7,7 @@ import java.util.UUID;
 import launcher.LauncherAPI;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
+import launchserver.auth.provider.AuthProviderResult;
 
 public final class NullAuthHandler extends AuthHandler {
     private volatile AuthHandler handler;
@@ -16,8 +17,8 @@ public final class NullAuthHandler extends AuthHandler {
     }
 
     @Override
-    public UUID auth(String username, String accessToken) throws IOException {
-        return getHandler().auth(username, accessToken);
+    public UUID auth(AuthProviderResult authResult) throws IOException {
+        return getHandler().auth(authResult);
     }
 
     @Override

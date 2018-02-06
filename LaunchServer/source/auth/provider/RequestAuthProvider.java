@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
+import launcher.helper.SecurityHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 
@@ -24,13 +25,14 @@ public final class RequestAuthProvider extends AuthProvider {
     }
 
     @Override
-    public String auth(String login, String password, String ip) throws IOException {
+    public AuthProviderResult auth(String login, String password, String ip) throws IOException {
         String currentResponse = IOHelper.request(new URL(getFormattedURL(login, password, ip)));
 
         // Match username
         Matcher matcher = response.matcher(currentResponse);
         return matcher.matches() && matcher.groupCount() >= 1 ?
-            matcher.group("username") : authError(currentResponse);
+            new AuthProviderResult(matcher.group("username"), SecurityHelper.randomStringToken()) :
+            authError(currentResponse);
     }
 
     @Override

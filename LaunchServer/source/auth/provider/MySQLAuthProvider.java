@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import launcher.helper.CommonHelper;
+import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.ListConfigEntry;
@@ -30,7 +31,7 @@ public final class MySQLAuthProvider extends AuthProvider {
     }
 
     @Override
-    public String auth(String login, String password, String ip) throws SQLException, AuthException {
+    public AuthProviderResult auth(String login, String password, String ip) throws SQLException, AuthException {
         try (Connection c = mySQLHolder.getConnection(); PreparedStatement s = c.prepareStatement(query)) {
             String[] replaceParams = { "login", login, "password", password, "ip", ip };
             for (int i = 0; i < queryParams.length; i++) {
@@ -40,7 +41,7 @@ public final class MySQLAuthProvider extends AuthProvider {
             // Execute SQL query
             s.setQueryTimeout(MySQLSourceConfig.TIMEOUT);
             try (ResultSet set = s.executeQuery()) {
-                return set.next() ? set.getString(1) : authError("Incorrect username or password");
+                return set.next() ? new AuthProviderResult(set.getString(1), SecurityHelper.randomStringToken()) : authError("Incorrect username or password");
             }
         }
     }

@@ -24,6 +24,7 @@ import launcher.serialize.config.entry.BlockConfigEntry;
 import launcher.serialize.config.entry.BooleanConfigEntry;
 import launcher.serialize.config.entry.StringConfigEntry;
 import launcher.serialize.stream.StreamObject;
+import launchserver.auth.provider.AuthProviderResult;
 
 public abstract class FileAuthHandler extends AuthHandler {
     @LauncherAPI public final Path file;
@@ -57,24 +58,24 @@ public abstract class FileAuthHandler extends AuthHandler {
     }
 
     @Override
-    public final UUID auth(String username, String accessToken) {
+    public final UUID auth(AuthProviderResult authResult) {
         lock.writeLock().lock();
         try {
-            UUID uuid = usernameToUUID(username);
+            UUID uuid = usernameToUUID(authResult.username);
             Entry entry = entryMap.get(uuid);
 
             // Not registered? Fix it!
             if (entry == null) {
-                entry = new Entry(username);
+                entry = new Entry(authResult.username);
 
                 // Generate UUID
-                uuid = genUUIDFor(username);
+                uuid = genUUIDFor(authResult.username);
                 entryMap.put(uuid, entry);
-                usernamesMap.put(CommonHelper.low(username), uuid);
+                usernamesMap.put(CommonHelper.low(authResult.username), uuid);
             }
 
             // Authenticate
-            entry.auth(username, accessToken);
+            entry.auth(authResult.username, authResult.accessToken);
             return uuid;
         } finally {
             lock.writeLock().unlock();

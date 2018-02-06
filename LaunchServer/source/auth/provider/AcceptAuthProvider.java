@@ -1,5 +1,6 @@
 package launchserver.auth.provider;
 
+import launcher.helper.SecurityHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 
 public final class AcceptAuthProvider extends AuthProvider {
@@ -8,8 +9,8 @@ public final class AcceptAuthProvider extends AuthProvider {
     }
 
     @Override
-    public String auth(String login, String password, String ip) {
-        return login; // Same as login
+    public AuthProviderResult auth(String login, String password, String ip) {
+        return new AuthProviderResult(login, SecurityHelper.randomStringToken()); // Same as login
     }
 
     @Override

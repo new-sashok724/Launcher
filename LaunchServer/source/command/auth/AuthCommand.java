@@ -3,8 +3,8 @@ package launchserver.command.auth;
 import java.util.UUID;
 
 import launcher.helper.LogHelper;
-import launcher.helper.SecurityHelper;
 import launchserver.LaunchServer;
+import launchserver.auth.provider.AuthProviderResult;
 import launchserver.command.Command;
 
 public final class AuthCommand extends Command {
@@ -29,13 +29,10 @@ public final class AuthCommand extends Command {
         String password = args[1];
 
         // Authenticate
-        String username = server.config.authProvider.auth(login, password, "127.0.0.1");
-
-        // Authenticate on server (and get UUID)
-        String accessToken = SecurityHelper.randomStringToken();
-        UUID uuid = server.config.authHandler.auth(username, accessToken);
+        AuthProviderResult result = server.config.authProvider.auth(login, password, "127.0.0.1");
+        UUID uuid = server.config.authHandler.auth(result);
 
         // Print auth successful message
-        LogHelper.subInfo("UUID: %s, Username: '%s', Access Token: '%s'", uuid, username, accessToken);
+        LogHelper.subInfo("UUID: %s, Username: '%s', Access Token: '%s'", uuid, result.username, result.accessToken);
     }
 }

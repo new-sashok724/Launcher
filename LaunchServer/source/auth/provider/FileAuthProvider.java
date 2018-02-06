@@ -11,6 +11,7 @@ import java.util.Set;
 import launcher.helper.CommonHelper;
 import launcher.helper.IOHelper;
 import launcher.helper.LogHelper;
+import launcher.helper.SecurityHelper;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.TextConfigReader;
@@ -40,7 +41,7 @@ public final class FileAuthProvider extends DigestAuthProvider {
     }
 
     @Override
-    public String auth(String login, String password, String ip) throws IOException {
+    public AuthProviderResult auth(String login, String password, String ip) throws IOException {
         Entry entry;
         synchronized (cacheLock) {
             updateCache();
@@ -52,7 +53,9 @@ public final class FileAuthProvider extends DigestAuthProvider {
         if (entry == null || entry.ip != null && !entry.ip.equals(ip)) {
             authError("Authentication from this IP is not allowed");
         }
-        return entry.username;
+
+        // We're done
+        return new AuthProviderResult(entry.username, SecurityHelper.randomStringToken());
     }
 
     @Override

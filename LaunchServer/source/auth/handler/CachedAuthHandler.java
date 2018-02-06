@@ -11,10 +11,11 @@ import launcher.helper.CommonHelper;
 import launcher.helper.SecurityHelper;
 import launcher.request.auth.JoinServerRequest;
 import launcher.serialize.config.entry.BlockConfigEntry;
+import launchserver.auth.provider.AuthProviderResult;
 
 public abstract class CachedAuthHandler extends AuthHandler {
-    private final Map<UUID, Entry> entryCache = new HashMap<>();
-    private final Map<String, UUID> usernamesCache = new HashMap<>();
+    private final Map<UUID, Entry> entryCache = new HashMap<>(1024);
+    private final Map<String, UUID> usernamesCache = new HashMap<>(1024);
 
     @LauncherAPI
     protected CachedAuthHandler(BlockConfigEntry block) {
@@ -22,15 +23,15 @@ public abstract class CachedAuthHandler extends AuthHandler {
     }
 
     @Override
-    public final synchronized UUID auth(String username, String accessToken) throws IOException {
-        Entry entry = getEntry(username);
-        if (entry == null || !updateAuth(entry.uuid, entry.username, accessToken)) {
-            return authError(String.format("UUID is null for username '%s'", username));
+    public final synchronized UUID auth(AuthProviderResult result) throws IOException {
+        Entry entry = getEntry(result.username);
+        if (entry == null || !updateAuth(entry.uuid, entry.username, result.accessToken)) {
+            return authError(String.format("UUID is null for username '%s'", result.username));
         }
 
         // Update cached access token (and username case)
-        entry.username = username;
-        entry.accessToken = accessToken;
+        entry.username = result.username;
+        entry.accessToken = result.accessToken;
         entry.serverID = null;
         return entry.uuid;
     }

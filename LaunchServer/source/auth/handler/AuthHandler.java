@@ -11,6 +11,7 @@ import launcher.helper.VerifyHelper;
 import launcher.serialize.config.ConfigObject;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launchserver.auth.AuthException;
+import launchserver.auth.provider.AuthProviderResult;
 
 public abstract class AuthHandler extends ConfigObject implements AutoCloseable {
     private static final Map<String, Adapter<AuthHandler>> AUTH_HANDLERS = new ConcurrentHashMap<>(4);
@@ -24,7 +25,7 @@ public abstract class AuthHandler extends ConfigObject implements AutoCloseable 
     public abstract void close() throws IOException;
 
     @LauncherAPI
-    public abstract UUID auth(String username, String accessToken) throws IOException;
+    public abstract UUID auth(AuthProviderResult authResult) throws IOException;
 
     @LauncherAPI
     public abstract UUID checkServer(String username, String serverID) throws IOException;

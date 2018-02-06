@@ -3,7 +3,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- bootstrap/pom.xml	(revision ef326dba192fe532dc6509e0975266715da5ccea)
+--- bootstrap/pom.xml	(revision 4c84f37fd23dfd67e4fee5dfd7cb62d67791129f)
 +++ bootstrap/pom.xml	(revision )
 @@ -50,7 +50,8 @@
                  <configuration>
@@ -20,7 +20,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision ef326dba192fe532dc6509e0975266715da5ccea)
+--- proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision 4c84f37fd23dfd67e4fee5dfd7cb62d67791129f)
 +++ proxy/src/main/java/net/md_5/bungee/connection/InitialHandler.java	(revision )
 @@ -2,6 +2,7 @@
  
@@ -123,7 +123,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision ef326dba192fe532dc6509e0975266715da5ccea)
+--- bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision 4c84f37fd23dfd67e4fee5dfd7cb62d67791129f)
 +++ bootstrap/src/main/java/net/md_5/bungee/Bootstrap.java	(revision )
 @@ -5,9 +5,9 @@
  
@@ -142,7 +142,7 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision ef326dba192fe532dc6509e0975266715da5ccea)
+--- proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision 4c84f37fd23dfd67e4fee5dfd7cb62d67791129f)
 +++ proxy/src/main/java/net/md_5/bungee/connection/LoginResult.java	(revision )
 @@ -1,5 +1,6 @@
  package net.md_5.bungee.connection;
@@ -167,7 +167,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 +            properties[index++] = new Property(CompatProfile.SKIN_DIGEST_PROPERTY, profile.skinDigest, "");
 +        }
 +        if (profile.cloakURL != null) {
-+            properties[index++] = new Property(CompatProfile.CLOAK_URL_PROPERTY, profile.cloakDigest, "");
++            properties[index++] = new Property(CompatProfile.CLOAK_URL_PROPERTY, profile.cloakURL, "");
 +        }
 +        if (profile.cloakDigest != null) {
 +            properties[index++] = new Property(CompatProfile.CLOAK_DIGEST_PROPERTY, profile.cloakDigest, "");
@@ -182,12 +182,12 @@ IDEA additional info:
 Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 <+>UTF-8
 ===================================================================
---- pom.xml	(revision ef326dba192fe532dc6509e0975266715da5ccea)
+--- pom.xml	(revision 4c84f37fd23dfd67e4fee5dfd7cb62d67791129f)
 +++ pom.xml	(revision )
-@@ -67,8 +67,8 @@
+@@ -68,8 +68,8 @@
      <properties>
          <build.number>unknown</build.number>
-         <netty.version>4.1.15.Final</netty.version>
+         <netty.version>4.1.17.Final</netty.version>
 -        <maven.compiler.source>1.7</maven.compiler.source>
 -        <maven.compiler.target>1.7</maven.compiler.target>
 +        <maven.compiler.source>1.8</maven.compiler.source>
@@ -195,7 +195,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
          <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
      </properties>
  
-@@ -96,6 +96,13 @@
+@@ -97,6 +97,13 @@
              <artifactId>lombok</artifactId>
              <version>1.16.16</version>
              <scope>provided</scope>

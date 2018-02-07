@@ -175,7 +175,7 @@ public final class ClientLauncher {
         // Verify ClientLauncher sign and classpath
         LogHelper.debug("Verifying ClientLauncher sign and classpath");
         SecurityHelper.verifySign(LauncherRequest.BINARY_PATH, params.launcherSign, publicKey);
-        URL[] classpath = JVMHelper.LOADER.getURLs();
+        URL[] classpath = JVMHelper.getClassPath();
         for (URL classpathURL : classpath) {
             Path file = Paths.get(classpathURL.toURI());
             if (!file.startsWith(IOHelper.JVM_DIR) && !file.equals(LauncherRequest.BINARY_PATH)) {
@@ -306,7 +306,7 @@ public final class ClientLauncher {
         // Add client classpath
         URL[] classPath = resolveClassPath(params.clientDir, profile.getClassPath());
         for (URL url : classPath) {
-            JVMHelper.UCP.addURL(url);
+            JVMHelper.addClassPath(url);
         }
 
         // Resolve main class and method

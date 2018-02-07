@@ -31,7 +31,6 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
 import launcher.LauncherAPI;
-import sun.misc.Resource;
 
 public final class SecurityHelper {
     // Algorithm constants
@@ -124,8 +123,8 @@ public final class SecurityHelper {
     @LauncherAPI
     public static boolean isValidCertificates(Class<?> clazz) {
         // Verify META-INF/MANIFEST.MF certificate
-        Resource metaInf = JVMHelper.UCP.getResource(JarFile.MANIFEST_NAME);
-        if (metaInf == null || !isValidCertificates(metaInf.getCertificates())) {
+        Certificate[] certificates = JVMHelper.getCertificates(JarFile.MANIFEST_NAME);
+        if (certificates == null || !isValidCertificates(certificates)) {
             return false;
         }
 

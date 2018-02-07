@@ -8,7 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/source-authlib" isTestSource="false" packagePrefix="com.mojang.authlib" />
       <excludeFolder url="file://$MODULE_DIR$/runtime" />
     </content>
-    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="module-library" scope="PROVIDED">
       <library>
         <CLASSES>

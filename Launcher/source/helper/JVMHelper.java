@@ -6,13 +6,13 @@ import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URLClassLoader;
+import java.net.URL;
 import java.nio.file.Path;
+import java.security.cert.Certificate;
 import java.util.Locale;
 
 import com.sun.management.OperatingSystemMXBean;
 import launcher.LauncherAPI;
-import sun.misc.URLClassPath;
 
 public final class JVMHelper {
     // MXBeans exports
@@ -29,15 +29,28 @@ public final class JVMHelper {
 
     // Public static fields
     @LauncherAPI public static final Runtime RUNTIME = Runtime.getRuntime();
-    @LauncherAPI public static final URLClassLoader LOADER = (URLClassLoader) ClassLoader.getSystemClassLoader();
-    @LauncherAPI public static final URLClassPath UCP = getURLClassPath();
+    @LauncherAPI public static final ClassLoader LOADER = ClassLoader.getSystemClassLoader();
 
     // Useful internal fields and constants
     private static final String JAVA_LIBRARY_PATH = "java.library.path";
-    private static final Field USR_PATHS_FIELD = getUsrPathsField();
-    private static final Field SYS_PATHS_FIELD = getSysPathsField();
+    private static final Field USR_PATHS_FIELD;
+    private static final Field SYS_PATHS_FIELD;
+    private static final Object UCP;
+    private static final Method UCP_ADDURL_METHOD;
+    private static final Method UCP_GETURLS_METHOD;
+    private static final Method UCP_GETRESOURCE_METHOD;
+    private static final Method RESOURCE_GETCERTS_METHOD;
 
     private JVMHelper() {
+    }
+
+    @LauncherAPI
+    public static void addClassPath(URL url) {
+        try {
+            UCP_ADDURL_METHOD.invoke(UCP, url);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new InternalError(e);
+        }
     }
 
     @LauncherAPI
@@ -68,6 +81,25 @@ public final class JVMHelper {
         RUNTIME.gc();
         RUNTIME.runFinalization();
         LogHelper.debug("Used heap: %d MiB", RUNTIME.totalMemory() - RUNTIME.freeMemory() >> 20);
+    }
+
+    @LauncherAPI
+    public static Certificate[] getCertificates(String resource) {
+        try {
+            Object resource0 = UCP_GETRESOURCE_METHOD.invoke(UCP, resource);
+            return resource0 == null ? null : (Certificate[]) RESOURCE_GETCERTS_METHOD.invoke(resource0);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new InternalError(e);
+        }
+    }
+
+    @LauncherAPI
+    public static URL[] getClassPath() {
+        try {
+            return (URL[]) UCP_GETURLS_METHOD.invoke(UCP);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new InternalError(e);
+        }
     }
 
     @LauncherAPI
@@ -131,26 +163,16 @@ public final class JVMHelper {
         return Math.min(physicalRam, OS_BITS == 32 ? 1536 : 4096); // Limit 32-bit OS to 1536 MiB, and 64-bit OS to 4096 MiB (because it's enough)
     }
 
-    private static Field getSysPathsField() {
+    static {
         try {
-            return getField(ClassLoader.class, "sys_paths");
-        } catch (NoSuchFieldException e) {
-            throw new InternalError(e);
-        }
-    }
-
-    private static URLClassPath getURLClassPath() {
-        try {
-            return (URLClassPath) getField(URLClassLoader.class, "ucp").get(LOADER);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new InternalError(e);
-        }
-    }
-
-    private static Field getUsrPathsField() {
-        try {
-            return getField(ClassLoader.class, "usr_paths");
-        } catch (NoSuchFieldException e) {
+            USR_PATHS_FIELD = getField(ClassLoader.class, "usr_paths");
+            SYS_PATHS_FIELD = getField(ClassLoader.class, "sys_paths");
+            UCP = getField(LOADER.getClass(), "ucp").get(LOADER);
+            UCP_ADDURL_METHOD = getMethod(UCP.getClass(), "addURL", URL.class);
+            UCP_GETURLS_METHOD = getMethod(UCP.getClass(), "getURLs");
+            UCP_GETRESOURCE_METHOD = getMethod(UCP.getClass(), "getResource", String.class);
+            RESOURCE_GETCERTS_METHOD = getMethod(UCP_GETRESOURCE_METHOD.getReturnType(), "getCertificates");
+        } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException e) {
             throw new InternalError(e);
         }
     }

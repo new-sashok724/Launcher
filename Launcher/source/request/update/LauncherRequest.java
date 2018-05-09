@@ -74,6 +74,7 @@ public final class LauncherRequest extends Request<Result> {
         return new Result(null, sign, profiles);
     }
 
+    @LauncherAPI
     public static void update(Config config, Result result) throws SignatureException, IOException {
         SecurityHelper.verifySign(result.binary, result.sign, config.publicKey);
 

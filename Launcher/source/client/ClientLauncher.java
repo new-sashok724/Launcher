@@ -2,8 +2,8 @@ package launcher.client;
 
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodType;
 import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -47,6 +47,7 @@ import launcher.serialize.signed.SignedObjectHolder;
 import launcher.serialize.stream.StreamObject;
 
 public final class ClientLauncher {
+    private static final String[] EMPTY_ARRAY = new String[0];
     private static final String MAGICAL_INTEL_OPTION = "-XX:HeapDumpPath=ThisTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump";
     private static final Set<PosixFilePermission> BIN_POSIX_PERMISSIONS = Collections.unmodifiableSet(EnumSet.of(
         PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, // Owner
@@ -311,18 +312,13 @@ public final class ClientLauncher {
 
         // Resolve main class and method
         Class<?> mainClass = Class.forName(profile.getMainClass());
-        Method mainMethod = mainClass.getDeclaredMethod("main", String[].class);
-        mainMethod.setAccessible(true);
+        MethodHandle mainMethod = JVMHelper.LOOKUP.findStatic(mainClass, "main", MethodType.methodType(void.class, String[].class));
 
         // Invoke main method with exception wrapping
         LAUNCHED.set(true);
         JVMHelper.fullGC();
-        try {
-            System.setProperty("minecraft.applet.TargetDirectory", params.clientDir.toString()); // For 1.5.2
-            mainMethod.invoke(null, (Object) args.toArray(new String[args.size()]));
-        } catch (InvocationTargetException e) {
-            throw e.getTargetException();
-        }
+        System.setProperty("minecraft.applet.TargetDirectory", params.clientDir.toString()); // For 1.5.2
+        mainMethod.invoke((Object) args.toArray(EMPTY_ARRAY));
     }
 
     private static URL[] resolveClassPath(Path clientDir, String... classPath) throws IOException {

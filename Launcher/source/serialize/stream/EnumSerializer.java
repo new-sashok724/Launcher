@@ -1,7 +1,6 @@
 package launcher.serialize.stream;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,20 +15,8 @@ public final class EnumSerializer<E extends Enum<?> & Itf> {
 
     @LauncherAPI
     public EnumSerializer(Class<E> clazz) {
-        for (Field field : clazz.getFields()) {
-            if (!field.isEnumConstant()) {
-                continue;
-            }
-
-            // Add to map
-            Itf itf;
-            try {
-                itf = (Itf) field.get(null);
-            } catch (IllegalAccessException e) {
-                throw new InternalError(e);
-            }
-            VerifyHelper.putIfAbsent(map, itf.getNumber(), clazz.cast(itf),
-                "Duplicate number for enum constant " + field.getName());
+        for (E e : clazz.getEnumConstants()) {
+            VerifyHelper.putIfAbsent(map, e.getNumber(), e, "Duplicate number for enum constant " + e.name());
         }
     }
 

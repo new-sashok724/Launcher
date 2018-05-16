@@ -43,8 +43,8 @@ var update = {
 
             // Formatting
             state.filePath, // File path
-            state.getFileDownloadedMiB(), state.getFileSizeMiB(), // File downloaded
-            state.getTotalDownloadedMiB(), state.getTotalSizeMiB(), // Total downloaded
+            state.getFileDownloadedMiB() + /* Fuck nashorn */ 0.0, state.getFileSizeMiB() + 0.0, // File downloaded
+            state.getTotalDownloadedMiB() + /* Fuck nashorn */ 0.0, state.getTotalSizeMiB() + 0.0, // Total downloaded
             bps <= 0.0 ? 0.0 : bps / 1024.0, // Speed
             estimatedHH, estimatedMM, estimatedSS // Estimated (hh:mm:ss)
         ));

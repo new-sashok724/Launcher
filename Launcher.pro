@@ -16,8 +16,10 @@
 -renamesourcefileattribute Source
 
 -dontnote
+-dontwarn
 -dontshrink
 -dontoptimize
+-ignorewarnings
 -target 8
 -forceprocessing
 

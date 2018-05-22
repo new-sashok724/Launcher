@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import com.mysql.cj.jdbc.MysqlDataSource;
 import com.zaxxer.hikari.HikariDataSource;
 import launcher.LauncherAPI;
 import launcher.helper.LogHelper;
@@ -64,7 +64,7 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
     public synchronized Connection getConnection() throws SQLException {
         if (source == null) { // New data source
             MysqlDataSource mysqlSource = new MysqlDataSource();
-            mysqlSource.setUseUnicode(true);
+            mysqlSource.setCharacterEncoding("UTF-8");
 
             // Prep statements cache
             mysqlSource.setPrepStmtCacheSize(250);

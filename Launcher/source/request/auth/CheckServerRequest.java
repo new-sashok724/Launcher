@@ -34,7 +34,7 @@ public final class CheckServerRequest extends Request<PlayerProfile> {
 
     @Override
     protected PlayerProfile requestDo(HInput input, HOutput output) throws IOException {
-        output.writeASCII(username, 16);
+        output.writeString(username, 64);
         output.writeASCII(serverID, 41); // 1 char for minus sign
         output.flush();
 

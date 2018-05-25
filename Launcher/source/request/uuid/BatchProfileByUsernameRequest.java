@@ -39,7 +39,7 @@ public final class BatchProfileByUsernameRequest extends Request<PlayerProfile[]
     protected PlayerProfile[] requestDo(HInput input, HOutput output) throws IOException {
         output.writeLength(usernames.length, MAX_BATCH_SIZE);
         for (String username : usernames) {
-            output.writeASCII(username, 16);
+            output.writeString(username, 64);
         }
         output.flush();
 

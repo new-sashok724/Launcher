@@ -19,7 +19,7 @@ public final class JoinServerResponse extends Response {
 
     @Override
     public void reply() throws IOException {
-        String username = VerifyHelper.verifyUsername(input.readASCII(16));
+        String username = VerifyHelper.verifyUsername(input.readString(64));
         String accessToken = SecurityHelper.verifyToken(input.readASCII(-SecurityHelper.TOKEN_STRING_LENGTH));
         String serverID = JoinServerRequest.verifyServerID(input.readASCII(41)); // With minus sign
 

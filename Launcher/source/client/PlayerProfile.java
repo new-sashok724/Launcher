@@ -24,7 +24,7 @@ public final class PlayerProfile extends StreamObject {
     @LauncherAPI
     public PlayerProfile(HInput input) throws IOException {
         uuid = input.readUUID();
-        username = VerifyHelper.verifyUsername(input.readASCII(16));
+        username = VerifyHelper.verifyUsername(input.readString(64));
         skin = input.readBoolean() ? new Texture(input) : null;
         cloak = input.readBoolean() ? new Texture(input) : null;
     }
@@ -40,7 +40,7 @@ public final class PlayerProfile extends StreamObject {
     @Override
     public void write(HOutput output) throws IOException {
         output.writeUUID(uuid);
-        output.writeASCII(username, 16);
+        output.writeString(username, 64);
 
         // Write textures
         output.writeBoolean(skin != null);

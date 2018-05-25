@@ -3,7 +3,6 @@ package launcher.request.auth;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-import launcher.Launcher;
 import launcher.Launcher.Config;
 import launcher.LauncherAPI;
 import launcher.helper.SecurityHelper;
@@ -40,7 +39,7 @@ public final class JoinServerRequest extends Request<Boolean> {
 
     @Override
     protected Boolean requestDo(HInput input, HOutput output) throws IOException {
-        output.writeASCII(username, 16);
+        output.writeString(username, 64);
         output.writeASCII(accessToken, -SecurityHelper.TOKEN_STRING_LENGTH);
         output.writeASCII(serverID, 41); // 1 char for minus sign
         output.flush();

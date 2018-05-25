@@ -31,7 +31,7 @@ public final class ProfileByUsernameRequest extends Request<PlayerProfile> {
 
     @Override
     protected PlayerProfile requestDo(HInput input, HOutput output) throws IOException {
-        output.writeASCII(username, 16);
+        output.writeString(username, 64);
         output.flush();
 
         // Return profile

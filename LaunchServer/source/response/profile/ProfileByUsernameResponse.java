@@ -16,7 +16,7 @@ public final class ProfileByUsernameResponse extends Response {
 
     @Override
     public void reply() throws IOException {
-        String username = VerifyHelper.verifyUsername(input.readASCII(16));
+        String username = VerifyHelper.verifyUsername(input.readString(64));
         debug("Username: " + username);
 
         // Write response

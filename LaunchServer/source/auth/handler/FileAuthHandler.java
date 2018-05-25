@@ -206,7 +206,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 
         @LauncherAPI
         public Entry(HInput input) throws IOException {
-            username = VerifyHelper.verifyUsername(input.readASCII(16));
+            username = VerifyHelper.verifyUsername(input.readString(64));
             if (input.readBoolean()) {
                 accessToken = SecurityHelper.verifyToken(input.readASCII(-SecurityHelper.TOKEN_STRING_LENGTH));
                 if (input.readBoolean()) {
@@ -217,7 +217,7 @@ public abstract class FileAuthHandler extends AuthHandler {
 
         @Override
         public void write(HOutput output) throws IOException {
-            output.writeASCII(username, 16);
+            output.writeString(username, 64);
             output.writeBoolean(accessToken != null);
             if (accessToken != null) {
                 output.writeASCII(accessToken, -SecurityHelper.TOKEN_STRING_LENGTH);

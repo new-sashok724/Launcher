@@ -19,7 +19,7 @@ public final class BatchProfileByUsernameResponse extends Response {
     public void reply() throws IOException {
         String[] usernames = new String[input.readLength(BatchProfileByUsernameRequest.MAX_BATCH_SIZE)];
         for (int i = 0; i < usernames.length; i++) {
-            usernames[i] = VerifyHelper.verifyUsername(input.readASCII(16));
+            usernames[i] = VerifyHelper.verifyUsername(input.readString(64));
         }
         debug("Usernames: " + Arrays.toString(usernames));
 

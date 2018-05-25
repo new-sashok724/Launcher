@@ -20,7 +20,7 @@ public final class CheckServerResponse extends Response {
 
     @Override
     public void reply() throws IOException {
-        String username = VerifyHelper.verifyUsername(input.readASCII(16));
+        String username = VerifyHelper.verifyUsername(input.readString(64));
         String serverID = JoinServerRequest.verifyServerID(input.readASCII(41)); // With minus sign
         debug("Username: %s, Server ID: %s", username, serverID);
 

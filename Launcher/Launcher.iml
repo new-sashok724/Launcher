@@ -6,7 +6,6 @@
       <sourceFolder url="file://$MODULE_DIR$/source" isTestSource="false" packagePrefix="launcher" />
       <sourceFolder url="file://$MODULE_DIR$/source-testing" isTestSource="true" packagePrefix="launcher" />
       <sourceFolder url="file://$MODULE_DIR$/source-authlib" isTestSource="false" packagePrefix="com.mojang.authlib" />
-      <excludeFolder url="file://$MODULE_DIR$/runtime" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="module-library" scope="PROVIDED">

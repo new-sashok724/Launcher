@@ -65,6 +65,7 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
         if (source == null) { // New data source
             MysqlDataSource mysqlSource = new MysqlDataSource();
             mysqlSource.setCharacterEncoding("UTF-8");
+            mysqlSource.setUseSSL(false);
 
             // Prep statements cache
             mysqlSource.setPrepStmtCacheSize(250);
@@ -79,6 +80,7 @@ public final class MySQLSourceConfig extends ConfigObject implements AutoCloseab
             mysqlSource.setMaintainTimeStats(false);
             mysqlSource.setUseUnbufferedInput(false);
             mysqlSource.setUseReadAheadInput(false);
+            mysqlSource.setTcpNoDelay(true);
 
             // Set credentials
             mysqlSource.setServerName(address);

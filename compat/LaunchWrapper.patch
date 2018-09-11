@@ -1,14 +1,13 @@
-diff --git a/src/main/java/net/minecraft/launchwrapper/LaunchClassLoader.java b/src/main/java/net/minecraft/launchwrapper/LaunchClassLoader.java
-index f4e83af..d3a6d7f 100644
---- a/src/main/java/net/minecraft/launchwrapper/LaunchClassLoader.java
-+++ b/src/main/java/net/minecraft/launchwrapper/LaunchClassLoader.java
-@@ -58,6 +58,12 @@ public class LaunchClassLoader extends URLClassLoader {
+--- src/main/java/net/minecraft/launchwrapper/LaunchClassLoader.java	(revision a4801b70f8a0148c6e6279ec2e91527e8019e1c8)
++++ src/main/java/net/minecraft/launchwrapper/LaunchClassLoader.java	(date 1536688577949)
+@@ -54,6 +54,13 @@
          addClassLoaderExclusion("org.apache.logging.");
          addClassLoaderExclusion("net.minecraft.launchwrapper.");
- 
+
 +        // classloader launcher exclusions
 +        addClassLoaderExclusion("launcher.");
-+        addClassLoaderExclusion("com.mojang.");
++        addClassLoaderExclusion("com.mojang.authlib.");
++        addClassLoaderExclusion("com.mojang.util.");
 +        addClassLoaderExclusion("com.google.gson.");
 +        addClassLoaderExclusion("org.json.");
 +

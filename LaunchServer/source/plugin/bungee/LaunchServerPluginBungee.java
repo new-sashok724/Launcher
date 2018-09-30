@@ -1,5 +1,6 @@
 package launchserver.plugin.bungee;
 
+import launcher.helper.CommonHelper;
 import launchserver.plugin.LaunchServerPluginBridge;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -27,6 +28,7 @@ public final class LaunchServerPluginBungee extends Plugin {
         }
 
         // Register command
+        CommonHelper.newThread("LaunchServer Thread", true, bridge).start();
         getProxy().getPluginManager().registerCommand(this, new LaunchServerCommandBungee(this));
     }
 }

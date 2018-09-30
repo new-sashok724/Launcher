@@ -1,5 +1,6 @@
 package launchserver.plugin.bukkit;
 
+import launcher.helper.CommonHelper;
 import launchserver.plugin.LaunchServerPluginBridge;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,6 +28,7 @@ public final class LaunchServerPluginBukkit extends JavaPlugin {
         }
 
         // Register command
+        CommonHelper.newThread("LaunchServer Thread", true, bridge).start();
         getCommand("launchserver").setExecutor(new LaunchServerCommandBukkit(this));
     }
 }

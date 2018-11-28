@@ -28,11 +28,11 @@ import launcher.request.auth.CheckServerRequest;
 import launcher.request.auth.JoinServerRequest;
 import launcher.request.uuid.ProfileByUUIDRequest;
 
-public final class YggdrasilMinecraftSessionService extends BaseMinecraftSessionService {
+public class YggdrasilMinecraftSessionService extends BaseMinecraftSessionService {
     public static final JsonParser JSON_PARSER = new JsonParser();
     public static final boolean NO_TEXTURES = Boolean.parseBoolean("launcher.authlib.noTextures");
 
-    public YggdrasilMinecraftSessionService(AuthenticationService service) {
+    public YggdrasilMinecraftSessionService(YggdrasilAuthenticationService service) {
         super(service);
         LogHelper.debug("Patched MinecraftSessionService created");
     }

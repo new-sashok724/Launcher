@@ -14,7 +14,7 @@ import launcher.request.uuid.ProfileByUsernameRequest;
 
 // Used to bypass Launcher's class name obfuscation and access API
 @LauncherAPI
-public final class CompatBridge {
+public class CompatBridge {
     public static final int PROFILES_MAX_BATCH_SIZE = BatchProfileByUsernameRequest.MAX_BATCH_SIZE;
 
     private CompatBridge() {

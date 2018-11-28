@@ -8,7 +8,7 @@ import launcher.client.PlayerProfile;
 import launcher.helper.SecurityHelper;
 
 @LauncherAPI
-public final class CompatProfile {
+public class CompatProfile {
     public static final String SKIN_URL_PROPERTY = ClientLauncher.SKIN_URL_PROPERTY;
     public static final String SKIN_DIGEST_PROPERTY = ClientLauncher.SKIN_DIGEST_PROPERTY;
     public static final String CLOAK_URL_PROPERTY = ClientLauncher.CLOAK_URL_PROPERTY;

@@ -141,6 +141,11 @@ public abstract class FileAuthHandler extends AuthHandler {
     }
 
     @LauncherAPI
+    public final Set<Map.Entry<UUID, Entry>> entrySet() {
+        return Collections.unmodifiableMap(entryMap).entrySet();
+    }
+
+    @LauncherAPI
     protected abstract void readAuthFile() throws IOException;
 
     @LauncherAPI
@@ -158,11 +163,6 @@ public abstract class FileAuthHandler extends AuthHandler {
         } finally {
             lock.writeLock().unlock();
         }
-    }
-
-    @LauncherAPI
-    protected final Set<Map.Entry<UUID, Entry>> entrySet() {
-        return Collections.unmodifiableMap(entryMap).entrySet();
     }
 
     private UUID genUUIDFor(String username) {

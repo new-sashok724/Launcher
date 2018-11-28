@@ -18,6 +18,8 @@ import launchserver.LaunchServer;
 import launchserver.command.Command;
 import launchserver.command.CommandException;
 import launchserver.command.auth.AuthCommand;
+import launchserver.command.auth.CheckServerCommand;
+import launchserver.command.auth.JoinServerCommand;
 import launchserver.command.auth.UUIDToUsernameCommand;
 import launchserver.command.auth.UsernameToUUIDCommand;
 import launchserver.command.basic.BuildCommand;
@@ -36,6 +38,7 @@ import launchserver.command.hash.SyncBinariesCommand;
 import launchserver.command.hash.SyncProfilesCommand;
 import launchserver.command.hash.SyncUpdatesCommand;
 import launchserver.command.hash.UnindexAssetCommand;
+import launchserver.command.legacy.DumpBinaryAuthHandler;
 
 public abstract class CommandHandler implements Runnable {
     private final Map<String, Command> commands = new ConcurrentHashMap<>(32);
@@ -63,8 +66,13 @@ public abstract class CommandHandler implements Runnable {
 
         // Register auth commands
         registerCommand("auth", new AuthCommand(server));
+        registerCommand("joinServer", new JoinServerCommand(server));
+        registerCommand("checkServer", new CheckServerCommand(server));
         registerCommand("usernameToUUID", new UsernameToUUIDCommand(server));
         registerCommand("uuidToUsername", new UUIDToUsernameCommand(server));
+
+        // Register legacy commands
+        registerCommand("dumpBinaryAuthHandler", new DumpBinaryAuthHandler(server));
     }
 
     @Override

@@ -9,7 +9,7 @@ import com.mojang.authlib.UserAuthentication;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import launcher.helper.LogHelper;
 
-public final class YggdrasilAuthenticationService implements AuthenticationService {
+public class YggdrasilAuthenticationService implements AuthenticationService {
     @SuppressWarnings("UnusedParameters")
     public YggdrasilAuthenticationService(Proxy proxy, String clientToken) {
         LogHelper.debug("Patched AuthenticationService created: '%s'", clientToken);

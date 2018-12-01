@@ -32,6 +32,11 @@ public class YggdrasilMinecraftSessionService extends BaseMinecraftSessionServic
     public static final JsonParser JSON_PARSER = new JsonParser();
     public static final boolean NO_TEXTURES = Boolean.parseBoolean("launcher.authlib.noTextures");
 
+    public YggdrasilMinecraftSessionService(AuthenticationService service) {
+        super(service);
+        LogHelper.debug("Patched MinecraftSessionService created");
+    }
+
     public YggdrasilMinecraftSessionService(YggdrasilAuthenticationService service) {
         super(service);
         LogHelper.debug("Patched MinecraftSessionService created");

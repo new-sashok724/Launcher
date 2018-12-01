@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
-public class MinecraftProfileTexture {
+public final class MinecraftProfileTexture {
     public static final Set<Type> PROFILE_TEXTURE_TYPES = Collections.unmodifiableSet(EnumSet.allOf(Type.class));
     public static final int PROFILE_TEXTURE_COUNT = PROFILE_TEXTURE_TYPES.size();
 

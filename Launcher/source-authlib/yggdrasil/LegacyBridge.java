@@ -10,7 +10,7 @@ import launcher.request.auth.JoinServerRequest;
 
 // Used by 1.6.4 and below versions
 @LauncherAPI
-public class LegacyBridge {
+public final class LegacyBridge {
     private LegacyBridge() {
     }
 

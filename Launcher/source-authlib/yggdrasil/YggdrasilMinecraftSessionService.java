@@ -38,8 +38,7 @@ public class YggdrasilMinecraftSessionService extends BaseMinecraftSessionServic
     }
 
     public YggdrasilMinecraftSessionService(YggdrasilAuthenticationService service) {
-        super(service);
-        LogHelper.debug("Patched MinecraftSessionService created");
+        this((AuthenticationService) service);
     }
 
     @Override

@@ -25,7 +25,7 @@ public class YggdrasilGameProfileRepository implements GameProfileRepository {
     }
 
     public YggdrasilGameProfileRepository(YggdrasilAuthenticationService authenticationService) {
-        LogHelper.debug("Patched GameProfileRepository created");
+        this();
     }
 
     @Override

@@ -44,8 +44,8 @@ public abstract class Request<R> {
         // Make request to LaunchServer
         try (Socket socket = IOHelper.newSocket()) {
             socket.connect(IOHelper.resolve(config.address));
-            try (HInput input = new HInput(socket.getInputStream());
-                HOutput output = new HOutput(socket.getOutputStream())) {
+            try (HInput input = new HInput(IOHelper.newBufferedInputStream(socket.getInputStream()));
+                HOutput output = new HOutput(IOHelper.newBufferedOutStream(socket.getOutputStream()))) {
                 writeHandshake(input, output);
                 return requestDo(input, output);
             }

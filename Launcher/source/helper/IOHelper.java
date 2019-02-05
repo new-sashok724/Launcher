@@ -1,6 +1,8 @@
 package launcher.helper;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
@@ -643,6 +645,16 @@ public final class IOHelper {
     public static void write(Path file, byte[] bytes) throws IOException {
         createParentDirs(file);
         Files.write(file, bytes, WRITE_OPTIONS);
+    }
+
+    @LauncherAPI
+    public static OutputStream newBufferedOutStream(OutputStream out) {
+        return new BufferedOutputStream(out);
+    }
+
+    @LauncherAPI
+    public static InputStream newBufferedInputStream(InputStream in) {
+        return new BufferedInputStream(in);
     }
 
     private static final class DeleteDirVisitor extends SimpleFileVisitor<Path> {

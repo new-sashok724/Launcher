@@ -16,6 +16,7 @@ import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.WriterConfig;
 import launcher.helper.IOHelper;
+import launcher.helper.LogHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 
 public final class MojangAuthProvider extends AuthProvider {
@@ -76,6 +77,7 @@ public final class MojangAuthProvider extends AuthProvider {
 
             // Parse response
             String json = new String(IOHelper.read(input), charsetObject);
+            LogHelper.subDebug("Raw Mojang response: '" + json + '\'');
             return json.isEmpty() ? null : Json.parse(json).asObject();
         }
     }

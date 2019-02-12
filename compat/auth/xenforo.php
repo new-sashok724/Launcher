@@ -38,7 +38,9 @@ if(class_exists('XenForo_Authentication_Core12')) {
 	$auth = new XenForo_Authentication_Core12;
 } else if(class_exists('XenForo_Authentication_Core')) {
 	$auth = new XenForo_Authentication_Core;
-} else exit('Unable to select authentication core');
+} else {
+	exit('Unable to select authentication core');
+}
 
 // Try authenticate
 $auth->setData($data);

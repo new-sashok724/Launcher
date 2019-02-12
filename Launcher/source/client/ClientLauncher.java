@@ -317,6 +317,8 @@ public final class ClientLauncher {
         // Invoke main method with exception wrapping
         LAUNCHED.set(true);
         JVMHelper.fullGC();
+        System.setProperty("minecraft.launcher.brand", "sashok724's Launcher v3");
+        System.setProperty("minecraft.launcher.version", Launcher.VERSION);
         System.setProperty("minecraft.applet.TargetDirectory", params.clientDir.toString()); // For 1.5.2
         mainMethod.invoke((Object) args.toArray(EMPTY_ARRAY));
     }

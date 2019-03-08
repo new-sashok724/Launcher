@@ -16,9 +16,9 @@ var config = {
     ramDefault: 1024, // Default RAM amount (0 for auto)
 
     // Custom JRE config (!!! DON'T CHANGE !!!)
-    jvmMustdie32Dir: "jre-8u131-win32", jvmMustdie64Dir: "jre-8u131-win64",
-    jvmLinux32Dir: "jre-8u131-linux32", jvmLinux64Dir: "jre-8u131-linux64",
-    jvmMacOSXDir: "jre-8u131-macosx", jvmUnknownDir: "jre-8u131-unknown"
+    jvmMustdie32Dir: "jre-8u202-win32", jvmMustdie64Dir: "jre-8u202-win64",
+    jvmLinux32Dir: "jre-8u202-linux32", jvmLinux64Dir: "jre-8u202-linux64",
+    jvmMacOSXDir: "jre-8u202-macosx", jvmUnknownDir: "jre-8u202-unknown"
 };
 
 // ====== DON'T TOUCH! ====== //

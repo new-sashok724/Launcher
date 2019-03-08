@@ -77,20 +77,14 @@ public final class Launcher {
     private static final AtomicReference<Config> CONFIG = new AtomicReference<>();
 
     // Version info
-    @LauncherAPI
-    public static final String VERSION = "15.4";
-    @LauncherAPI
-    public static final String BUILD = readBuildNumber();
-    @LauncherAPI
-    public static final int PROTOCOL_MAGIC = 0x724724_00 + 23;
+    @LauncherAPI public static final String VERSION = "15.4";
+    @LauncherAPI public static final String BUILD = readBuildNumber();
+    @LauncherAPI public static final int PROTOCOL_MAGIC = 0x724724_00 + 23;
 
     // Constants
-    @LauncherAPI
-    public static final String RUNTIME_DIR = "runtime";
-    @LauncherAPI
-    public static final String CONFIG_FILE = "config.bin";
-    @LauncherAPI
-    public static final String INIT_SCRIPT_FILE = "init.js";
+    @LauncherAPI public static final String RUNTIME_DIR = "runtime";
+    @LauncherAPI public static final String CONFIG_FILE = "config.bin";
+    @LauncherAPI public static final String INIT_SCRIPT_FILE = "init.js";
 
     // Instance
     private final AtomicBoolean started = new AtomicBoolean(false);

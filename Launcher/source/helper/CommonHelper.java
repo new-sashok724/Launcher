@@ -7,7 +7,7 @@ import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import launcher.LauncherAPI;
 
 public final class CommonHelper {
-    private static final String[] SCRIPT_ENGINE_ARGS = { "-strict" };
+    private static final String[] SCRIPT_ENGINE_ARGS = { "-strict", "--language=es6", "--optimistic-types=false" };
 
     private CommonHelper() {
     }

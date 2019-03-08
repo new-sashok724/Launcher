@@ -22,7 +22,7 @@ public final class CheckServerCommand extends Command {
     }
 
     @Override
-    public void invoke(String... args) throws Exception {
+    public void invoke(String... args) throws Throwable {
         verifyArgs(args, 2);
         String username = args[0];
         String serverID = args[1];

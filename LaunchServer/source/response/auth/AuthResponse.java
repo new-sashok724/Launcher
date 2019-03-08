@@ -27,7 +27,7 @@ public final class AuthResponse extends Response {
     }
 
     @Override
-    public void reply() throws Exception {
+    public void reply() throws Throwable {
         String login = input.readString(255);
         byte[] encryptedPassword = input.readByteArray(SecurityHelper.CRYPTO_MAX_LENGTH);
 
@@ -53,8 +53,8 @@ public final class AuthResponse extends Response {
         } catch (AuthException e) {
             requestError(e.getMessage());
             return;
-        } catch (Exception e) {
-            LogHelper.error(e);
+        } catch (Throwable exc) {
+            LogHelper.error(exc);
             requestError("Internal auth provider error");
             return;
         }
@@ -67,8 +67,8 @@ public final class AuthResponse extends Response {
         } catch (AuthException e) {
             requestError(e.getMessage());
             return;
-        } catch (Exception e) {
-            LogHelper.error(e);
+        } catch (Throwable exc) {
+            LogHelper.error(exc);
             requestError("Internal auth handler error");
             return;
         }

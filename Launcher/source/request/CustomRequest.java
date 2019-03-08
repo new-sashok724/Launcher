@@ -24,7 +24,7 @@ public abstract class CustomRequest<T> extends Request<T> {
     }
 
     @Override
-    protected final T requestDo(HInput input, HOutput output) throws Exception {
+    protected final T requestDo(HInput input, HOutput output) throws Throwable {
         output.writeASCII(VerifyHelper.verifyIDName(getName()), 255);
         output.flush();
 

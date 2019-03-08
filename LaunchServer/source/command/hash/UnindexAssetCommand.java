@@ -30,7 +30,7 @@ public final class UnindexAssetCommand extends Command {
     }
 
     @Override
-    public void invoke(String... args) throws Exception {
+    public void invoke(String... args) throws Throwable {
         verifyArgs(args, 3);
         String inputAssetDirName = IOHelper.verifyFileName(args[0]);
         String indexFileName = IOHelper.verifyFileName(args[1]);

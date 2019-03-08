@@ -66,13 +66,13 @@ public final class IOHelper {
 
     // Constants
     @LauncherAPI public static final int SOCKET_TIMEOUT = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.socketTimeout", Integer.toString(30000))),
+        Integer.parseInt(System.getProperty("launcher.socketTimeout", Integer.toString(30000))),
         VerifyHelper.POSITIVE, "launcher.socketTimeout can't be <= 0");
     @LauncherAPI public static final int HTTP_TIMEOUT = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
+        Integer.parseInt(System.getProperty("launcher.httpTimeout", Integer.toString(5000))),
         VerifyHelper.POSITIVE, "launcher.httpTimeout can't be <= 0");
     @LauncherAPI public static final int BUFFER_SIZE = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.bufferSize", Integer.toString(4096))),
+        Integer.parseInt(System.getProperty("launcher.bufferSize", Integer.toString(4096))),
         VerifyHelper.POSITIVE, "launcher.bufferSize can't be <= 0");
 
     // Platform-dependent
@@ -107,7 +107,7 @@ public final class IOHelper {
     public static void close(AutoCloseable closeable) {
         try {
             closeable.close();
-        } catch (Exception exc) {
+        } catch (Throwable exc) {
             LogHelper.error(exc);
         }
     }

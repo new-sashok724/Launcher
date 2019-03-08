@@ -32,7 +32,7 @@ public final class DownloadAssetCommand extends Command {
     }
 
     @Override
-    public void invoke(String... args) throws Exception {
+    public void invoke(String... args) throws Throwable {
         verifyArgs(args, 2);
         Version version = Version.byName(args[0]);
         String dirName = IOHelper.verifyFileName(args[1]);

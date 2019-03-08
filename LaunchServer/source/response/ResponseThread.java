@@ -47,7 +47,7 @@ public final class ResponseThread implements Runnable {
 
         // Process connection
         boolean cancelled = false;
-        Exception savedError = null;
+        Throwable savedError = null;
         try (HInput input = new HInput(socket.getInputStream());
             HOutput output = new HOutput(socket.getOutputStream())) {
             Type type = readHandshake(input, output);
@@ -63,9 +63,9 @@ public final class ResponseThread implements Runnable {
                 LogHelper.subDebug(String.format("#%d Request error: %s", id, e.getMessage()));
                 output.writeString(e.getMessage(), 0);
             }
-        } catch (Exception e) {
-            savedError = e;
-            LogHelper.error(e);
+        } catch (Throwable exc) {
+            savedError = exc;
+            LogHelper.error(exc);
         } finally {
             IOHelper.close(socket);
             if (!cancelled) {
@@ -111,7 +111,7 @@ public final class ResponseThread implements Runnable {
         return type;
     }
 
-    private void respond(Type type, HInput input, HOutput output) throws Exception {
+    private void respond(Type type, HInput input, HOutput output) throws Throwable {
         if (server.serverSocketHandler.logConnections) {
             LogHelper.info("Connection #%d from %s: %s", id, IOHelper.getIP(socket.getRemoteSocketAddress()), type.name());
         } else {

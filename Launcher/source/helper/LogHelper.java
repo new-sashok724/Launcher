@@ -172,7 +172,7 @@ public final class LogHelper {
             }
             return sw.toString();
         } catch (IOException e) {
-            throw new InternalError(e);
+            throw new AssertionError(e);
         }
     }
 

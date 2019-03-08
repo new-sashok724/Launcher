@@ -21,7 +21,7 @@ public final class VersionCommand extends Command {
     }
 
     @Override
-    public void invoke(String... args) throws Exception {
+    public void invoke(String... args) {
         LogHelper.subInfo("LaunchServer version: %s (build #%s)", Launcher.VERSION, Launcher.BUILD);
     }
 }

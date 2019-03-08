@@ -24,7 +24,7 @@ public abstract class Response {
     }
 
     @LauncherAPI
-    public abstract void reply() throws Exception;
+    public abstract void reply() throws Throwable;
 
     @LauncherAPI
     protected final void debug(String message) {

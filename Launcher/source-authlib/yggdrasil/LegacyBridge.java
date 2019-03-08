@@ -15,7 +15,7 @@ public final class LegacyBridge {
     }
 
     @SuppressWarnings("unused")
-    public static boolean checkServer(String username, String serverID) throws Exception {
+    public static boolean checkServer(String username, String serverID) throws Throwable {
         LogHelper.debug("LegacyBridge.checkServer, Username: '%s', Server ID: %s", username, serverID);
         return new CheckServerRequest(username, serverID).request() != null;
     }
@@ -44,8 +44,8 @@ public final class LegacyBridge {
         LogHelper.debug("LegacyBridge.joinServer, Username: '%s', Access token: %s, Server ID: %s", username, accessToken, serverID);
         try {
             return new JoinServerRequest(username, accessToken, serverID).request() ? "OK" : "Bad Login (Clientside)";
-        } catch (Exception e) {
-            return e.toString();
+        } catch (Throwable exc) {
+            return exc.toString();
         }
     }
 }

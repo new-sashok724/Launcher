@@ -23,7 +23,7 @@ public final class AuthCommand extends Command {
     }
 
     @Override
-    public void invoke(String... args) throws Exception {
+    public void invoke(String... args) throws Throwable {
         verifyArgs(args, 2);
         String login = args[0];
         String password = args[1];

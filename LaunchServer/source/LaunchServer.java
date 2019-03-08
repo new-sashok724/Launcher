@@ -16,8 +16,6 @@ import java.security.KeyPair;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -59,6 +57,7 @@ import launchserver.auth.handler.AuthHandler;
 import launchserver.auth.handler.CachedAuthHandler;
 import launchserver.auth.handler.FileAuthHandler;
 import launchserver.auth.provider.AuthProvider;
+import launchserver.auth.provider.DigestAuthProvider;
 import launchserver.binary.EXEL4JLauncherBinary;
 import launchserver.binary.EXELauncherBinary;
 import launchserver.binary.JARLauncherBinary;
@@ -96,8 +95,8 @@ public final class LaunchServer implements Runnable, AutoCloseable {
     // Server
     @LauncherAPI public final CommandHandler commandHandler;
     @LauncherAPI public final ServerSocketHandler serverSocketHandler;
+    @LauncherAPI public final ScriptEngine engine = CommonHelper.newScriptEngine();
     private final AtomicBoolean started = new AtomicBoolean(false);
-    private final ScriptEngine engine = CommonHelper.newScriptEngine();
 
     // Updates and profiles
     private volatile List<SignedObjectHolder<ClientProfile>> profilesList;
@@ -213,8 +212,8 @@ public final class LaunchServer implements Runnable, AutoCloseable {
             ((Invocable) engine).invokeFunction("close");
         } catch (NoSuchMethodException ignored) {
             // Do nothing if method simply doesn't exist
-        } catch (Exception e) {
-            LogHelper.error(e);
+        } catch (Throwable exc) {
+            LogHelper.error(exc);
         }
 
         // Print last message before death :(
@@ -233,8 +232,8 @@ public final class LaunchServer implements Runnable, AutoCloseable {
             LogHelper.info("Loading plugin.js script");
             try {
                 loadScript(IOHelper.toURL(scriptFile));
-            } catch (Exception e) {
-                throw new RuntimeException("Error while loading plugin.js", e);
+            } catch (Throwable exc) {
+                throw new RuntimeException("Error while loading plugin.js", exc);
             }
         }
 
@@ -379,8 +378,8 @@ public final class LaunchServer implements Runnable, AutoCloseable {
         bindings.put("server", this);
 
         // Add launcher and launchserver class bindings
-        Launcher.addLauncherClassBindings(bindings);
-        addLaunchServerClassBindings(bindings);
+        Launcher.addLauncherClassBindings(engine, bindings);
+        addLaunchServerClassBindings(engine, bindings);
     }
 
     public static void main(String... args) throws Throwable {
@@ -390,39 +389,39 @@ public final class LaunchServer implements Runnable, AutoCloseable {
         LogHelper.printVersion("LaunchServer");
 
         // Start LaunchServer
-        Instant start = Instant.now();
+        long start = System.currentTimeMillis();
         try {
             new LaunchServer(IOHelper.WORKING_DIR, false).run();
         } catch (Throwable exc) {
             LogHelper.error(exc);
             return;
         }
-        Instant end = Instant.now();
-        LogHelper.debug("LaunchServer started in %dms", Duration.between(start, end).toMillis());
+        long end = System.currentTimeMillis();
+        LogHelper.debug("LaunchServer started in %dms", end - start);
     }
 
-    private static void addLaunchServerClassBindings(Map<String, Object> bindings) {
-        bindings.put("LaunchServerClass", LaunchServer.class);
+    public static void addLaunchServerClassBindings(ScriptEngine engine, Map<String, Object> bindings) {
+        Launcher.addClassBinding(engine, bindings, "LaunchServer", LaunchServer.class);
 
         // Set auth class bindings
-        bindings.put("AuthHandlerClass", AuthHandler.class);
-        bindings.put("FileAuthHandlerClass", FileAuthHandler.class);
-        bindings.put("CachedAuthHandlerClass", CachedAuthHandler.class);
-        bindings.put("AuthProviderClass", AuthProvider.class);
-        bindings.put("DigestAuthProviderClass", AuthProvider.class);
-        bindings.put("MySQLSourceConfigClass", MySQLSourceConfig.class);
-        bindings.put("AuthExceptionClass", AuthException.class);
-        bindings.put("TextureProviderClass", TextureProvider.class);
+        Launcher.addClassBinding(engine, bindings, "AuthHandler", AuthHandler.class);
+        Launcher.addClassBinding(engine, bindings, "FileAuthHandler", FileAuthHandler.class);
+        Launcher.addClassBinding(engine, bindings, "CachedAuthHandler", CachedAuthHandler.class);
+        Launcher.addClassBinding(engine, bindings, "AuthProvider", AuthProvider.class);
+        Launcher.addClassBinding(engine, bindings, "DigestAuthProvider", DigestAuthProvider.class);
+        Launcher.addClassBinding(engine, bindings, "MySQLSourceConfig", MySQLSourceConfig.class);
+        Launcher.addClassBinding(engine, bindings, "AuthException", AuthException.class);
+        Launcher.addClassBinding(engine, bindings, "TextureProvider", TextureProvider.class);
 
         // Set command class bindings
-        bindings.put("CommandClass", Command.class);
-        bindings.put("CommandHandlerClass", CommandHandler.class);
-        bindings.put("CommandExceptionClass", CommandException.class);
+        Launcher.addClassBinding(engine, bindings, "Command", Command.class);
+        Launcher.addClassBinding(engine, bindings, "CommandHandler", CommandHandler.class);
+        Launcher.addClassBinding(engine, bindings, "CommandException", CommandException.class);
 
         // Set response class bindings
-        bindings.put("ResponseClass", Response.class);
-        bindings.put("ResponseFactoryClass", Factory.class);
-        bindings.put("ServerSocketHandlerListenerClass", Listener.class);
+        Launcher.addClassBinding(engine, bindings, "Response", Response.class);
+        Launcher.addClassBinding(engine, bindings, "ResponseFactory", Factory.class);
+        Launcher.addClassBinding(engine, bindings, "ServerSocketHandlerListener", Listener.class);
     }
 
     private final class ProfilesFileVisitor extends SimpleFileVisitor<Path> {

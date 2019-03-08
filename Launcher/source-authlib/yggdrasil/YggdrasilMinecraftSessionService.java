@@ -54,8 +54,8 @@ public class YggdrasilMinecraftSessionService extends BaseMinecraftSessionServic
         PlayerProfile pp;
         try {
             pp = new ProfileByUUIDRequest(uuid).request();
-        } catch (Exception e) {
-            LogHelper.debug("Couldn't fetch profile properties for '%s': %s", profile, e);
+        } catch (Throwable exc) {
+            LogHelper.debug("Couldn't fetch profile properties for '%s': %s", profile, exc);
             return profile;
         }
 
@@ -114,9 +114,9 @@ public class YggdrasilMinecraftSessionService extends BaseMinecraftSessionServic
         PlayerProfile pp;
         try {
             pp = new CheckServerRequest(username, serverID).request();
-        } catch (Exception e) {
-            LogHelper.error(e);
-            throw new AuthenticationUnavailableException(e);
+        } catch (Throwable exc) {
+            LogHelper.error(exc);
+            throw new AuthenticationUnavailableException(exc);
         }
 
         // Return profile if found
@@ -142,8 +142,8 @@ public class YggdrasilMinecraftSessionService extends BaseMinecraftSessionServic
         boolean success;
         try {
             success = new JoinServerRequest(username, accessToken, serverID).request();
-        } catch (Exception e) {
-            throw new AuthenticationUnavailableException(e);
+        } catch (Throwable exc) {
+            throw new AuthenticationUnavailableException(exc);
         }
 
         // Verify is success
@@ -182,9 +182,10 @@ public class YggdrasilMinecraftSessionService extends BaseMinecraftSessionServic
         // Decode textures payload
         JsonObject texturesJSON;
         try {
-            byte[] decoded = Base64.getDecoder().decode(texturesBase64);
-            texturesJSON = JSON_PARSER.parse(new String(decoded, IOHelper.UNICODE_CHARSET)).getAsJsonObject().getAsJsonObject("textures");
-        } catch (Exception ignored) {
+            byte[] asBytes = Base64.getDecoder().decode(texturesBase64);
+            String asString = new String(asBytes, IOHelper.UNICODE_CHARSET);
+            texturesJSON = JSON_PARSER.parse(asString).getAsJsonObject().getAsJsonObject("textures");
+        } catch (Throwable ignored) {
             LogHelper.error("Could not decode textures payload, Username: '%s', UUID: '%s'", profile.getName(), profile.getUUID());
             return;
         }

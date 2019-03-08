@@ -1,4 +1,4 @@
-server.loadScript(IOHelperClass.static.toURL(java.nio.file.Paths.get("apiServer.js")));
+server.loadScript(IOHelperClass.static.toURL(java.nio.file.Paths.get("api.js")));
 
 // Print test message
 LogHelper.info("[plugin.js] Test message");

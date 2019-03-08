@@ -23,7 +23,7 @@ public abstract class AuthProvider extends ConfigObject implements AutoCloseable
     public abstract void close() throws IOException;
 
     @LauncherAPI
-    public abstract AuthProviderResult auth(String login, String password, String ip) throws Exception;
+    public abstract AuthProviderResult auth(String login, String password, String ip) throws Throwable;
 
     @LauncherAPI
     public static AuthProviderResult authError(String message) throws AuthException {
@@ -45,14 +45,14 @@ public abstract class AuthProvider extends ConfigObject implements AutoCloseable
     }
 
     static {
-        registerProvider("null", NullAuthProvider::new);
         registerProvider("accept", AcceptAuthProvider::new);
         registerProvider("reject", RejectAuthProvider::new);
+        registerProvider("delegate", DelegateAuthProvider::new);
 
         // Auth providers that doesn't do nothing :D
+        registerProvider("file", FileAuthProvider::new);
         registerProvider("mojang", MojangAuthProvider::new);
         registerProvider("mysql", MySQLAuthProvider::new);
-        registerProvider("file", FileAuthProvider::new);
         registerProvider("request", RequestAuthProvider::new);
     }
 }

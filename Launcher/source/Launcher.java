@@ -7,8 +7,6 @@ import java.net.URL;
 import java.nio.file.NoSuchFileException;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,6 +21,7 @@ import javax.script.Invocable;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
+import javafx.application.Application;
 
 import launcher.client.ClientLauncher;
 import launcher.client.ClientLauncher.Params;
@@ -78,14 +77,20 @@ public final class Launcher {
     private static final AtomicReference<Config> CONFIG = new AtomicReference<>();
 
     // Version info
-    @LauncherAPI public static final String VERSION = "15.4";
-    @LauncherAPI public static final String BUILD = readBuildNumber();
-    @LauncherAPI public static final int PROTOCOL_MAGIC = 0x724724_00 + 23;
+    @LauncherAPI
+    public static final String VERSION = "15.4";
+    @LauncherAPI
+    public static final String BUILD = readBuildNumber();
+    @LauncherAPI
+    public static final int PROTOCOL_MAGIC = 0x724724_00 + 23;
 
     // Constants
-    @LauncherAPI public static final String RUNTIME_DIR = "runtime";
-    @LauncherAPI public static final String CONFIG_FILE = "config.bin";
-    @LauncherAPI public static final String INIT_SCRIPT_FILE = "init.js";
+    @LauncherAPI
+    public static final String RUNTIME_DIR = "runtime";
+    @LauncherAPI
+    public static final String CONFIG_FILE = "config.bin";
+    @LauncherAPI
+    public static final String INIT_SCRIPT_FILE = "init.js";
 
     // Instance
     private final AtomicBoolean started = new AtomicBoolean(false);
@@ -122,82 +127,92 @@ public final class Launcher {
         bindings.put("launcher", this);
 
         // Add launcher class bindings
-        addLauncherClassBindings(bindings);
+        addLauncherClassBindings(engine, bindings);
     }
 
     @LauncherAPI
-    public static void addLauncherClassBindings(Map<String, Object> bindings) {
-        bindings.put("LauncherClass", Launcher.class);
-        bindings.put("LauncherConfigClass", Config.class);
+    public static void addLauncherClassBindings(ScriptEngine engine, Map<String, Object> bindings) {
+        addClassBinding(engine, bindings, "Launcher", Launcher.class);
+        addClassBinding(engine, bindings, "Config", Config.class);
 
         // Set client class bindings
-        bindings.put("PlayerProfileClass", PlayerProfile.class);
-        bindings.put("PlayerProfileTextureClass", Texture.class);
-        bindings.put("ClientProfileClass", ClientProfile.class);
-        bindings.put("ClientProfileVersionClass", Version.class);
-        bindings.put("ClientLauncherClass", ClientLauncher.class);
-        bindings.put("ClientLauncherParamsClass", Params.class);
-        bindings.put("ServerPingerClass", ServerPinger.class);
+        addClassBinding(engine, bindings, "PlayerProfile", PlayerProfile.class);
+        addClassBinding(engine, bindings, "PlayerProfileTexture", Texture.class);
+        addClassBinding(engine, bindings, "ClientProfile", ClientProfile.class);
+        addClassBinding(engine, bindings, "ClientProfileVersion", Version.class);
+        addClassBinding(engine, bindings, "ClientLauncher", ClientLauncher.class);
+        addClassBinding(engine, bindings, "ClientLauncherParams", Params.class);
+        addClassBinding(engine, bindings, "ServerPinger", ServerPinger.class);
 
         // Set request class bindings
-        bindings.put("RequestClass", Request.class);
-        bindings.put("RequestTypeClass", Request.Type.class);
-        bindings.put("RequestExceptionClass", RequestException.class);
-        bindings.put("CustomRequestClass", CustomRequest.class);
-        bindings.put("PingRequestClass", PingRequest.class);
-        bindings.put("AuthRequestClass", AuthRequest.class);
-        bindings.put("JoinServerRequestClass", JoinServerRequest.class);
-        bindings.put("CheckServerRequestClass", CheckServerRequest.class);
-        bindings.put("UpdateRequestClass", UpdateRequest.class);
-        bindings.put("LauncherRequestClass", LauncherRequest.class);
-        bindings.put("ProfileByUsernameRequestClass", ProfileByUsernameRequest.class);
-        bindings.put("ProfileByUUIDRequestClass", ProfileByUUIDRequest.class);
-        bindings.put("BatchProfileByUsernameRequestClass", BatchProfileByUsernameRequest.class);
+        addClassBinding(engine, bindings, "Request", Request.class);
+        addClassBinding(engine, bindings, "RequestType", Request.Type.class);
+        addClassBinding(engine, bindings, "RequestException", RequestException.class);
+        addClassBinding(engine, bindings, "CustomRequest", CustomRequest.class);
+        addClassBinding(engine, bindings, "PingRequest", PingRequest.class);
+        addClassBinding(engine, bindings, "AuthRequest", AuthRequest.class);
+        addClassBinding(engine, bindings, "JoinServerRequest", JoinServerRequest.class);
+        addClassBinding(engine, bindings, "CheckServerRequest", CheckServerRequest.class);
+        addClassBinding(engine, bindings, "UpdateRequest", UpdateRequest.class);
+        addClassBinding(engine, bindings, "LauncherRequest", LauncherRequest.class);
+        addClassBinding(engine, bindings, "ProfileByUsernameRequest", ProfileByUsernameRequest.class);
+        addClassBinding(engine, bindings, "ProfileByUUIDRequest", ProfileByUUIDRequest.class);
+        addClassBinding(engine, bindings, "BatchProfileByUsernameRequest", BatchProfileByUsernameRequest.class);
 
         // Set hasher class bindings
-        bindings.put("FileNameMatcherClass", FileNameMatcher.class);
-        bindings.put("HashedDirClass", HashedDir.class);
-        bindings.put("HashedFileClass", HashedFile.class);
-        bindings.put("HashedEntryTypeClass", HashedEntry.Type.class);
+        addClassBinding(engine, bindings, "FileNameMatcher", FileNameMatcher.class);
+        addClassBinding(engine, bindings, "HashedDir", HashedDir.class);
+        addClassBinding(engine, bindings, "HashedFile", HashedFile.class);
+        addClassBinding(engine, bindings, "HashedEntryType", HashedEntry.Type.class);
 
         // Set serialization class bindings
-        bindings.put("HInputClass", HInput.class);
-        bindings.put("HOutputClass", HOutput.class);
-        bindings.put("StreamObjectClass", StreamObject.class);
-        bindings.put("StreamObjectAdapterClass", StreamObject.Adapter.class);
-        bindings.put("SignedBytesHolderClass", SignedBytesHolder.class);
-        bindings.put("SignedObjectHolderClass", SignedObjectHolder.class);
-        bindings.put("EnumSerializerClass", EnumSerializer.class);
+        addClassBinding(engine, bindings, "HInput", HInput.class);
+        addClassBinding(engine, bindings, "HOutput", HOutput.class);
+        addClassBinding(engine, bindings, "StreamObject", StreamObject.class);
+        addClassBinding(engine, bindings, "StreamObjectAdapter", StreamObject.Adapter.class);
+        addClassBinding(engine, bindings, "SignedBytesHolder", SignedBytesHolder.class);
+        addClassBinding(engine, bindings, "SignedObjectHolder", SignedObjectHolder.class);
+        addClassBinding(engine, bindings, "EnumSerializer", EnumSerializer.class);
 
         // Set config serialization class bindings
-        bindings.put("ConfigObjectClass", ConfigObject.class);
-        bindings.put("ConfigObjectAdapterClass", Adapter.class);
-        bindings.put("BlockConfigEntryClass", BlockConfigEntry.class);
-        bindings.put("BooleanConfigEntryClass", BooleanConfigEntry.class);
-        bindings.put("IntegerConfigEntryClass", IntegerConfigEntry.class);
-        bindings.put("ListConfigEntryClass", ListConfigEntry.class);
-        bindings.put("StringConfigEntryClass", StringConfigEntry.class);
-        bindings.put("ConfigEntryTypeClass", Type.class);
-        bindings.put("TextConfigReaderClass", TextConfigReader.class);
-        bindings.put("TextConfigWriterClass", TextConfigWriter.class);
+        addClassBinding(engine, bindings, "ConfigObject", ConfigObject.class);
+        addClassBinding(engine, bindings, "ConfigObjectAdapter", Adapter.class);
+        addClassBinding(engine, bindings, "BlockConfigEntry", BlockConfigEntry.class);
+        addClassBinding(engine, bindings, "BooleanConfigEntry", BooleanConfigEntry.class);
+        addClassBinding(engine, bindings, "IntegerConfigEntry", IntegerConfigEntry.class);
+        addClassBinding(engine, bindings, "ListConfigEntry", ListConfigEntry.class);
+        addClassBinding(engine, bindings, "StringConfigEntry", StringConfigEntry.class);
+        addClassBinding(engine, bindings, "ConfigEntryType", Type.class);
+        addClassBinding(engine, bindings, "TextConfigReader", TextConfigReader.class);
+        addClassBinding(engine, bindings, "TextConfigWriter", TextConfigWriter.class);
 
         // Set helper class bindings
-        bindings.put("CommonHelperClass", CommonHelper.class);
-        bindings.put("IOHelperClass", IOHelper.class);
-        bindings.put("JVMHelperClass", JVMHelper.class);
-        bindings.put("JVMHelperOSClass", OS.class);
-        bindings.put("LogHelperClass", LogHelper.class);
-        bindings.put("LogHelperOutputClass", Output.class);
-        bindings.put("SecurityHelperClass", SecurityHelper.class);
-        bindings.put("DigestAlgorithmClass", DigestAlgorithm.class);
-        bindings.put("VerifyHelperClass", VerifyHelper.class);
+        addClassBinding(engine, bindings, "CommonHelper", CommonHelper.class);
+        addClassBinding(engine, bindings, "IOHelper", IOHelper.class);
+        addClassBinding(engine, bindings, "JVMHelper", JVMHelper.class);
+        addClassBinding(engine, bindings, "JVMHelperOS", OS.class);
+        addClassBinding(engine, bindings, "LogHelper", LogHelper.class);
+        addClassBinding(engine, bindings, "LogHelperOutput", Output.class);
+        addClassBinding(engine, bindings, "SecurityHelper", SecurityHelper.class);
+        addClassBinding(engine, bindings, "DigestAlgorithm", DigestAlgorithm.class);
+        addClassBinding(engine, bindings, "VerifyHelper", VerifyHelper.class);
 
         // Load JS API if available
         try {
-            Class.forName("javafx.application.Application");
-            bindings.put("JSApplicationClass", JSApplication.class);
-        } catch (ClassNotFoundException ignored) {
+            addClassBinding(engine, bindings, "Application", Application.class);
+            addClassBinding(engine, bindings, "JSApplication", JSApplication.class);
+        } catch (Throwable ignored) {
             LogHelper.warning("JavaFX API isn't available");
+        }
+    }
+
+    @LauncherAPI
+    public static void addClassBinding(ScriptEngine engine, Map<String, Object> bindings, String name, Class<?> clazz) {
+        bindings.put(name + "Class", clazz); // Backwards-compatibility
+        try {
+            engine.eval("var " + name + " = " + name + "Class.static;");
+        } catch (ScriptException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -245,15 +260,15 @@ public final class Launcher {
         LogHelper.printVersion("Launcher");
 
         // Start Launcher
-        Instant start = Instant.now();
+        long start = System.currentTimeMillis();
         try {
             new Launcher().start(args);
-        } catch (Exception e) {
-            LogHelper.error(e);
+        } catch (Throwable exc) {
+            LogHelper.error(exc);
             return;
         }
-        Instant end = Instant.now();
-        LogHelper.debug("Launcher started in %dms", Duration.between(start, end).toMillis());
+        long end = System.currentTimeMillis();
+        LogHelper.debug("Launcher started in %dms", end - start);
     }
 
     private static String readBuildNumber() {
@@ -265,13 +280,18 @@ public final class Launcher {
     }
 
     public static final class Config extends StreamObject {
-        @LauncherAPI public static final String ADDRESS_OVERRIDE_PROPERTY = "launcher.addressOverride";
-        @LauncherAPI public static final String ADDRESS_OVERRIDE = System.getProperty(ADDRESS_OVERRIDE_PROPERTY, null);
+        @LauncherAPI
+        public static final String ADDRESS_OVERRIDE_PROPERTY = "launcher.addressOverride";
+        @LauncherAPI
+        public static final String ADDRESS_OVERRIDE = System.getProperty(ADDRESS_OVERRIDE_PROPERTY, null);
 
         // Instance
-        @LauncherAPI public final InetSocketAddress address;
-        @LauncherAPI public final RSAPublicKey publicKey;
-        @LauncherAPI public final Map<String, byte[]> runtime;
+        @LauncherAPI
+        public final InetSocketAddress address;
+        @LauncherAPI
+        public final RSAPublicKey publicKey;
+        @LauncherAPI
+        public final Map<String, byte[]> runtime;
 
         @LauncherAPI
         @SuppressWarnings("AssignmentToCollectionOrArrayFieldFromParameter")

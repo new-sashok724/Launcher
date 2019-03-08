@@ -1,8 +1,6 @@
 package launchserver.plugin;
 
 import java.nio.file.Path;
-import java.time.Duration;
-import java.time.Instant;
 
 import launcher.helper.JVMHelper;
 import launcher.helper.LogHelper;
@@ -16,15 +14,15 @@ public final class LaunchServerPluginBridge implements Runnable, AutoCloseable {
         LogHelper.printVersion("LaunchServer");
 
         // Create new LaunchServer
-        Instant start = Instant.now();
+        long start = System.currentTimeMillis();
         try {
             server = new LaunchServer(dir, true);
         } catch (Throwable exc) {
             LogHelper.error(exc);
             throw exc;
         }
-        Instant end = Instant.now();
-        LogHelper.debug("LaunchServer started in %dms", Duration.between(start, end).toMillis());
+        long end = System.currentTimeMillis();
+        LogHelper.debug("LaunchServer started in %dms", end - start);
     }
 
     @Override

@@ -9,52 +9,52 @@ import launcher.helper.VerifyHelper;
 import launcher.serialize.config.entry.BlockConfigEntry;
 import launchserver.auth.provider.AuthProviderResult;
 
-public final class NullAuthHandler extends AuthHandler {
-    private volatile AuthHandler handler;
+public class DelegateAuthHandler extends AuthHandler {
+    private volatile AuthHandler delegate;
 
-    public NullAuthHandler(BlockConfigEntry block) {
+    public DelegateAuthHandler(BlockConfigEntry block) {
         super(block);
     }
 
     @Override
     public UUID auth(AuthProviderResult authResult) throws IOException {
-        return getHandler().auth(authResult);
+        return getDelegate().auth(authResult);
     }
 
     @Override
     public UUID checkServer(String username, String serverID) throws IOException {
-        return getHandler().checkServer(username, serverID);
+        return getDelegate().checkServer(username, serverID);
     }
 
     @Override
     public void close() throws IOException {
-        AuthHandler handler = this.handler;
-        if (handler != null) {
-            handler.close();
+        AuthHandler delegate = this.delegate;
+        if (delegate != null) {
+            delegate.close();
         }
     }
 
     @Override
     public boolean joinServer(String username, String accessToken, String serverID) throws IOException {
-        return getHandler().joinServer(username, accessToken, serverID);
+        return getDelegate().joinServer(username, accessToken, serverID);
     }
 
     @Override
     public UUID usernameToUUID(String username) throws IOException {
-        return getHandler().usernameToUUID(username);
+        return getDelegate().usernameToUUID(username);
     }
 
     @Override
     public String uuidToUsername(UUID uuid) throws IOException {
-        return getHandler().uuidToUsername(uuid);
+        return getDelegate().uuidToUsername(uuid);
     }
 
     @LauncherAPI
-    public void setBackend(AuthHandler handler) {
-        this.handler = handler;
+    public void setDelegate(AuthHandler delegate) {
+        this.delegate = delegate;
     }
 
-    private AuthHandler getHandler() {
-        return VerifyHelper.verify(handler, Objects::nonNull, "Backend auth handler wasn't set");
+    private AuthHandler getDelegate() {
+        return VerifyHelper.verify(delegate, Objects::nonNull, "Delegate auth handler wasn't set");
     }
 }

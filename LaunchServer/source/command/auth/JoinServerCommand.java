@@ -20,7 +20,7 @@ public final class JoinServerCommand extends Command {
     }
 
     @Override
-    public void invoke(String... args) throws Exception {
+    public void invoke(String... args) throws Throwable {
         verifyArgs(args, 3);
         String username = args[0];
         String accessToken = args[1];

@@ -109,9 +109,9 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
         this.listener = listener;
     }
 
-    /*package*/ void onDisconnect(long id, Exception e) {
+    /*package*/ void onDisconnect(long id, Throwable exc) {
         if (listener != null) {
-            listener.onDisconnect(id, e);
+            listener.onDisconnect(id, exc);
         }
     }
 
@@ -124,7 +124,7 @@ public final class ServerSocketHandler implements Runnable, AutoCloseable {
         boolean onConnect(long id, InetAddress address);
 
         @LauncherAPI
-        void onDisconnect(long id, Exception e);
+        void onDisconnect(long id, Throwable exc);
 
         @LauncherAPI
         boolean onHandshake(long id, Type type);

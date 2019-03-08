@@ -312,7 +312,8 @@ public final class ClientLauncher {
 
         // Resolve main class and method
         Class<?> mainClass = Class.forName(profile.getMainClass());
-        MethodHandle mainMethod = JVMHelper.LOOKUP.findStatic(mainClass, "main", MethodType.methodType(void.class, String[].class));
+        MethodHandle mainMethod = JVMHelper.LOOKUP.findStatic(mainClass, "main", MethodType.methodType(void.class, String[].class))
+            .asFixedArity();
 
         // Invoke main method with exception wrapping
         LAUNCHED.set(true);
@@ -424,7 +425,7 @@ public final class ClientLauncher {
     }
 }
 
-// It's here since first commit, there's no any reasons to remove :D
+// She's here since first commit, there's no any reasons to remove :D
 // ++oyyysssssssssssooooooo++++++++/////:::::-------------................----:::----::+osssso+///+++++ooys/:/+ssssyyssyooooooo+++////:::::::::-::///++ossyhdddddddhhys/----::::::::::::::/:////////////
 // ++oyyssssssssssoooooooo++++++++//////:::::--------------------------------:::::-:::/+oo+//://+oo+//syysssssyyyyyhyyyssssssoo+++///::--:----:--:://++osyyhdddmddmdhys/------:::::::::::::::///////////
 // ++syyssssssssssoooooooo++++++++///////:::::::::::::::-----------------------::--::/++++/:--::/+++//osysshhhhyhhdyyyyyssyssoo++//::-------------::/+++oyhyhdddmddmdhy+--------::::::::::::::://///////

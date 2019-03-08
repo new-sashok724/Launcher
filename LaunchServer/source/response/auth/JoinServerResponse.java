@@ -31,8 +31,8 @@ public final class JoinServerResponse extends Response {
         } catch (AuthException e) {
             requestError(e.getMessage());
             return;
-        } catch (Exception e) {
-            LogHelper.error(e);
+        } catch (Throwable exc) {
+            LogHelper.error(exc);
             requestError("Internal auth handler error");
             return;
         }

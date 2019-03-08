@@ -21,7 +21,7 @@ public abstract class Command {
     public abstract String getUsageDescription();
 
     @LauncherAPI
-    public abstract void invoke(String... args) throws Exception;
+    public abstract void invoke(String... args) throws Throwable;
 
     @LauncherAPI
     protected final void verifyArgs(String[] args, int min) throws CommandException {

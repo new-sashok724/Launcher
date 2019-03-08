@@ -44,7 +44,7 @@ public final class LauncherRequest extends Request<Result> {
 
     @Override
     @SuppressWarnings("CallToSystemExit")
-    protected Result requestDo(HInput input, HOutput output) throws Exception {
+    protected Result requestDo(HInput input, HOutput output) throws Throwable {
         output.writeBoolean(EXE_BINARY);
         output.flush();
         readError(input);

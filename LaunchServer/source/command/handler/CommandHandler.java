@@ -1,8 +1,6 @@
 package launchserver.command.handler;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +23,7 @@ import launchserver.command.auth.UsernameToUUIDCommand;
 import launchserver.command.basic.BuildCommand;
 import launchserver.command.basic.ClearCommand;
 import launchserver.command.basic.DebugCommand;
+import launchserver.command.basic.EvalCommand;
 import launchserver.command.basic.GCCommand;
 import launchserver.command.basic.HelpCommand;
 import launchserver.command.basic.LogConnectionsCommand;
@@ -52,6 +51,7 @@ public abstract class CommandHandler implements Runnable {
         registerCommand("rebind", new RebindCommand(server));
         registerCommand("debug", new DebugCommand(server));
         registerCommand("clear", new ClearCommand(server));
+        registerCommand("eval", new EvalCommand(server));
         registerCommand("gc", new GCCommand(server));
         registerCommand("logConnections", new LogConnectionsCommand(server));
 
@@ -106,8 +106,8 @@ public abstract class CommandHandler implements Runnable {
         String[] args;
         try {
             args = parse(line);
-        } catch (Exception e) {
-            LogHelper.error(e);
+        } catch (Throwable exc) {
+            LogHelper.error(exc);
             return;
         }
 
@@ -122,16 +122,16 @@ public abstract class CommandHandler implements Runnable {
         }
 
         // Measure start time and invoke command
-        Instant startTime = Instant.now();
+        long start = System.currentTimeMillis();
         try {
             lookup(args[0]).invoke(Arrays.copyOfRange(args, 1, args.length));
-        } catch (Exception e) {
-            LogHelper.error(e);
+        } catch (Throwable exc) {
+            LogHelper.error(exc);
         }
 
         // Bell if invocation took > 1s
-        Instant endTime = Instant.now();
-        if (bell && Duration.between(startTime, endTime).getSeconds() >= 5) {
+        long end = System.currentTimeMillis();
+        if (bell && end - start >= 5_000L) {
             try {
                 bell();
             } catch (IOException e) {

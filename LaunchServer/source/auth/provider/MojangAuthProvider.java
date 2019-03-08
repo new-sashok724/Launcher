@@ -28,13 +28,13 @@ public final class MojangAuthProvider extends AuthProvider {
     }
 
     @Override
-    public AuthProviderResult auth(String login, String password, String ip) throws Exception {
+    public AuthProviderResult auth(String login, String password, String ip) throws Throwable {
         JsonObject request = Json.object().
             add("agent", Json.object().add("name", "Minecraft").add("version", 1)).
             add("username", login).add("password", password);
 
         // Verify there's no error
-        JsonObject response = makeJSONRequest(URL, request);
+        JsonObject response = makeMojangRequest(URL, request);
         if (response == null) {
             authError("Empty mojang response");
         }
@@ -59,12 +59,17 @@ public final class MojangAuthProvider extends AuthProvider {
         // Do nothing
     }
 
-    public static JsonObject makeJSONRequest(URL url, JsonObject request) throws IOException {
-        // Make authentication request
-        HttpURLConnection connection = IOHelper.newConnectionPost(url);
-        connection.setRequestProperty("Content-Type", "application/json");
-        try (OutputStream output = connection.getOutputStream()) {
-            output.write(request.toString(WriterConfig.MINIMAL).getBytes(StandardCharsets.UTF_8));
+    public static JsonObject makeMojangRequest(URL url, JsonObject request) throws IOException {
+        HttpURLConnection connection = request == null ?
+            (HttpURLConnection) IOHelper.newConnection(url) :
+            IOHelper.newConnectionPost(url);
+
+        // Make request
+        if (request != null) {
+            connection.setRequestProperty("Content-Type", "application/json");
+            try (OutputStream output = connection.getOutputStream()) {
+                output.write(request.toString(WriterConfig.MINIMAL).getBytes(StandardCharsets.UTF_8));
+            }
         }
         connection.getResponseCode(); // Actually make request
 

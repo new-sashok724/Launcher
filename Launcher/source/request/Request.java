@@ -32,11 +32,11 @@ public abstract class Request<R> {
     public abstract Type getType();
 
     @LauncherAPI
-    protected abstract R requestDo(HInput input, HOutput output) throws Exception;
+    protected abstract R requestDo(HInput input, HOutput output) throws Throwable;
 
     @LauncherAPI
     @SuppressWarnings("DesignForExtension")
-    public R request() throws Exception {
+    public R request() throws Throwable {
         if (!started.compareAndSet(false, true)) {
             throw new IllegalStateException("Request already started");
         }

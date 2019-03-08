@@ -59,8 +59,8 @@ public abstract class AuthHandler extends ConfigObject implements AutoCloseable 
     }
 
     static {
-        registerHandler("null", NullAuthHandler::new);
         registerHandler("memory", MemoryAuthHandler::new);
+        registerHandler("delegate", DelegateAuthHandler::new);
 
         // Auth handler that doesn't do nothing :D
         registerHandler("binaryFile", BinaryFileAuthHandler::new);

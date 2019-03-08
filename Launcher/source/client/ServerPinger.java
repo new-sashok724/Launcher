@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -15,6 +13,7 @@ import com.eclipsesource.json.JsonObject;
 import launcher.LauncherAPI;
 import launcher.client.ClientProfile.Version;
 import launcher.helper.IOHelper;
+import launcher.helper.JVMHelper;
 import launcher.helper.LogHelper;
 import launcher.helper.VerifyHelper;
 import launcher.serialize.HInput;
@@ -34,8 +33,8 @@ public final class ServerPinger {
     // Cache
     private final Object cacheLock = new Object();
     private Result cache = null;
-    private Exception cacheException = null;
-    private Instant cacheTime = null;
+    private Throwable cacheError = null;
+    private long cacheUntil = Long.MIN_VALUE;
 
     @LauncherAPI
     public ServerPinger(InetSocketAddress address, Version version) {
@@ -44,31 +43,24 @@ public final class ServerPinger {
     }
 
     @LauncherAPI
-    public Result ping() throws IOException {
-        Instant now = Instant.now();
+    public Result ping() {
         synchronized (cacheLock) {
             // Update ping cache
-            if (cacheTime == null || Duration.between(now, cacheTime).toMillis() >= IOHelper.SOCKET_TIMEOUT) {
-                cacheTime = now;
+            if (System.currentTimeMillis() >= cacheUntil) {
                 try {
                     cache = doPing();
-                    cacheException = null;
-                } catch (IOException | IllegalArgumentException /* Protocol error */ e) {
+                    cacheError = null;
+                } catch (Throwable exc) {
                     cache = null;
-                    cacheException = e;
+                    cacheError = exc;
+                } finally {
+                    cacheUntil = System.currentTimeMillis() + IOHelper.SOCKET_TIMEOUT;
                 }
             }
 
             // Verify is result available
-            if (cache == null) {
-                if (cacheException instanceof IOException) {
-                    throw (IOException) cacheException;
-                }
-                if (cacheException instanceof IllegalArgumentException) {
-                    throw (IllegalArgumentException) cacheException;
-                }
-                cacheException = new IOException("Unavailable");
-                throw (IOException) cacheException;
+            if (cacheError != null) {
+                JVMHelper.UNSAFE.throwException(cacheError);
             }
 
             // We're done

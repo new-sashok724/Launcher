@@ -21,7 +21,7 @@ public final class GCCommand extends Command {
     }
 
     @Override
-    public void invoke(String... args) throws Exception {
+    public void invoke(String... args) throws Throwable {
         LogHelper.subInfo("Performing full GC");
         JVMHelper.fullGC();
 

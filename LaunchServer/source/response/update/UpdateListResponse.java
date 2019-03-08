@@ -16,7 +16,7 @@ public final class UpdateListResponse extends Response {
     }
 
     @Override
-    public void reply() throws Exception {
+    public void reply() throws Throwable {
         Set<Entry<String, SignedObjectHolder<HashedDir>>> updateDirs = server.getUpdateDirs();
 
         // Write all update dirs names

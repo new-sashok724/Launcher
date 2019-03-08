@@ -19,7 +19,7 @@ public final class RebindCommand extends Command {
     }
 
     @Override
-    public void invoke(String... args) throws Exception {
+    public void invoke(String... args) {
         server.rebindServerSocket();
     }
 }

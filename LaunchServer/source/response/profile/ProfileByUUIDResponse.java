@@ -38,8 +38,8 @@ public final class ProfileByUUIDResponse extends Response {
         Texture skin;
         try {
             skin = server.config.textureProvider.getSkinTexture(uuid, username);
-        } catch (IOException e) {
-            LogHelper.error(new IOException(String.format("Can't get skin texture: '%s'", username), e));
+        } catch (Throwable exc) {
+            LogHelper.error(new IOException(String.format("Can't get skin texture: '%s'", username), exc));
             skin = null;
         }
 
@@ -47,8 +47,8 @@ public final class ProfileByUUIDResponse extends Response {
         Texture cloak;
         try {
             cloak = server.config.textureProvider.getCloakTexture(uuid, username);
-        } catch (IOException e) {
-            LogHelper.error(new IOException(String.format("Can't get cloak texture: '%s'", username), e));
+        } catch (Throwable exc) {
+            LogHelper.error(new IOException(String.format("Can't get cloak texture: '%s'", username), exc));
             cloak = null;
         }
 

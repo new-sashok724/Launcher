@@ -16,10 +16,10 @@ import launcher.serialize.config.entry.StringConfigEntry;
 
 public final class MySQLSourceConfig extends ConfigObject implements AutoCloseable {
     @LauncherAPI public static final int TIMEOUT = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.mysql.idleTimeout", Integer.toString(5000))),
+        Integer.parseInt(System.getProperty("launcher.mysql.idleTimeout", Integer.toString(5000))),
         VerifyHelper.POSITIVE, "launcher.mysql.idleTimeout can't be <= 5000");
     private static final int MAX_POOL_SIZE = VerifyHelper.verifyInt(
-        Integer.parseUnsignedInt(System.getProperty("launcher.mysql.maxPoolSize", Integer.toString(3))),
+        Integer.parseInt(System.getProperty("launcher.mysql.maxPoolSize", Integer.toString(3))),
         VerifyHelper.POSITIVE, "launcher.mysql.maxPoolSize can't be <= 0");
 
     // Instance

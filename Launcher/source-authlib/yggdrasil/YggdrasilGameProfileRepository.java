@@ -39,10 +39,10 @@ public class YggdrasilGameProfileRepository implements GameProfileRepository {
             PlayerProfile[] sliceProfiles;
             try {
                 sliceProfiles = new BatchProfileByUsernameRequest(sliceUsernames).request();
-            } catch (Exception e) {
+            } catch (Throwable exc) {
                 for (String username : sliceUsernames) {
-                    LogHelper.debug("Couldn't find profile '%s': %s", username, e);
-                    callback.onProfileLookupFailed(new GameProfile((UUID) null, username), e);
+                    LogHelper.debug("Couldn't find profile '%s': %s", username, exc);
+                    callback.onProfileLookupFailed(new GameProfile((UUID) null, username), exc instanceof Exception ? (Exception) exc : new Exception(exc));
                 }
 
                 // Busy wait, like in standard authlib

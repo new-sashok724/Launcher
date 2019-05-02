@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -136,6 +137,11 @@ public final class ClientLauncher {
         ProcessBuilder builder = new ProcessBuilder(args);
         builder.directory(params.clientDir.toFile());
         builder.inheritIO();
+        Map<String, String> env = builder.environment();
+        env.put("_JAVA_OPTS", "");
+        env.put("_JAVA_OPTIONS", "");
+        env.put("JAVA_OPTS", "");
+        env.put("JAVA_OPTIONS", "");
         if (pipeOutput) {
             builder.redirectErrorStream(true);
             builder.redirectOutput(Redirect.PIPE);

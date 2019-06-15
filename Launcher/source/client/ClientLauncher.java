@@ -195,16 +195,16 @@ public final class ClientLauncher {
         LogHelper.debug("Starting JVM and client WatchService");
         FileNameMatcher assetMatcher = profile.object.getAssetUpdateMatcher();
         FileNameMatcher clientMatcher = profile.object.getClientUpdateMatcher();
-		DirWatcher jvmWatcher = new DirWatcher(IOHelper.JVM_DIR, jvmHDir.object, null, digest); // JVM Watcher
-		DirWatcher assetWatcher = new DirWatcher(params.assetDir, assetHDir.object, assetMatcher, digest);
-		DirWatcher clientWatcher = new DirWatcher(params.clientDir, clientHDir.object, clientMatcher, digest);
+	DirWatcher jvmWatcher = new DirWatcher(IOHelper.JVM_DIR, jvmHDir.object, null, digest); // JVM Watcher
+	DirWatcher assetWatcher = new DirWatcher(params.assetDir, assetHDir.object, assetMatcher, digest);
+	DirWatcher clientWatcher = new DirWatcher(params.clientDir, clientHDir.object, clientMatcher, digest);
+	    
+	// Verify current state of all dirs
+	verifyHDir(IOHelper.JVM_DIR, jvmHDir.object, null, digest);
+	verifyHDir(params.assetDir, assetHDir.object, assetMatcher, digest);
+	verifyHDir(params.clientDir, clientHDir.object, clientMatcher, digest);
 		
-		// Verify current state of all dirs
-		verifyHDir(IOHelper.JVM_DIR, jvmHDir.object, null, digest);
-		verifyHDir(params.assetDir, assetHDir.object, assetMatcher, digest);
-		verifyHDir(params.clientDir, clientHDir.object, clientMatcher, digest);
-		
-		// Start WatchService, and only then client
+	// Start WatchService, and only then client
         CommonHelper.newThread("JVM Directory Watcher", true, jvmWatcher).start();
         CommonHelper.newThread("Asset Directory Watcher", true, assetWatcher).start();
         CommonHelper.newThread("Client Directory Watcher", true, clientWatcher).start();

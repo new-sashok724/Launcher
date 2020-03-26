@@ -154,7 +154,7 @@ public final class JVMHelper {
 
     private static int getRAMAmount() {
         int physicalRam = (int) (OPERATING_SYSTEM_MXBEAN.getTotalPhysicalMemorySize() >> 20);
-        return Math.min(physicalRam, OS_BITS == 32 ? 1536 : 8192); // Limit 32-bit OS to 1536 MiB, and 64-bit OS to 8192 MiB (because it's enough)
+        return Math.min(physicalRam, 32768); // Limit to 32768 MiB (because it really wasnt enough)
     }
 
     public static Class<?> firstClass(String... names) throws ClassNotFoundException {

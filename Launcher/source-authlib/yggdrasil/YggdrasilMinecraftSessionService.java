@@ -82,14 +82,14 @@ public class YggdrasilMinecraftSessionService extends BaseMinecraftSessionServic
             Property skinURL = Iterables.getFirst(profile.getProperties().get(ClientLauncher.SKIN_URL_PROPERTY), null);
             Property skinDigest = Iterables.getFirst(profile.getProperties().get(ClientLauncher.SKIN_DIGEST_PROPERTY), null);
             if (skinURL != null && skinDigest != null) {
-                textures.put(Type.SKIN, new MinecraftProfileTexture(skinURL.getValue(), skinDigest.getValue()));
+                textures.put(Type.SKIN, new MinecraftProfileTexture(skinURL.getValue(), skinDigest.getValue().replace("..", "")));
             }
 
             // Add cloak URL to textures map
             Property cloakURL = Iterables.getFirst(profile.getProperties().get(ClientLauncher.CLOAK_URL_PROPERTY), null);
             Property cloakDigest = Iterables.getFirst(profile.getProperties().get(ClientLauncher.CLOAK_DIGEST_PROPERTY), null);
             if (cloakURL != null && cloakDigest != null) {
-                textures.put(Type.CAPE, new MinecraftProfileTexture(cloakURL.getValue(), cloakDigest.getValue()));
+                textures.put(Type.CAPE, new MinecraftProfileTexture(cloakURL.getValue(), cloakDigest.getValue().replace("..", "")));
             }
 
             // Try to find missing textures in textures payload (now always true because launcher is not passing elytra skins)

@@ -1,5 +1,4 @@
-# Launcher
-sashok724's Launcher v3
+# sashok724's Launcher v3
 
 Сайт с инструкцией: https://launcher.sashok724.net/
 

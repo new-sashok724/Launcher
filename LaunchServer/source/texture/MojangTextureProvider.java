@@ -40,12 +40,12 @@ public final class MojangTextureProvider extends TextureProvider {
 
     @Override
     public synchronized Texture getCloakTexture(UUID uuid, String username) {
-        return getCached(uuid, username).skin;
+        return getCached(uuid, username).cloak;
     }
 
     @Override
     public synchronized Texture getSkinTexture(UUID uuid, String username) {
-        return getCached(uuid, username).cloak;
+        return getCached(uuid, username).skin;
     }
 
     private CacheData getCached(UUID uuid, String username) {
